@@ -224,6 +224,7 @@ public class MailController extends AbstractController {
    */
   private static void sendMessage(RoutingContext context, MailClient mailClient, MailMessage email,
       Handler<AsyncResult<MailSendResult>> handler) {
+    LOGGER.info("Going to send message");
     mailClient.sendMail(email, result -> {
       if (result.failed()) {
         LOGGER.error("", result.cause());

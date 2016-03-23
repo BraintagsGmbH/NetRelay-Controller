@@ -16,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import de.braintags.netrelay.TestAllNetRelay;
 import de.braintags.netrelay.unit.TAuthentication;
 import de.braintags.netrelay.unit.TCaptureParameters;
 import de.braintags.netrelay.unit.TDataTablesController;
@@ -42,5 +41,9 @@ import de.braintags.netrelay.unit.TTemplateController;
 public class TestAllNetRelayController {
   // -DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=5
   // -Djava.util.logging.config.file=src/main/resources/logging.properties
+
+  // -DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=500
+  // -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4jLogDelegateFactory
+  // -DmailClientUserName=dev-test@braintags.net -DmailClientPassword=quolap9r
 
 }

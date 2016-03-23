@@ -102,6 +102,7 @@ public class ThymeleafTemplateController extends AbstractController {
 
   @Override
   public void initProperties(Properties properties) {
+    LOGGER.info("init " + getName());
     ThymeleafTemplateEngine thEngine = createTemplateEngine(properties);
     templateHandler = TemplateHandler.create(thEngine, getTemplateDirectory(properties), getContentType(properties));
   }

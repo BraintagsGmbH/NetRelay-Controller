@@ -44,7 +44,7 @@ public class TMailProcessor extends NetRelayBaseConnectorTest {
       Async async = context.async();
       DemoMailProcessor.async = async;
       context.assertEquals(DEMO_PROPERTY, demoProperty, "init does not seem to be handled");
-      async.await(WAITTIME);
+      async.await();
       context.assertTrue(eventProcessed, "the event wasn't processed");
     } catch (Exception e) {
       context.fail(e);

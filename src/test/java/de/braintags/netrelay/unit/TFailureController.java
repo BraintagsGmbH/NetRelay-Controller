@@ -21,7 +21,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.TestContext;
 
 /**
- * Test the FAilureController
+ * Test the FailureController
  * 
  * @author Michael Remme
  * 

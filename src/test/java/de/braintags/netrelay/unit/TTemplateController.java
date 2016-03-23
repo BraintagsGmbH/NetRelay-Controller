@@ -24,7 +24,7 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  * 
  */
-public class TTemplateController extends NetRelayBaseTest {
+public class TTemplateController extends NetRelayBaseConnectorTest {
 
   @Test
   public void testIndex(TestContext context) throws Exception {

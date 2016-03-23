@@ -16,7 +16,14 @@ import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
+import de.braintags.netrelay.controller.CurrentMemberController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
+import de.braintags.netrelay.controller.api.MailController;
+import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.controller.authentication.PasswordLostController;
+import de.braintags.netrelay.controller.authentication.RegisterController;
+import de.braintags.netrelay.controller.impl.BodyController;
+import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -45,11 +52,18 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    RouterDefinition def = settings.getRouterDefinitions()
-        .getNamedDefinition(ThymeleafTemplateController.class.getSimpleName());
-    if (def != null) {
-      def.getHandlerProperties().setProperty(ThymeleafTemplateController.TEMPLATE_DIRECTORY_PROPERTY, "testTemplates");
-    }
+    settings.getRouterDefinitions().add(MailController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().add(AuthenticationController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().add(RegisterController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().add(PasswordLostController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().add(CurrentMemberController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(),
+        PersistenceController.createDefaultRouterDefinition());
+
+    RouterDefinition tct = ThymeleafTemplateController.createDefaultRouterDefinition();
+    tct.getHandlerProperties().setProperty(ThymeleafTemplateController.TEMPLATE_DIRECTORY_PROPERTY, "testTemplates");
+    settings.getRouterDefinitions().add(tct);
+
   }
 
   /**

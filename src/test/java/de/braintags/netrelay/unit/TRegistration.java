@@ -36,7 +36,7 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  * 
  */
-public class TRegistration extends NetRelayBaseTest {
+public class TRegistration extends NetRelayBaseConnectorTest {
   /**
    * Comment for <code>MY_USERNAME</code>
    */
