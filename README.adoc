@@ -1,0 +1,12 @@
+= NetRelay Controller
+
+*various implementations of IController for NetRelay*
+
+This project is an extension of the project NetRelay and contains several implementations of
+{@link de.braintags.netrelay.controller.IController}.
+
+If you want to go more into detail, go to
+*link:src/docs/asciidoc/java/index.adoc[ NetRelay Controllers documentation ]*
+
+
+
