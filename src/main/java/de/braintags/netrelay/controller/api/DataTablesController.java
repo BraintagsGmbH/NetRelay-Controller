@@ -23,8 +23,8 @@ import de.braintags.io.vertx.pojomapper.mapping.IField;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mapping.IStoreObject;
 import de.braintags.io.vertx.util.exception.ParameterRequiredException;
+import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.api.DataTableLinkDescriptor.ColDef;
-import de.braintags.netrelay.controller.impl.AbstractController;
 import de.braintags.netrelay.mapping.NetRelayMapperFactory;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
@@ -130,13 +130,13 @@ public class DataTablesController extends AbstractController {
             } else {
               mapperFactory.getStoreObjectFactory().createStoreObjects(query.getMapper(), Arrays.asList(selection),
                   str -> {
-                if (str.failed()) {
-                  handler.handle(Future.failedFuture(result.cause()));
-                } else {
-                  handler.handle(Future.succeededFuture(
-                      createJsonObject(query.getMapper(), str.result(), descr, totalResult, tableCount)));
-                }
-              });
+                    if (str.failed()) {
+                      handler.handle(Future.failedFuture(result.cause()));
+                    } else {
+                      handler.handle(Future.succeededFuture(
+                          createJsonObject(query.getMapper(), str.result(), descr, totalResult, tableCount)));
+                    }
+                  });
             }
           }
         });
@@ -176,7 +176,7 @@ public class DataTablesController extends AbstractController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractController#initProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @Override
   public void initProperties(Properties properties) {

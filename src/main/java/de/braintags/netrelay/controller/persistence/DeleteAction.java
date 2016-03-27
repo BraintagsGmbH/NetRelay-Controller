@@ -16,7 +16,7 @@ import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.io.vertx.pojomapper.dataaccess.delete.IDelete;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.netrelay.controller.impl.AbstractCaptureController.CaptureMap;
+import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

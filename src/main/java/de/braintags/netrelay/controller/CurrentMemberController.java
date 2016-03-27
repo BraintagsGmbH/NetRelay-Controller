@@ -16,7 +16,6 @@ import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
-import de.braintags.netrelay.controller.impl.AbstractController;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
@@ -126,7 +125,7 @@ public class CurrentMemberController extends AbstractController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractController#initProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @Override
   public void initProperties(Properties properties) {

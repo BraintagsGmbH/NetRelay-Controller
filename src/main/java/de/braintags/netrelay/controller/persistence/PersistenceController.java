@@ -18,8 +18,8 @@ import java.util.Properties;
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
 import de.braintags.io.vertx.util.CounterObject;
 import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.netrelay.controller.AbstractCaptureController;
 import de.braintags.netrelay.controller.Action;
-import de.braintags.netrelay.controller.impl.AbstractCaptureController;
 import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.netrelay.routing.CaptureDefinition;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -116,7 +116,7 @@ public class PersistenceController extends AbstractCaptureController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractCaptureController#handle(io.vertx.ext.web.RoutingContext,
+   * @see de.braintags.netrelay.controller.AbstractCaptureController#handle(io.vertx.ext.web.RoutingContext,
    * java.util.List)
    */
   @Override
@@ -178,7 +178,7 @@ public class PersistenceController extends AbstractCaptureController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractCaptureController#internalInitProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.AbstractCaptureController#internalInitProperties(java.util.Properties)
    */
   @Override
   protected void internalInitProperties(Properties properties) {

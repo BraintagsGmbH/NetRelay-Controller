@@ -20,9 +20,9 @@ import de.braintags.io.vertx.pojomapper.dataaccess.write.IWrite;
 import de.braintags.io.vertx.pojomapper.util.QueryHelper;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.RequestUtil;
+import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.api.MailController.MailSendResult;
-import de.braintags.netrelay.controller.impl.AbstractController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.model.IAuthenticatable;
 import de.braintags.netrelay.model.Member;
@@ -395,7 +395,7 @@ public class PasswordLostController extends AbstractController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractController#initProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @SuppressWarnings("unchecked")
   @Override

@@ -16,7 +16,7 @@ import java.util.Properties;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.io.vertx.pojomapper.mongo.MongoDataStore;
-import de.braintags.netrelay.controller.impl.AbstractController;
+import de.braintags.netrelay.controller.AbstractController;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -84,7 +84,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractController#initProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @Override
   public void initProperties(Properties properties) {

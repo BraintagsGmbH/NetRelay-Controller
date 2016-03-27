@@ -14,7 +14,7 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.impl.FailureController;
+import de.braintags.netrelay.controller.FailureController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.http.HttpMethod;

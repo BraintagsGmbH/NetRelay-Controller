@@ -24,8 +24,8 @@ import org.apache.commons.io.FilenameUtils;
 import de.braintags.io.vertx.util.CounterObject;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.NetRelay;
+import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
-import de.braintags.netrelay.controller.impl.AbstractController;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -56,7 +56,7 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
       "routes" : [ "/api/sendmail" ],
       "blocking" : false,
       "failureDefinition" : false,
-      "controller" : "de.braintags.netrelay.controller.impl.api.MailController",
+      "controller" : "de.braintags.netrelay.controller.api.MailController",
       "httpMethod" : null,
       "handlerProperties" : {
         "templateDirectory" : "templates",
@@ -421,7 +421,7 @@ public class MailController extends AbstractController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractController#initProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @Override
   public void initProperties(Properties properties) {

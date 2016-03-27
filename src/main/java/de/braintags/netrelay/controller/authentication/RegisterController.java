@@ -481,7 +481,7 @@ public class RegisterController extends AbstractAuthProviderController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.AbstractController#initProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @SuppressWarnings("unchecked")
   @Override

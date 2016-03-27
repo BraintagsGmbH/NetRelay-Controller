@@ -18,7 +18,7 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQueryResult;
 import de.braintags.io.vertx.pojomapper.exception.NoSuchRecordException;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.netrelay.controller.impl.AbstractCaptureController.CaptureMap;
+import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -42,8 +42,8 @@ public class DisplayAction extends AbstractAction {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.persistence.AbstractAction#handle(io.vertx.ext.web.RoutingContext,
-   * de.braintags.netrelay.controller.impl.AbstractCaptureController.CaptureMap)
+   * @see de.braintags.netrelay.controller.persistence.AbstractAction#handle(io.vertx.ext.web.RoutingContext,
+   * de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap)
    */
   @Override
   void handle(String entityName, RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler) {

@@ -12,7 +12,7 @@
  */
 package de.braintags.netrelay.controller.persistence;
 
-import de.braintags.netrelay.controller.impl.AbstractCaptureController.CaptureMap;
+import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -36,8 +36,8 @@ public class NoneAction extends AbstractAction {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.persistence.AbstractAction#handle(java.lang.String,
-   * io.vertx.ext.web.RoutingContext, de.braintags.netrelay.controller.impl.AbstractCaptureController.CaptureMap,
+   * @see de.braintags.netrelay.controller.persistence.AbstractAction#handle(java.lang.String,
+   * io.vertx.ext.web.RoutingContext, de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap,
    * io.vertx.core.Handler)
    */
   @Override

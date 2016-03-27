@@ -16,7 +16,7 @@ import java.util.Map;
 
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.util.exception.ParameterRequiredException;
-import de.braintags.netrelay.controller.impl.AbstractCaptureController.CaptureMap;
+import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -37,7 +37,7 @@ public class UpdateAction extends InsertAction {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.impl.persistence.InsertAction#extractProperties(java.lang.String,
+   * @see de.braintags.netrelay.controller.persistence.InsertAction#extractProperties(java.lang.String,
    * io.vertx.ext.web.RoutingContext)
    */
   @Override

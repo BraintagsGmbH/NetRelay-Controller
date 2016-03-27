@@ -20,7 +20,7 @@ import java.util.Set;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.netrelay.controller.impl.AbstractCaptureController.CaptureMap;
+import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.exception.FileNameException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

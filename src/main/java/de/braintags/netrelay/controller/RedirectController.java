@@ -15,7 +15,6 @@ package de.braintags.netrelay.controller;
 import java.util.Properties;
 
 import de.braintags.netrelay.RequestUtil;
-import de.braintags.netrelay.controller.impl.AbstractController;
 import de.braintags.netrelay.exception.PropertyRequiredException;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.http.HttpServerResponse;

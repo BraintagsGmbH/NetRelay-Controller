@@ -15,7 +15,7 @@ package de.braintags.netrelay.unit;
 import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
-import de.braintags.netrelay.controller.impl.BodyController;
+import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;

@@ -20,7 +20,6 @@ import org.thymeleaf.extras.conditionalcomments.dialect.ConditionalCommentsDiale
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolver;
 
-import de.braintags.netrelay.controller.impl.AbstractController;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.TemplateHandler;
