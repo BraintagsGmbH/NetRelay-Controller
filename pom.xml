@@ -41,6 +41,34 @@
 		
 	</dependencies>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven.surefire.plugin.version}</version>
+					<configuration>
+						<!-- Testing shall be executed by one Suites, which are calling each other test class -->
+						<includes>
+							<include>**/TestAll*.java</include>
+						</includes>
+						<failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+						<systemPropertyVariables>
+							<io.netty.leakDetectionLevel>PARANOID</io.netty.leakDetectionLevel>
+							<mailClientUserName>${mailClientUserName}</mailClientUserName>
+                			<mailClientPassword>${mailClientPassword}</mailClientPassword>
+						</systemPropertyVariables>
+						<argLine>-server -Xmx1200M</argLine>
+						<forkCount>1</forkCount>
+						<reuseForks>true</reuseForks>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+
 	<scm>
 		<connection>scm:git:git@github.com:BraintagsGmbH/NetRelay-Controller.git</connection>
 		<developerConnection>scm:git:git@github.com:BraintagsGmbH/NetRelay-Controller.git</developerConnection>

@@ -118,6 +118,9 @@ public class DataTableLinkDescriptor {
           } else {
             query.field(def.name).is(value);
           }
+          if (def.sortable) {
+            query.addSort(def.name);
+          }
           if (co.reduce()) {
             querySuccess(query, handler);
           }
@@ -177,6 +180,7 @@ public class DataTableLinkDescriptor {
   class ColDef {
     public String name;
     public String searchValue;
+    public boolean sortable = false;
 
     ColDef(RoutingContext context, String name, int position) {
       this.name = name;
@@ -186,7 +190,7 @@ public class DataTableLinkDescriptor {
     // mDataProp_0=0&sSearch_0=11&bRegex_0=false&bSearchable_0=true&bSortable_0=true&
     void extract(RoutingContext context, int position) {
       searchValue = context.request().getParam("sSearch_" + position);
-
+      sortable = Boolean.valueOf(context.request().getParam("bSortable_" + position));
     }
 
   }
