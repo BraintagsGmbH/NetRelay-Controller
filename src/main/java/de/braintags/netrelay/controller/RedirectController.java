@@ -21,7 +21,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * The RedirectController redirects fitting rules to the page, specified by property
+ * The RedirectController redirects fitting routes to the page, specified by property
  * {@link RedirectController#DESTINATION_PROPERTY}
  * 
  * <br>

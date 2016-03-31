@@ -30,6 +30,13 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.ext.web.RoutingContext;
 
 /**
+ * The PersistenceController is the instance, which translates the parameters and data of a request into a datastore
+ * based action. A request like "http://localhost/article/detail?ID=5&entity=article" will be interpreted by the
+ * controller to fetch the article with the id 5 from the datastore and to store it inside the context, so that is can
+ * be displayed by a template engine.
+ * 
+ * To understand the configuration, you should read the section "Capture Collection" inside the NetRelay documentation
+ * 
  * The PersistenceController is the frame, which defines the logics of a request, so that mapper objects can be fetched
  * from a datastore, inserted or updated by request or form parameters and deleted from the datastore.
  * 

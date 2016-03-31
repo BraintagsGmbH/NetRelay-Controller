@@ -4,13 +4,17 @@
 
 = NetRelay^(R)^ Controller
 
+
 This project is an extension of the project NetRelay and contains several implementations of
-`link:../../apidocs/de/braintags/netrelay/controller/IController.html[IController]`.
+`link:../../apidocs/de/braintags/netrelay/controller/IController.html[IController]`, which are ready to be used, configurable and cover lot of use
+cases.
+
+To understand and to use those implementations you should be familar with the use of NetRelay.
+
+For basic information about NetRelay go to the https://github.com/BraintagsGmbH/NetRelay[ NetRelay documentation ]
 
 If you are searching for a very quick entry into NetRelay with a prepared, ready to use project based on NetRelay,
 you should go to link:https://github.com/BraintagsGmbH/NetRelay-Demoproject[ Quickstart with NetRelay-Demoproject]
-
-For basic information about NetRelay go to the https://github.com/BraintagsGmbH/NetRelay[ NetRelay documentation ]
 
 == Using NetRelay-Controller inside your build environments
 To use this project, add the following dependency to the _dependencies_ section of your build descriptor:
@@ -36,4 +40,49 @@ dependencies {
 ----
 
 
-index.adoc
+== Controllers
+
+Description of the function of existing controllers.
+
+More detailed information about the configuration parameters,
+return values etc. can be found inside the javadoc of the corresponding implementation.
+
+=== `link:../../apidocs/de/braintags/netrelay/controller/RedirectController.html[RedirectController]`
+The RedirectController redirects fitting routes to a configurable destination
+
+=== `link:../../apidocs/de/braintags/netrelay/controller/CurrentMemberController.html[CurrentMemberController]`
+If a user is logged in, the propriate record is fetched from the datastore and stored in the context, so that it can
+be used by following controllers, like a template controller, for instance
+
+=== `link:../../apidocs/de/braintags/netrelay/controller/ThymeleafTemplateController.html[ThymeleafTemplateController]`
+This controller is used to process templates based on the template engine Thymeleaf
+
+=== `link:../../apidocs/de/braintags/netrelay/controller/persistence/PersistenceController.html[PersistenceController]`
+The PersistenceController is the instance, which translates the parameters and data of a request into a datastore
+based action.
+
+A request like "http://localhost/article/detail?ID=5&entity=article" will be interpreted by the
+controller to fetch the article with the id 5 from the datastore and to store it inside the context, so that is can
+be displayed by a template engine.
+
+=== Authentication and registration
+This package contains several controllers, which can be used to configure and use the complete process of
+authentication, registration etc.
+
+==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/AuthenticationController.html[AuthenticationController]`
+All routes, which are covered by this controller are protected.
+
+The controller takes automatically care about login
+and logout of users.
+
+
+==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/RegisterController.html[RegisterController]`
+This controller performs a user registration with an integrated automatic double opt in process
+
+==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/PasswordLostController.html[PasswordLostController]`
+The PasswordLostController is used to manage the process for a user, who doesn't remember his password. The process
+integrates automatically double opt in.
+
+=== `link:../../apidocs/de/braintags/netrelay/controller/api/MailController.html[MailController]`
+
+=== `link:../../apidocs/de/braintags/netrelay/controller/api/DataTablesController.html[DataTablesController]`

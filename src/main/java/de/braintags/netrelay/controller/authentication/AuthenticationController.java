@@ -27,7 +27,8 @@ import io.vertx.ext.web.handler.RedirectAuthHandler;
 import io.vertx.ext.web.handler.UserSessionHandler;
 
 /**
- * Controller performs the authentication, login and logout of members.
+ * All routes, which are covered by this controller are protected. The controller takes automatically care about login
+ * and logout of users.
  * If a call to a protected page is performed, a 302-redirect to the defined login page is processed
  * If the login failed, then the controller tries to reroute the call to the defined login page again. Before it is
  * setting the parameter {@value #AUTHENTICATION_ERROR_PARAM}. If this page is not defined, then a 403 error is sent.
