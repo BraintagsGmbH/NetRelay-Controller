@@ -44,47 +44,44 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 
 /**
- * A controller which is sending mails by using the {@link NetRelay#getMailClient()}. As a reply a JsonObject with the
- * result will be sent.
- * 
- * <pre>
- * config:
-
-, {
-      "name" : "MailController",
-      "active" : true,
-      "routes" : [ "/api/sendmail" ],
-      "blocking" : false,
-      "failureDefinition" : false,
-      "controller" : "de.braintags.netrelay.controller.api.MailController",
-      "httpMethod" : null,
-      "handlerProperties" : {
-        "templateDirectory" : "templates",
-        "mode" : "XHTML",
-        "cacheEnabled" : "true",
-        "from" : "address@sender.com",
-        "inline" : "true"
-      },
-      "captureCollection" : null
-    }
-
-Parameter ( lassen sich entweder per config oder per request parameter setzen:
-
-to - an wen geht die Mail, gelesen aus Config, Request-Parametern oder Context
-from: absender
-subject: titel der Mail
-mailText: text einer Mail für textbasierten Inhalt
-htmlText: HTML Inhalt einer Mail
-template: der Pfad eines Templates im Template-Verzeichnis. Wird geparsed mit Thymeleaf und dann als Inhalt geschickt. Überschreibt htmlText
-{@value #HOST_PROP}
-{@value #PORT_PROP}
-{@value #SCHEME_PROP}
+ * A controller which is sending mails by using the {@link NetRelay#getMailClient()}. The controller can compose the
+ * content of the mail by using a static text, which will be set inside the configuration. Or - if a template is defined
+ * by the configuration - the content will be generated dynamic. Most of the parameters, which are used by the
+ * controller, can be set either by configuration or request parameters.
  * 
  * 
+ * Config-Parameter:<br/>
+ * Most parameters are settable by configuration properties, request parameters and by the context.
+ * <UL>
+ * <LI>{@value #FROM_PARAM}
+ * <LI>{@value #TO_PARAMETER}
+ * <LI>{@value #BOUNCE_ADDRESS_PARAM}
+ * <LI>{@value #SUBJECT_PARAMETER}
+ * <LI>{@value #TEXT_PARAMETER}
+ * <LI>{@value #HTML_PARAMETER}
+ * <LI>{@value #TEMPLATE_PARAM}
+ * <LI>{@value #INLINE_PROP}
+ * <LI>{@value #HOSTNAME_PROP}
+ * <LI>{@value #PORT_PROP}
+ * <LI>{@value #SCHEME_PROP}
+ * </UL>
+ * <br>
  * 
+ * Request-Parameter:<br/>
+ * most of the parameters, which can be set by the properties, can be set by request parameters either
+ * <UL>
+ * <LI>{@value #FROM_PARAM}
+ * <LI>{@value #TO_PARAMETER}
+ * <LI>{@value #SUBJECT_PARAMETER}
+ * <LI>{@value #TEXT_PARAMETER}
+ * <LI>{@value #HTML_PARAMETER}
+ * <LI>{@value #TEMPLATE_PARAM}
+ * </UL>
+ * <br/>
  * 
- * 
- * </pre>
+ * Result-Parameter:<br/>
+ * The controller sends back a json reply with the information success ( true / false ), errorMessage and
+ * {@link MailSendResult}
  *
  * @author Michael Remme
  * 
@@ -97,7 +94,7 @@ public class MailController extends AbstractController {
   private static final Pattern IMG_PATTERN = Pattern.compile("(<img [^>]*src=\")([^\"]+)(\"[^>]*>)");
 
   /**
-   * The parameter inside the configuration properties by which the sender of mails is defined
+   * The name of the parameter, by which the sender of mails is defined. Ii is read from properties or request.
    */
   public static final String FROM_PARAM = "from";
 
@@ -107,50 +104,52 @@ public class MailController extends AbstractController {
   public static final String BOUNCE_ADDRESS_PARAM = "bounceAddress";
 
   /**
-   * The name of the parameter inside the request, by which the address to send the mail to is set
+   * The name of the parameter inside the request or properties, by which the address to send the mail to is set
    */
   public static final String TO_PARAMETER = "to";
 
   /**
-   * the parameter inside the request, which is specifying the mail subject
+   * the parameter inside the request or properties, which is specifying the mail subject
    */
   public static final String SUBJECT_PARAMETER = "subject";
   /**
-   * The parameter inside the request, which contains the mail text to be sent
+   * The parameter inside the properties, request or context, which contains the mail text to be sent
    */
   public static final String TEXT_PARAMETER = "mailText";
 
   /**
-   * The parameter inside the request, which contains the HTML text to be sent
+   * The parameter inside the properties, request or context, which contains the HTML text to be sent
    */
   public static final String HTML_PARAMETER = "htmlText";
 
   /**
-   * With this parameter the template can be set, which will be parsed to generate the content of the mail
+   * With this parameter the template can be set, which will be parsed to generate the content of the mail. It is read
+   * from properties, request or context. NOTE: if the content of the mail shall be created by a template, then the
+   * configuration must define the properties, which are needed by {@link ThymeleafTemplateController}
    */
   public static final String TEMPLATE_PARAM = "template";
 
   /**
-   * With this parameter it is defined, wether images, which are referenced inside the mail content, shall be integrated
-   * inline
+   * With this parameter of the properties it is defined, wether images, which are referenced inside the mail content,
+   * shall be integrated inline
    */
   public static final String INLINE_PROP = "inline";
 
   /**
-   * Property by which the hostname can be set. The hostname will be placed into the context, before processing the
-   * template
+   * Property by which the hostname can be set. The hostname will be placed into the context, before processing a
+   * template, so that it can be used inside link buildings, for instance
    */
   public static final String HOSTNAME_PROP = "host";
 
   /**
    * Property by which the port can be set. The port will be placed into the context, before processing the
-   * template
+   * template, so that it can be used inside link buildings, for instance
    */
   public static final String PORT_PROP = "port";
 
   /**
    * Property by which the scheme can be set. The scheme will be placed into the context, before processing the
-   * template
+   * template, so that it can be used inside link buildings, for instance
    */
   public static final String SCHEME_PROP = "scheme";
 
@@ -165,9 +164,7 @@ public class MailController extends AbstractController {
    */
   @Override
   public void handle(RoutingContext context) {
-    sendMail(context, getNetRelay().getMailClient(), prefs, result -> {
-      sendReply(context, result.result());
-    });
+    sendMail(context, getNetRelay().getMailClient(), prefs, result -> sendReply(context, result.result()));
   }
 
   private void sendReply(RoutingContext context, MailSendResult result) {

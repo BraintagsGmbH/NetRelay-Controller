@@ -70,19 +70,24 @@ This package contains several controllers, which can be used to configure and us
 authentication, registration etc.
 
 ==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/AuthenticationController.html[AuthenticationController]`
-All routes, which are covered by this controller are protected.
+All routes, which are covered by this controller are protected and require a valid login.
 
-The controller takes automatically care about login
-and logout of users.
-
+The controller takes
+automatically care about login and logout of users.
 
 ==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/RegisterController.html[RegisterController]`
-This controller performs a user registration with an integrated automatic double opt in process
+This controller performs a user registration with an integrated automatic double opt in process.
 
 ==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/PasswordLostController.html[PasswordLostController]`
 The PasswordLostController is used to manage the process for a user, who doesn't remember his password. The process
 integrates automatically double opt in.
 
 === `link:../../apidocs/de/braintags/netrelay/controller/api/MailController.html[MailController]`
+A controller which is sending mails by using the mail cloient, which is defined by NetRelay.
+
+The
+controller can compose the content of the mail by using a static text, which will be set inside the configuration. Or
+- if a template is defined by the configuration - the content will be created dynamic.
 
 === `link:../../apidocs/de/braintags/netrelay/controller/api/DataTablesController.html[DataTablesController]`
+A controller, which generates the input for a jquery datatable

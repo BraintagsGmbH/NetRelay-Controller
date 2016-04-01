@@ -9,7 +9,7 @@
  * automatically care about login and logout of users.
  * 
  * ==== {@link de.braintags.netrelay.controller.authentication.RegisterController}
- * This controller performs a user registration with an integrated automatic double opt in process
+ * This controller performs a user registration with an integrated automatic double opt in process.
  * 
  * ==== {@link de.braintags.netrelay.controller.authentication.PasswordLostController}
  * The PasswordLostController is used to manage the process for a user, who doesn't remember his password. The process

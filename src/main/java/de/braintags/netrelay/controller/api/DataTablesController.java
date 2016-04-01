@@ -37,10 +37,9 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * A controller, which generates the input for a jquery datatable
- * 
- * <br/>
  * <br/>
  * Config-Parameter:<br/>
+ * None
  * <br>
  * 
  * Request-Parameter:<br/>
