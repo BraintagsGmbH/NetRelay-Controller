@@ -39,6 +39,7 @@ public class TMailController extends NetRelayBaseConnectorTest {
   @Test
   public void sendSimpleMail(TestContext context) {
     try {
+      resetRoutes(false);
       String url = "/api/sendMail";
       Buffer responseBuffer = Buffer.buffer();
       testRequest(context, HttpMethod.POST, url, req -> {
@@ -63,6 +64,7 @@ public class TMailController extends NetRelayBaseConnectorTest {
   @Test
   public void sendHtmlMessage(TestContext context) {
     try {
+      resetRoutes(false);
       String url = "/api/sendMail";
       Buffer responseBuffer = Buffer.buffer();
       testRequest(context, HttpMethod.POST, url, req -> {
@@ -87,14 +89,45 @@ public class TMailController extends NetRelayBaseConnectorTest {
   }
 
   @Test
-  public void sendHtmlMessageWithInlineImage(TestContext context) {
+  public void sendHtmlMessageWithAttachedImage(TestContext context) {
     try {
+      resetRoutes(false);
       String url = "/api/sendMail";
       Buffer responseBuffer = Buffer.buffer();
       testRequest(context, HttpMethod.POST, url, req -> {
         Buffer buffer = Buffer.buffer();
         buffer.appendString("to=" + NetRelayBaseTest.TESTS_MAIL_RECIPIENT);
-        buffer.appendString("&subject=").appendString(RequestUtil.encodeText("Test sendHtmlMessageWithInlineImage"));
+        buffer.appendString("&subject=")
+            .appendString(RequestUtil.encodeText("Test sendHtmlMessageWithAttachedImage ATTACHED"));
+        // buffer.appendString("&mailText=").appendString(RequestUtil.encodeText("super cleverer text als nachricht"));
+        buffer.appendString("&htmlText=").appendString(
+            RequestUtil.encodeText("this is html text <a href=\"braintags.de\">braintags.de</a> with an <img src=\""
+                + TEST_IMAGE_URI + "\"/>"));
+
+        req.headers().set("content-length", String.valueOf(buffer.length()));
+        req.headers().set("content-type", "application/x-www-form-urlencoded");
+        req.write(buffer);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        JsonObject json = new JsonObject(resp.content.toString());
+        context.assertTrue(json.getBoolean("success"), "success flag not set");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+  }
+
+  @Test
+  public void sendHtmlMessageWithInlineImage(TestContext context) {
+    try {
+      resetRoutes(true);
+      String url = "/api/sendMail";
+      Buffer responseBuffer = Buffer.buffer();
+      testRequest(context, HttpMethod.POST, url, req -> {
+        Buffer buffer = Buffer.buffer();
+        buffer.appendString("to=" + NetRelayBaseTest.TESTS_MAIL_RECIPIENT);
+        buffer.appendString("&subject=")
+            .appendString(RequestUtil.encodeText("Test sendHtmlMessageWithInlineImage INLINE"));
         // buffer.appendString("&mailText=").appendString(RequestUtil.encodeText("super cleverer text als nachricht"));
         buffer.appendString("&htmlText=").appendString(
             RequestUtil.encodeText("this is html text <a href=\"braintags.de\">braintags.de</a> with an <img src=\""
@@ -116,6 +149,7 @@ public class TMailController extends NetRelayBaseConnectorTest {
   @Test
   public void sendHtmlMessageByTemplate(TestContext context) {
     try {
+      resetRoutes(false);
       String url = "/api/sendMail";
       Buffer responseBuffer = Buffer.buffer();
       testRequest(context, HttpMethod.POST, url, req -> {
@@ -140,14 +174,22 @@ public class TMailController extends NetRelayBaseConnectorTest {
 
   @Override
   public void modifySettings(TestContext context, Settings settings) {
+    LOGGER.info("MODIFY SETTINGS");
     super.modifySettings(context, settings);
     initMailClient(settings);
     RouterDefinition def = defineRouterDefinition(MailController.class, "/api/sendMail");
     def.getHandlerProperties().put(MailController.FROM_PARAM, TESTS_MAIL_FROM);
     def.getHandlerProperties().put(ThymeleafTemplateController.TEMPLATE_DIRECTORY_PROPERTY, "testTemplates");
-    def.getHandlerProperties().put(MailController.INLINE_PROP, "true");
+    def.getHandlerProperties().put(MailController.INLINE_PROP, "false");
 
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+  }
+
+  private void resetRoutes(boolean sendInline) throws Exception {
+    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
+        .getNamedDefinition(MailController.class.getSimpleName());
+    def.getHandlerProperties().put(MailController.INLINE_PROP, String.valueOf(sendInline));
+    netRelay.resetRoutes();
   }
 
 }
