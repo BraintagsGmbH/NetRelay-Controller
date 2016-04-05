@@ -5,7 +5,11 @@
 This project is an extension of the project NetRelay and contains several implementations of
 {@link de.braintags.netrelay.controller.IController}.
 
-If you want to go more into detail, go to
+If you are searching for a very quick entry with a prepared, ready to use project based on NetRelay, you should go to 
+*link:https://github.com/BraintagsGmbH/NetRelay-Demoproject[ Quickstart with NetRelay-Demoproject]*
+
+
+If you want to go more into details of existing Controllers, go to
 *link:src/docs/asciidoc/java/index.adoc[ NetRelay Controllers documentation ]*
 
 
