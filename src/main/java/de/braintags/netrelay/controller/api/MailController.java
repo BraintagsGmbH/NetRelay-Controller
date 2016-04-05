@@ -19,8 +19,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FilenameUtils;
-
 import de.braintags.io.vertx.util.CounterObject;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.NetRelay;
@@ -156,6 +154,8 @@ public class MailController extends AbstractController {
   private static final String UNCONFIGURED_ERROR = "The MailClient of NetRelay is not started, check the configuration and restart server!";
 
   private MailPreferences prefs;
+  private static int seq;
+  private static String hostname = "localhost";
 
   /*
    * (non-Javadoc)
@@ -204,7 +204,7 @@ public class MailController extends AbstractController {
           handler.handle(Future.succeededFuture(msResult));
         } else {
           MailMessage email = result.result();
-          sendMessage(context, mailClient, email, handler);
+          sendMessage(mailClient, email, handler);
         }
       });
     } catch (Exception e) {
@@ -215,11 +215,10 @@ public class MailController extends AbstractController {
   }
 
   /**
-   * @param context
    * @param email
    * @param sendResult
    */
-  private static void sendMessage(RoutingContext context, MailClient mailClient, MailMessage email,
+  private static void sendMessage(MailClient mailClient, MailMessage email,
       Handler<AsyncResult<MailSendResult>> handler) {
     LOGGER.info("Going to send message");
     mailClient.sendMail(email, result -> {
@@ -256,12 +255,24 @@ public class MailController extends AbstractController {
     email.setText(text);
     String template = prefs.template == null || prefs.template.hashCode() == 0
         ? readParameterOrContext(context, TEMPLATE_PARAM, null, false) : prefs.template;
+    createMailContent(context, prefs, handler, email, template);
+  }
+
+  /**
+   * @param context
+   * @param prefs
+   * @param handler
+   * @param email
+   * @param template
+   */
+  private static void createMailContent(RoutingContext context, MailPreferences prefs,
+      Handler<AsyncResult<MailMessage>> handler, MailMessage email, String template) {
     if (template != null && template.hashCode() != 0) {
       String file = prefs.templateDirectory + "/" + template;
       prefs.templateEngine.render(context, file, res -> {
         if (res.succeeded()) {
           email.setHtml(res.result().toString());
-          parseInlineMessage(context, prefs, email, handler);
+          checkInlineMessage(context, prefs, email, handler);
         } else {
           handler.handle(Future.failedFuture(res.cause()));
         }
@@ -270,8 +281,18 @@ public class MailController extends AbstractController {
       String html = prefs.html == null || prefs.html.hashCode() == 0
           ? readParameterOrContext(context, HTML_PARAMETER, null, false) : prefs.html;
       email.setHtml(html);
-      parseInlineMessage(context, prefs, email, handler);
+      checkInlineMessage(context, prefs, email, handler);
     }
+  }
+
+  private static void checkInlineMessage(RoutingContext context, MailPreferences prefs, MailMessage msg,
+      Handler<AsyncResult<MailMessage>> handler) {
+    if (prefs.inline) {
+      parseInlineMessage(context, prefs, msg, handler);
+    } else {
+      handler.handle(Future.succeededFuture(msg));
+    }
+
   }
 
   /**
@@ -281,63 +302,50 @@ public class MailController extends AbstractController {
    * @param textValue
    * @param helper
    */
-  public static void parseInlineMessage(RoutingContext context, MailPreferences prefs, MailMessage msg,
+  private static void parseInlineMessage(RoutingContext context, MailPreferences prefs, MailMessage msg,
       Handler<AsyncResult<MailMessage>> handler) {
-    if (prefs.inline) {
-      List<MailAttachment> attachments = new ArrayList<>();
-      int counter = 0;
-      String imgKeyName = "img";
-      StringBuffer result = new StringBuffer();
+    List<MailAttachment> attachments = new ArrayList<>();
+    StringBuffer result = new StringBuffer();
 
-      // group1: everything before the image src, group2:filename inside the "" of the src element, group4: everything
-      // after the image src
-      String htmlMessage = msg.getHtml();
-      if (htmlMessage != null) {
-        Matcher matcher = IMG_PATTERN.matcher(htmlMessage);
-        while (matcher.find()) {
-          String imageSource = matcher.group(2);
-          String cid = getContentId();
-          String extension = FilenameUtils.getExtension(imageSource);
-          URI imgUrl = makeAbsoluteURI(context, imageSource);
-          if (imgUrl != null) {
-            String cidName = cid.toString();
-            MailAttachment attachment = createAttachment(context, imgUrl, cidName);
-            matcher.appendReplacement(result, "$1cid:" + cidName + "$3");
-            attachments.add(attachment);
-          } else {
-            matcher.appendReplacement(result, "$0");
-          }
-        }
-        matcher.appendTail(result);
-      }
-      msg.setHtml(result.toString());
-      if (attachments.isEmpty()) {
-        handler.handle(Future.succeededFuture(msg));
-      } else {
-        CounterObject co = new CounterObject<>(attachments.size(), handler);
-        for (MailAttachment attachment : attachments) {
-          readData(context, prefs, (UriMailAttachment) attachment, rr -> {
-            if (rr.failed()) {
-              co.setThrowable(rr.cause());
-            } else {
-              if (co.reduce()) {
-                msg.setAttachment(attachments);
-                handler.handle(Future.succeededFuture(msg));
-              }
-            }
-          });
-          if (co.isError()) {
-            break;
-          }
+    // group1: everything before the image src, group2:filename inside the "" of the src element, group4: everything
+    // after the image src
+    String htmlMessage = msg.getHtml();
+    if (htmlMessage != null) {
+      Matcher matcher = IMG_PATTERN.matcher(htmlMessage);
+      while (matcher.find()) {
+        String imageSource = matcher.group(2);
+        String cid = getContentId();
+        URI imgUrl = makeAbsoluteURI(imageSource);
+        if (imgUrl != null) {
+          MailAttachment attachment = createAttachment(context, imgUrl, cid);
+          matcher.appendReplacement(result, "$1cid:" + cid + "$3");
+          attachments.add(attachment);
+        } else {
+          matcher.appendReplacement(result, "$0");
         }
       }
-    } else {
+      matcher.appendTail(result);
+    }
+    msg.setHtml(result.toString());
+    if (attachments.isEmpty()) {
       handler.handle(Future.succeededFuture(msg));
+    } else {
+      CounterObject co = new CounterObject<>(attachments.size(), handler);
+      for (MailAttachment attachment : attachments) {
+        readData(prefs, (UriMailAttachment) attachment, rr -> {
+          if (rr.failed()) {
+            co.setThrowable(rr.cause());
+          } else if (co.reduce()) {
+            msg.setAttachment(attachments);
+            handler.handle(Future.succeededFuture(msg));
+          }
+        });
+        if (co.isError()) {
+          break;
+        }
+      }
     }
   }
-
-  private static int seq;
-  private static String hostname = "localhost";
 
   /**
    * Sequence goes from 0 to 100K, then starts up at 0 again. This is large enough,
@@ -363,12 +371,12 @@ public class MailController extends AbstractController {
   private static MailAttachment createAttachment(RoutingContext context, URI uri, String cidName) {
     UriMailAttachment attachment = new UriMailAttachment(uri);
     attachment.setName(cidName);
-    attachment.setContentType(getContentType(context, uri));
+    attachment.setContentType(getContentType(uri));
     attachment.setDisposition("inline");
     return attachment;
   }
 
-  private static void readData(RoutingContext context, MailPreferences prefs, UriMailAttachment attachment,
+  private static void readData(MailPreferences prefs, UriMailAttachment attachment,
       Handler<AsyncResult<Void>> handler) {
     URI uri = attachment.getUri();
     HttpClient client = prefs.httpClient;
@@ -387,14 +395,14 @@ public class MailController extends AbstractController {
     req.end();
   }
 
-  private static String getContentType(RoutingContext context, URI uri) {
+  private static String getContentType(URI uri) {
     if (uri.getPath().endsWith(".png")) {
       return "image/png";
     }
     return null;
   }
 
-  private static URI makeAbsoluteURI(RoutingContext context, String url) {
+  private static URI makeAbsoluteURI(String url) {
     URI ret = URI.create(url);
 
     if (ret.isAbsolute()) {
