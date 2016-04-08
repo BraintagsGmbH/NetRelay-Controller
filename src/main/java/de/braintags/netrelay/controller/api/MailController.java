@@ -336,7 +336,7 @@ public class MailController extends AbstractController {
           if (rr.failed()) {
             co.setThrowable(rr.cause());
           } else if (co.reduce()) {
-            msg.setAttachment(attachments);
+            msg.setInlineAttachment(attachments);
             handler.handle(Future.succeededFuture(msg));
           }
         });
