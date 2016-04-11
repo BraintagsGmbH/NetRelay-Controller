@@ -415,7 +415,9 @@ public class RegisterController extends AbstractAuthProviderController {
 
   private void doUserLogin(IAuthenticatable user, Handler<AsyncResult<Void>> handler) {
     AuthProvider auth = getAuthProvider();
-    if (auth instanceof AuthProviderProxy) {
+    if (auth == null) {
+      handler.handle(Future.succeededFuture());
+    } else if (auth instanceof AuthProviderProxy) {
       try {
         AuthProviderProxy mAuth = (AuthProviderProxy) auth;
         JsonObject authInfo = getAuthObject(user, mAuth);
@@ -501,6 +503,16 @@ public class RegisterController extends AbstractAuthProviderController {
     super.initProperties(properties);
     allowDuplicateEmail = Boolean.valueOf(readProperty(ALLOW_DUPLICATION_EMAIL_PROP, "false", false));
     mailPrefs = MailController.createMailPreferences(getVertx(), properties);
+  }
+
+  @Override
+  protected AuthProviderProxy createAuthProvider(Properties properties) {
+    String tmpAuthProvider = readProperty(AUTH_PROVIDER_PROP, null, false);
+    if (tmpAuthProvider != null) {
+      return super.createAuthProvider(properties);
+    } else {
+      return null;
+    }
   }
 
   /**

@@ -100,13 +100,13 @@ public abstract class AbstractAuthProviderController extends AbstractController 
     return authProvider;
   }
 
-  private AuthProviderProxy createAuthProvider(Properties properties) {
-    String authProvider = readProperty(AUTH_PROVIDER_PROP, AUTH_PROVIDER_MONGO, false);
+  protected AuthProviderProxy createAuthProvider(Properties properties) {
+    String tmpAuthProvider = readProperty(AUTH_PROVIDER_PROP, AUTH_PROVIDER_MONGO, false);
     String mapper = readProperty(MongoAuth.PROPERTY_COLLECTION_NAME, null, true);
-    if (authProvider.equals(AUTH_PROVIDER_MONGO)) {
+    if (tmpAuthProvider.equals(AUTH_PROVIDER_MONGO)) {
       return new AuthProviderProxy(initMongoAuthProvider(mapper), mapper);
     } else {
-      throw new UnsupportedOperationException("unsupported authprovider: " + authProvider);
+      throw new UnsupportedOperationException("unsupported authprovider: " + tmpAuthProvider);
     }
   }
 

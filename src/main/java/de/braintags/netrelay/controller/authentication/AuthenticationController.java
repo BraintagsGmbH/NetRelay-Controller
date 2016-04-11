@@ -119,7 +119,8 @@ public class AuthenticationController extends AbstractAuthProviderController {
   public static final String AUTH_HANDLER_PROP = "authHandler";
 
   /**
-   * The name of the property which defines the login page to be used
+   * The name of the property which defines the login page to be used, something like "login.html", which is the page,
+   * which contains the form, by which a user can enter his username and password
    */
   public static final String LOGIN_PAGE_PROP = "loginPage";
 
