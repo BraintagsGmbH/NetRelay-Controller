@@ -113,7 +113,7 @@ public class FormLoginHandlerBt implements FormLoginHandler {
       context.fail(405); // Must be a POST
     } else {
       if (!req.isExpectMultipart()) {
-        throw new IllegalStateException("Form body not parsed - do you forget to include a BodyHandler?");
+        throw new IllegalStateException("Form body not parsed - did you forget to include a BodyHandler?");
       }
       MultiMap params = req.formAttributes();
       String username = params.get(usernameParam);
