@@ -373,6 +373,9 @@ public class MailController extends AbstractController {
     attachment.setName(cidName);
     attachment.setContentType(getContentType(uri));
     attachment.setDisposition("inline");
+    MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+    headers.add("Content-ID", "<"+cidName+">");
+    attachment.setHeaders(headers);
     return attachment;
   }
 
