@@ -28,6 +28,7 @@ import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -374,7 +375,7 @@ public class MailController extends AbstractController {
     attachment.setContentType(getContentType(uri));
     attachment.setDisposition("inline");
     MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-    headers.add("Content-ID", "<"+cidName+">");
+    headers.add("Content-ID", "<" + cidName + ">");
     attachment.setHeaders(headers);
     return attachment;
   }
