@@ -29,6 +29,8 @@ import io.vertx.ext.web.RoutingContext;
  * Config-Parameter:<br/>
  * {@value #DESTINATION_PROPERTY} - the name of the property, which defines the destination, where the redirect will aim
  * to<br>
+ * {@value #REUSE_PATH_PARAMETERS_PROPERTY}
+ * 
  * Request-Parameter:<br/>
  * <br/>
  * Result-Parameter:<br/>
@@ -42,7 +44,14 @@ public class RedirectController extends AbstractController {
    */
   public static final String DESTINATION_PROPERTY = "destination";
 
+  /**
+   * The property name which defines the parmater, wether on a redirect the parameters of the current request shall be
+   * reused or not. Default is true.
+   */
+  public static final String REUSE_PATH_PARAMETERS_PROPERTY = "reusePathParameters";
+
   private String destination;
+  private boolean reusePathParameters = true;
 
   /**
    * 
@@ -56,6 +65,9 @@ public class RedirectController extends AbstractController {
       throw new PropertyRequiredException(DESTINATION_PROPERTY);
     }
     destination = properties.getProperty(DESTINATION_PROPERTY);
+    if (properties.containsKey(REUSE_PATH_PARAMETERS_PROPERTY)) {
+      reusePathParameters = Boolean.valueOf(properties.getProperty(REUSE_PATH_PARAMETERS_PROPERTY));
+    }
   }
 
   /*
@@ -66,7 +78,7 @@ public class RedirectController extends AbstractController {
   @Override
   public void handle(RoutingContext context) {
     HttpServerResponse response = context.response();
-    RequestUtil.sendRedirect(response, context.request(), destination);
+    RequestUtil.sendRedirect(response, context.request(), destination, reusePathParameters);
   }
 
   /**
