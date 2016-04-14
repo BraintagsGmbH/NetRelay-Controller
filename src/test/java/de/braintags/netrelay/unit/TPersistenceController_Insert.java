@@ -92,6 +92,8 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     mu.addFormField(NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".name", "myFirstName");
     mu.addFormField(NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".age", "18");
     mu.addFormField(NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".child", "true");
+    mu.addFormField(NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".geoPoint", "[52.666, 78,999]");
+
   }
 
   @Test
