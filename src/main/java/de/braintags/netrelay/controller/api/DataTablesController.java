@@ -82,32 +82,39 @@ public class DataTablesController extends AbstractController {
       Objects.requireNonNull(mapperClass,
           "Could not determine mapper class for " + mapperName + ". Check the configuration");
       DataTableLinkDescriptor descr = new DataTableLinkDescriptor(mapperClass, context);
-
-      IQuery<?> tableQuery = descr.toRecordsInTableQuery(getNetRelay().getDatastore());
-      tableQuery.executeCount(tqResult -> {
-        if (tqResult.failed()) {
-          context.fail(tqResult.cause());
-        } else {
-          long tableCount = tqResult.result().getCount();
-          descr.toQuery(getNetRelay().getDatastore(), getNetRelay().getNetRelayMapperFactory(), qr -> {
-            if (qr.failed()) {
-              context.fail(qr.cause());
-            } else {
-              IQuery<?> query = qr.result();
-              execute(query, descr, tableCount, result -> {
-                if (result.failed()) {
-                  context.fail(result.cause());
-                } else {
-                  HttpServerResponse response = context.response();
-                  response.putHeader("content-type", "application/json; charset=utf-8")
-                      .end(result.result().encodePrettily());
-                }
-              });
-            }
-          });
-        }
-      });
+      handleQuery(context, descr);
     }
+  }
+
+  /**
+   * @param context
+   * @param descr
+   */
+  private void handleQuery(RoutingContext context, DataTableLinkDescriptor descr) {
+    IQuery<?> tableQuery = descr.toRecordsInTableQuery(getNetRelay().getDatastore());
+    tableQuery.executeCount(tqResult -> {
+      if (tqResult.failed()) {
+        context.fail(tqResult.cause());
+      } else {
+        long tableCount = tqResult.result().getCount();
+        descr.toQuery(getNetRelay().getDatastore(), getNetRelay().getNetRelayMapperFactory(), qr -> {
+          if (qr.failed()) {
+            context.fail(qr.cause());
+          } else {
+            IQuery<?> query = qr.result();
+            execute(query, descr, tableCount, result -> {
+              if (result.failed()) {
+                context.fail(result.cause());
+              } else {
+                HttpServerResponse response = context.response();
+                response.putHeader("content-type", "application/json; charset=utf-8")
+                    .end(result.result().encodePrettily());
+              }
+            });
+          }
+        });
+      }
+    });
   }
 
   private void execute(IQuery<?> query, DataTableLinkDescriptor descr, long tableCount,
