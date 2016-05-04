@@ -13,7 +13,9 @@
 package de.braintags.netrelay.controller.api;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
@@ -92,7 +94,7 @@ public class DataTableLinkDescriptor {
   private List<ColDef> clearColDefs() {
     ArrayList<ColDef> ret = new ArrayList<>();
     for (ColDef def : columns) {
-      if (def != null && def.searchValue.hashCode() != 0) {
+      if (def != null && def.name.hashCode() != 0) {
         ret.add(def);
       }
     }
@@ -119,7 +121,7 @@ public class DataTableLinkDescriptor {
             query.field(def.name).is(value);
           }
           if (def.sortable) {
-            query.addSort(def.name);
+            query.addSort(def.name, def.asc);
           }
           if (co.reduce()) {
             querySuccess(query, handler);
@@ -181,6 +183,7 @@ public class DataTableLinkDescriptor {
     public String name;
     public String searchValue;
     public boolean sortable = false;
+    public boolean asc = true;
 
     ColDef(RoutingContext context, String name, int position) {
       this.name = name;
@@ -188,9 +191,23 @@ public class DataTableLinkDescriptor {
     }
 
     // mDataProp_0=0&sSearch_0=11&bRegex_0=false&bSearchable_0=true&bSortable_0=true&
+    // iSortCol_0: "1" -> es wird nach der zweiten Spalte sortiert, startIndex=0
+    // sSortDir_0: "desc" oder "asc"
     void extract(RoutingContext context, int position) {
       searchValue = context.request().getParam("sSearch_" + position);
-      sortable = Boolean.valueOf(context.request().getParam("bSortable_" + position));
+      Iterator<Map.Entry<String, String>> it = context.request().params().iterator();
+      while (it.hasNext()) {
+        Map.Entry<String, String> entry = it.next();
+        if (entry.getKey().startsWith("iSortCol_") && entry.getValue().equals(String.valueOf(position))) {
+          this.sortable = true;
+          String dirProp = "sSortDir_" + entry.getKey().substring("iSortCol_".length());
+          String dir = context.request().getParam(dirProp);
+          if (dir != null && "desc".equals(dir)) {
+            this.asc = false;
+          }
+          break;
+        }
+      }
     }
 
   }

@@ -130,6 +130,7 @@ public class DataTablesController extends AbstractController {
             handler.handle(Future.failedFuture(result.cause()));
           } else {
             Object[] selection = result.result();
+            LOGGER.info("SELECTION SIZE: " + selection.length);
             if (selection.length == 0) {
               handler.handle(Future.succeededFuture(createJsonObject(query.getMapper(),
                   new ArrayList<IStoreObject<?>>(), descr, totalResult, tableCount)));

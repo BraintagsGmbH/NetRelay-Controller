@@ -57,7 +57,7 @@ public class TDataTablesController extends NetRelayBaseConnectorTest {
       .appendString("mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=false&")
       .appendString("mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=false&bSortable_5=false&")
       .appendString("mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=false&bSortable_6=false&").appendString(
-          "sSearch=&bRegex=false&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&sRangeSeparator=~&more_data=my_value");
+          "sSearch=&bRegex=false&iSortCol_0=2&sSortDir_0=desc&iSortingCols=1&sRangeSeparator=~&more_data=my_value");
 
   public static final Buffer LINK2 = Buffer.buffer("http://localhost:8080/api/datatable?mapper=Member&")
       .appendString("sEcho=76&iColumns=7&sColumns=id%2CuserName%2CfirstName%2ClastName%2Cemail%2C%2Cid&")
@@ -95,6 +95,19 @@ public class TDataTablesController extends NetRelayBaseConnectorTest {
       .appendString("&sSearch=&bRegex=false&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&sRangeSeparator=~")
       .appendString("&mapper=Member");
 
+  public static final Buffer SEARCH_CASE_INSENSITIVE = Buffer
+      .buffer("http://localhost:8080/api/datatable?mapper=Member&")
+      .appendString("sEcho=76&iColumns=7&sColumns=id%2CuserName%2CfirstName%2ClastName%2Cemail%2C%2Cid&")
+      .appendString("iDisplayStart=0&iDisplayLength=10&")
+      .appendString("mDataProp_0=0&sSearch_0=&bRegex_0=false&bSearchable_0=true&bSortable_0=true&")
+      .appendString("mDataProp_1=1&sSearch_1=ReMmE&bRegex_1=false&bSearchable_1=true&bSortable_1=true&")
+      .appendString("mDataProp_2=2&sSearch_2=&bRegex_2=false&bSearchable_2=true&bSortable_2=true&")
+      .appendString("mDataProp_3=3&sSearch_3=&bRegex_3=false&bSearchable_3=true&bSortable_3=true&")
+      .appendString("mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=true&")
+      .appendString("mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=false&bSortable_5=false&")
+      .appendString("mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=false&bSortable_6=false&").appendString(
+          "sSearch=&bRegex=false&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&sRangeSeparator=~&more_data=my_value");
+
   //
 
   @Test
@@ -107,7 +120,11 @@ public class TDataTablesController extends NetRelayBaseConnectorTest {
   public void testAllRecordsSorted(TestContext context) throws Exception {
     // sorted by first name
     String url = LINK_SORT.toString();
-    testParameters1(context, url, 3, 3);
+    JsonObject json = testParameters1(context, url, 3, 3);
+
+    JsonArray data = json.getJsonArray("data");
+    JsonArray first = data.getJsonArray(0);
+    context.assertEquals("Waltraud", first.getValue(2));
   }
 
   @Test
@@ -117,13 +134,15 @@ public class TDataTablesController extends NetRelayBaseConnectorTest {
   }
 
   @Test
+  public void testSearchUsernameCaseInsensitive(TestContext context) throws Exception {
+    String url = SEARCH_CASE_INSENSITIVE.toString();
+    testParameters1(context, url, 3, 1);
+  }
+
+  @Test
   public void testLimitRecords(TestContext context) throws Exception {
     String url = LINK3.toString();
     JsonObject json = testParameters1(context, url, 3, 3);
-    JsonArray data = json.getJsonArray("data");
-    JsonArray first = data.getJsonArray(0);
-    context.assertEquals("Michael", first.getValue(2));
-
   }
 
   public JsonObject testParameters1(TestContext context, String link, int total, int selection) throws Exception {
