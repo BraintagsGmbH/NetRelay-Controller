@@ -108,8 +108,6 @@ public class TDataTablesController extends NetRelayBaseConnectorTest {
       .appendString("mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=false&bSortable_6=false&").appendString(
           "sSearch=&bRegex=false&iSortCol_0=0&sSortDir_0=asc&iSortingCols=1&sRangeSeparator=~&more_data=my_value");
 
-  //
-
   @Test
   public void testAllRecords(TestContext context) throws Exception {
     String url = LINK.toString();

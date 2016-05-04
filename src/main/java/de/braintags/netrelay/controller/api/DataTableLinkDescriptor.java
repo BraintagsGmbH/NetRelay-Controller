@@ -115,10 +115,12 @@ public class DataTableLinkDescriptor {
           co.setThrowable(thResult.cause());
         } else {
           Object value = thResult.result().getResult();
-          if (allowContains(value)) {
-            query.field(def.name).contains(value);
-          } else {
-            query.field(def.name).is(value);
+          if (value != null && value.hashCode() != 0) {
+            if (allowContains(value)) {
+              query.field(def.name).contains(value);
+            } else {
+              query.field(def.name).is(value);
+            }
           }
           if (def.sortable) {
             query.addSort(def.name, def.asc);
