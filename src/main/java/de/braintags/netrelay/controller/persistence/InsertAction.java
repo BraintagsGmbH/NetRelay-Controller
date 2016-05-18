@@ -72,8 +72,10 @@ public class InsertAction extends AbstractAction {
     String startKey = entityName.toLowerCase() + ".";
     Set<FileUpload> fileUploads = context.fileUploads();
     FileSystem fs = getPersistenceController().getVertx().fileSystem();
+    LOGGER.info("Number of fileuploads: " + fileUploads.size());
+
     for (FileUpload upload : fileUploads) {
-      if (isHandleUpload(fs, upload, startKey)) {
+      if (isHandleUpload(upload, startKey)) {
         try {
           String fieldName = upload.name().toLowerCase();
           LOGGER.info("uploaded file detected for field name " + fieldName + ", fileName: " + upload.fileName());
@@ -96,9 +98,20 @@ public class InsertAction extends AbstractAction {
     return newDestination[1];
   }
 
-  private boolean isHandleUpload(FileSystem fs, FileUpload upload, String startKey) {
+  private boolean isHandleUpload(FileUpload upload, String startKey) {
+    LOGGER.info(
+        "CHECKING: " + upload.uploadedFileName() + " | fileName: " + upload.fileName() + " | name: " + upload.name());
     String fieldName = upload.name().toLowerCase();
-    return upload.size() > 0 && fieldName.startsWith(startKey);
+    if (upload.size() <= 0) {
+      LOGGER.info("NOT HANDLED: upload size is zero: " + upload.uploadedFileName() + " | fileName" + upload.fileName()
+          + " | " + upload.name());
+      return false;
+    }
+    if (!fieldName.startsWith(startKey)) {
+      LOGGER.info("NOT HANDLED: fieldname does not start with:" + startKey + " | " + fieldName);
+      return false;
+    }
+    return true;
   }
 
   private String[] examineNewDestination(FileSystem fs, FileUpload upload) {
