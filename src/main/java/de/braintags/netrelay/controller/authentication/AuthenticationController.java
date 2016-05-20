@@ -146,14 +146,6 @@ public class AuthenticationController extends AbstractAuthProviderController {
     initUserSessionHandler();
     initLoginAction();
     initLogoutAction();
-    initLogger();
-  }
-
-  private void initLogger() {
-    getNetRelay().getRouter().route().handler(context -> {
-      LOGGER.info("USER: " + context.user());
-      context.next();
-    });
   }
 
   private void initUserSessionHandler() {
