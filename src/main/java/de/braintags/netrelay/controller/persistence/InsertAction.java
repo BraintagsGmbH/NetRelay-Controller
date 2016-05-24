@@ -131,21 +131,33 @@ public class InsertAction extends AbstractAction {
     return destinations;
   }
 
-  private String createUniqueName(FileSystem fs, String upDir, String fileName) {
-    fileName = fileName.replaceAll(" ", "_");
+  private String createUniqueName(FileSystem fs, String upDir, String fileInName) {
+    final String fileName = cleanFileName(fileInName);
     String newFileName = fileName;
     int counter = 0;
-    String path = upDir + (upDir.endsWith("/") ? "" : "/") + newFileName;
+    String path = createPath(upDir, fileName);
     while (fs.existsBlocking(path)) {
       LOGGER.info("file exists already: " + path);
-      if (fileName.indexOf('.') > 0) {
-        newFileName = fileName.replaceFirst("\\.", counter++ + ".");
+      if (fileName.indexOf('.') >= 0) {
+        newFileName = fileName.replaceFirst("\\.", "_" + counter++ + ".");
       } else {
-        newFileName = fileName + counter++;
+        newFileName = fileName + "_" + counter++;
       }
-      path = upDir + (upDir.endsWith("/") ? "" : "/") + newFileName;
+      path = createPath(upDir, newFileName);
     }
     return newFileName;
+  }
+
+  private String createPath(String upDir, String fileName) {
+    return upDir + (upDir.endsWith("/") ? "" : "/") + fileName;
+  }
+
+  private String cleanFileName(String fileName) {
+    fileName = fileName.replaceAll(" ", "_");
+    if (fileName.lastIndexOf("\\") >= 0) {
+      fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+    }
+    return fileName;
   }
 
   /**
