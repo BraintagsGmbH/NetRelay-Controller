@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
+import de.braintags.netrelay.controller.CurrentMemberController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
@@ -64,20 +65,17 @@ public class TRegistration extends NetRelayBaseConnectorTest {
       DatastoreBaseTest.clearTable(context, Member.class);
       resetRoutes();
       performRegistration(context, email);
-      validateNoMultipleRequests(context, email);
-      // perform second time for checking duplications
-      performRegistration(context, email);
       RegisterClaim claim = validateNoMultipleRequests(context, email);
-      performConfirmation(context, claim);
+      Buffer cookie = performConfirmation(context, claim);
 
-      callProtectedPage(context);
+      callProtectedPage(context, cookie);
     } catch (Exception e) {
       context.fail(e);
     }
+
   }
 
-  private void callProtectedPage(TestContext context) throws Exception {
-    Buffer cookie = Buffer.buffer();
+  private void callProtectedPage(TestContext context, Buffer cookie) throws Exception {
     String url = TAuthentication.PROTECTED_URL;
     testRequest(context, HttpMethod.POST, url, httpConn -> {
       httpConn.headers().set("Cookie", cookie.toString());
@@ -137,9 +135,12 @@ public class TRegistration extends NetRelayBaseConnectorTest {
    * @param email
    * @throws Exception
    */
-  private void performConfirmation(TestContext context, RegisterClaim claim) throws Exception {
+  private Buffer performConfirmation(TestContext context, RegisterClaim claim) throws Exception {
+    Buffer cookie = Buffer.buffer();
+    LOGGER.info("PERFORMING CONFIRMATION");
     String url = CUSTOMER_DO_CONFIRMATION + "?" + RegisterController.VALIDATION_ID_PARAM + "=" + claim.id;
     testRequest(context, HttpMethod.GET, url, req -> {
+
     }, resp -> {
       LOGGER.info("RESPONSE: " + resp.content);
       LOGGER.info("HEADERS: " + resp.headers);
@@ -147,6 +148,9 @@ public class TRegistration extends NetRelayBaseConnectorTest {
           "No location header set, check for an exception or an error page!");
       context.assertTrue(resp.headers.get("location").contains("/customer/registerConfirmSuccess.html"),
           "no final redirect on confirmation success");
+      String setCookie = resp.headers.get("Set-Cookie");
+      context.assertNotNull(setCookie, "Cookie not found");
+      cookie.appendString(setCookie);
     }, 302, "Found", null);
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
@@ -154,6 +158,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     Member member = (Member) DatastoreBaseTest.findFirst(context, query);
     context.assertNotNull(member, "Member was not created");
     context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
+    return cookie;
   }
 
   /**
@@ -218,13 +223,6 @@ public class TRegistration extends NetRelayBaseConnectorTest {
   }
 
   private void resetRoutes() throws Exception {
-    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
-        .getNamedDefinition(AuthenticationController.class.getSimpleName());
-    def.setRoutes(new String[] { "/private/*" });
-    def.getHandlerProperties().put("collectionName", "Member");
-    def.getHandlerProperties().put("passwordField", "password");
-    def.getHandlerProperties().put("usernameField", "email");
-    def.getHandlerProperties().put("roleField", "roles");
     netRelay.resetRoutes();
   }
 
@@ -233,7 +231,24 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     super.modifySettings(context, settings);
     initMailClient(settings);
 
-    RouterDefinition def = settings.getRouterDefinitions().getNamedDefinition(RegisterController.class.getSimpleName());
+    RouterDefinition cmc = settings.getRouterDefinitions().remove(CurrentMemberController.class.getSimpleName());
+    if (cmc == null) {
+      cmc = new RouterDefinition();
+      cmc.setActive(true);
+      cmc.setController(CurrentMemberController.class);
+    }
+    cmc.setRoutes(new String[] { "/*" });
+    settings.getRouterDefinitions().addBefore(AuthenticationController.class.getSimpleName(), cmc);
+
+    RouterDefinition def = settings.getRouterDefinitions()
+        .getNamedDefinition(AuthenticationController.class.getSimpleName());
+    def.setRoutes(new String[] { "/private/*" });
+    def.getHandlerProperties().put("collectionName", "Member");
+    def.getHandlerProperties().put("passwordField", "password");
+    def.getHandlerProperties().put("usernameField", "email");
+    def.getHandlerProperties().put("roleField", "roles");
+
+    def = settings.getRouterDefinitions().getNamedDefinition(RegisterController.class.getSimpleName());
     def.setRoutes(new String[] { REGISTER_URL, CUSTOMER_DO_CONFIRMATION });
     def.getHandlerProperties().put(RegisterController.REG_START_FAIL_URL_PROP, "/customer/registerError.html");
     def.getHandlerProperties().put(MailController.FROM_PARAM, TESTS_MAIL_FROM);
@@ -244,6 +259,8 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put("passwordField", "password");
     def.getHandlerProperties().put("usernameField", "email");
     def.getHandlerProperties().put("roleField", "roles");
+
+    settings.getMappingDefinitions().addMapperDefinition(Member.class);
 
   }
 

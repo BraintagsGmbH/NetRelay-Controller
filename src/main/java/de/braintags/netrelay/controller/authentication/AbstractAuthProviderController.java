@@ -35,9 +35,13 @@ import io.vertx.ext.mongo.MongoClient;
  * possible parameters, which are read from the configuration
  * <UL>
  * <LI>{@value #AUTH_PROVIDER_PROP}
- * <LI>{@value #MAPPERNAME_IN_PRINCIPAL}
  * <LI>for {@link MongoAuth}, specific parameters for MongoAuth can be added, like
- * {@link MongoAuth#PROPERTY_COLLECTION_NAME}
+ * <UL>
+ * <LI>{@link MongoAuth#PROPERTY_COLLECTION_NAME}
+ * <LI>{@link MongoAuth#PROPERTY_PASSWORD_FIELD}
+ * <LI>{@link MongoAuth#PROPERTY_USERNAME_FIELD}
+ * <LI>{@link MongoAuth#PROPERTY_ROLE_FIELD}
+ * </UL>
  * </UL>
  * <br>
  * 
@@ -79,7 +83,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
    */
   public static final String AUTH_PROVIDER_PROP = "authProvider";
 
-  private AuthProvider authProvider;
+  private static AuthProvider authProvider;
 
   /*
    * (non-Javadoc)

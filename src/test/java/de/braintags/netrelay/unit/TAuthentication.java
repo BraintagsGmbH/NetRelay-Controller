@@ -15,6 +15,7 @@ package de.braintags.netrelay.unit;
 import org.junit.Test;
 
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
@@ -248,6 +249,18 @@ public class TAuthentication extends NetRelayBaseConnectorTest {
   private void improveRedirect(String redirectPath, TestContext context, ResponseCopy resp) {
     context.assertTrue(resp.headers.contains("location"), "parameter location does not exist");
     context.assertTrue(resp.headers.get("location").startsWith(redirectPath), "Expected redirect to " + redirectPath);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.unit.NetRelayBaseConnectorTest#modifySettings(io.vertx.ext.unit.TestContext,
+   * de.braintags.netrelay.init.Settings)
+   */
+  @Override
+  public void modifySettings(TestContext context, Settings settings) {
+    super.modifySettings(context, settings);
+    settings.getMappingDefinitions().addMapperDefinition(Member.class);
   }
 
 }

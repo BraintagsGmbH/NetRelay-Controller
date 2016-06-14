@@ -43,6 +43,8 @@ public class CurrentMemberController extends AbstractController {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(CurrentMemberController.class);
 
+  public static final String USER_PROPERTY_BT = "userPropertyBt";
+
   /*
    * (non-Javadoc)
    * 
@@ -50,6 +52,7 @@ public class CurrentMemberController extends AbstractController {
    */
   @Override
   public final void handle(RoutingContext context) {
+    LOGGER.info("Session-ID: " + context.session().id());
     loadMember(context, result -> {
       if (result.failed()) {
         context.fail(result.cause());
@@ -87,6 +90,10 @@ public class CurrentMemberController extends AbstractController {
    * @param handler
    */
   private final void loadMember(RoutingContext context, Handler<AsyncResult<Void>> handler) {
+    if (context.user() == null && context.session() != null && context.session().get(USER_PROPERTY_BT) != null) {
+      context.setUser(context.session().get(USER_PROPERTY_BT));
+    }
+
     if (context.user() != null) {
       try {
         Class<? extends Member> mapperClass = getMapperClass(context);
@@ -142,7 +149,7 @@ public class CurrentMemberController extends AbstractController {
     def.setBlocking(false);
     def.setController(CurrentMemberController.class);
     def.setHandlerProperties(getDefaultProperties());
-    def.setRoutes(new String[] {});
+    def.setRoutes(null);
     return def;
   }
 

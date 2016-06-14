@@ -25,6 +25,7 @@ import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.util.QueryHelper;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.RequestUtil;
+import de.braintags.netrelay.controller.CurrentMemberController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.api.MailController.MailSendResult;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -406,14 +407,14 @@ public class RegisterController extends AbstractAuthProviderController {
             handler.handle(Future.failedFuture(wr.cause()));
           } else {
             deactivateRegisterClaim(rc);
-            doUserLogin(user, handler);
+            doUserLogin(context, user, handler);
           }
         });
       }
     });
   }
 
-  private void doUserLogin(IAuthenticatable user, Handler<AsyncResult<Void>> handler) {
+  private void doUserLogin(RoutingContext context, IAuthenticatable user, Handler<AsyncResult<Void>> handler) {
     AuthProvider auth = getAuthProvider();
     if (auth == null) {
       handler.handle(Future.succeededFuture());
@@ -426,7 +427,9 @@ public class RegisterController extends AbstractAuthProviderController {
             LOGGER.warn("Unsuccessfull login", res.cause());
             handler.handle(Future.failedFuture(res.cause()));
           } else {
-            LOGGER.info("direct login successfull");
+            LOGGER.info("direct login successfull, user: " + res.result());
+            context.setUser(res.result());
+            context.session().put(CurrentMemberController.USER_PROPERTY_BT, res.result());
             handler.handle(Future.succeededFuture());
           }
         });
