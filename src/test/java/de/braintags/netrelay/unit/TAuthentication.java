@@ -32,7 +32,7 @@ public class TAuthentication extends NetRelayBaseConnectorTest {
   /**
    * Comment for <code>PROTECTED_URL</code>
    */
-  private static final String PROTECTED_URL = "/private/privatePage.html";
+  public static final String PROTECTED_URL = "/private/privatePage.html";
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TAuthentication.class);
 

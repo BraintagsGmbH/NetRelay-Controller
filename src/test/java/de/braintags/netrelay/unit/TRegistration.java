@@ -20,6 +20,7 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
+import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.authentication.RegisterController;
 import de.braintags.netrelay.controller.authentication.RegistrationCode;
 import de.braintags.netrelay.init.Settings;
@@ -27,6 +28,7 @@ import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.model.RegisterClaim;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.TestContext;
 
@@ -53,6 +55,38 @@ public class TRegistration extends NetRelayBaseConnectorTest {
 
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TRegistration.class);
+
+  @Test
+  public void testRegisterCheckDirectLogin(TestContext context) {
+    String email = USER_BRAINTAGS_DE;
+    try {
+      DatastoreBaseTest.clearTable(context, RegisterClaim.class);
+      DatastoreBaseTest.clearTable(context, Member.class);
+      resetRoutes();
+      performRegistration(context, email);
+      validateNoMultipleRequests(context, email);
+      // perform second time for checking duplications
+      performRegistration(context, email);
+      RegisterClaim claim = validateNoMultipleRequests(context, email);
+      performConfirmation(context, claim);
+
+      callProtectedPage(context);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+  }
+
+  private void callProtectedPage(TestContext context) throws Exception {
+    Buffer cookie = Buffer.buffer();
+    String url = TAuthentication.PROTECTED_URL;
+    testRequest(context, HttpMethod.POST, url, httpConn -> {
+      httpConn.headers().set("Cookie", cookie.toString());
+    }, resp -> {
+      LOGGER.info("RESPONSE: " + resp.content);
+      LOGGER.info("HEADERS: " + resp.headers);
+      context.assertTrue(resp.content.contains("PRIVAT"), "protected page should be read, but was not");
+    }, 200, "OK", null);
+  }
 
   @Test
   public void testRegisterPasswordmissing(TestContext context) {
@@ -184,6 +218,13 @@ public class TRegistration extends NetRelayBaseConnectorTest {
   }
 
   private void resetRoutes() throws Exception {
+    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
+        .getNamedDefinition(AuthenticationController.class.getSimpleName());
+    def.setRoutes(new String[] { "/private/*" });
+    def.getHandlerProperties().put("collectionName", "Member");
+    def.getHandlerProperties().put("passwordField", "password");
+    def.getHandlerProperties().put("usernameField", "email");
+    def.getHandlerProperties().put("roleField", "roles");
     netRelay.resetRoutes();
   }
 
