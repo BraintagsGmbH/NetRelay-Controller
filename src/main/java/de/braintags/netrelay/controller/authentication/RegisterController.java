@@ -24,8 +24,8 @@ import de.braintags.io.vertx.pojomapper.dataaccess.write.IWrite;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.util.QueryHelper;
 import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
-import de.braintags.netrelay.controller.CurrentMemberController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.api.MailController.MailSendResult;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -428,8 +428,7 @@ public class RegisterController extends AbstractAuthProviderController {
             handler.handle(Future.failedFuture(res.cause()));
           } else {
             LOGGER.info("direct login successfull, user: " + res.result());
-            context.setUser(res.result());
-            context.session().put(CurrentMemberController.USER_PROPERTY_BT, res.result());
+            MemberUtil.setContextUser(context, res.result());
             handler.handle(Future.succeededFuture());
           }
         });

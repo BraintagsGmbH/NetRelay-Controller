@@ -31,11 +31,50 @@ import io.vertx.ext.web.RoutingContext;
  * 
  */
 public class MemberUtil {
+  public static final String USER_PROPERTY_BT = "userPropertyBt";
 
   /**
    * 
    */
   private MemberUtil() {
+  }
+
+  /**
+   * Method checks, wether the context.user must be set from a value from the current session
+   * 
+   * @param context
+   */
+  public static final void recoverContextUser(RoutingContext context) {
+    if (context.user() == null && context.session() != null && context.session().get(USER_PROPERTY_BT) != null) {
+      context.setUser(context.session().get(USER_PROPERTY_BT));
+    }
+  }
+
+  /**
+   * Add the given user into the context and place it into the session, so that method
+   * {@link #recoverContextUser(RoutingContext)} can recover it
+   * 
+   * @param context
+   * @param user
+   */
+  public static final void setContextUser(RoutingContext context, User user) {
+    context.setUser(user);
+    if (context.session() != null) {
+      context.session().put(USER_PROPERTY_BT, user);
+    }
+  }
+
+  /**
+   * Perform a logout, means. removes current user and user infos from context and session
+   * 
+   * @param context
+   */
+  public static final void logout(RoutingContext context) {
+    context.clearUser();
+    if (context.session() != null) {
+      context.session().remove(USER_PROPERTY_BT);
+      removeCurrentUser(context);
+    }
   }
 
   /**

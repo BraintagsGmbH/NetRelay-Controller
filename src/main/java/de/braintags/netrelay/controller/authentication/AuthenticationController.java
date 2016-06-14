@@ -133,9 +133,9 @@ public class AuthenticationController extends AbstractAuthProviderController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext event) {
-    authHandler.handle(event);
-
+  public void handle(RoutingContext context) {
+    MemberUtil.recoverContextUser(context);
+    authHandler.handle(context);
   }
 
   @Override
@@ -156,10 +156,7 @@ public class AuthenticationController extends AbstractAuthProviderController {
     String logoutUrl = readProperty(LOGOUT_ACTION_URL_PROP, DEFAULT_LOGOUT_ACTION_URL, false);
     String logoutDestinationURL = readProperty(LOGOUT_DESTINATION_PAGE_PROP, DEFAULT_LOGOUT_DESTINATION, false);
     getNetRelay().getRouter().route(logoutUrl).handler(context -> {
-      if (context.user() != null) {
-        context.clearUser();
-        MemberUtil.removeCurrentUser(context);
-      }
+      MemberUtil.logout(context);
       String path = logoutDestinationURL + "?" + LOGOUT_MESSAGE_PROP + "=success";
       RequestUtil.sendRedirect(context.response(), path);
     });

@@ -43,8 +43,6 @@ public class CurrentMemberController extends AbstractController {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(CurrentMemberController.class);
 
-  public static final String USER_PROPERTY_BT = "userPropertyBt";
-
   /*
    * (non-Javadoc)
    * 
@@ -90,10 +88,7 @@ public class CurrentMemberController extends AbstractController {
    * @param handler
    */
   private final void loadMember(RoutingContext context, Handler<AsyncResult<Void>> handler) {
-    if (context.user() == null && context.session() != null && context.session().get(USER_PROPERTY_BT) != null) {
-      context.setUser(context.session().get(USER_PROPERTY_BT));
-    }
-
+    MemberUtil.recoverContextUser(context);
     if (context.user() != null) {
       try {
         Class<? extends Member> mapperClass = getMapperClass(context);
@@ -129,15 +124,6 @@ public class CurrentMemberController extends AbstractController {
     return mapperClass;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
-   */
-  @Override
-  public void initProperties(Properties properties) {
-  }
-
   /**
    * Creates a default definition for the current instance
    * 
@@ -159,7 +145,16 @@ public class CurrentMemberController extends AbstractController {
    * @return
    */
   public static Properties getDefaultProperties() {
-    Properties json = new Properties();
-    return json;
+    return new Properties();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
+   */
+  @Override
+  public void initProperties(Properties properties) {
+    // nothing to do here
   }
 }
