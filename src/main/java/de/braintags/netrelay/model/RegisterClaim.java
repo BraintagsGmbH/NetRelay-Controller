@@ -12,6 +12,7 @@
  */
 package de.braintags.netrelay.model;
 
+import de.braintags.netrelay.controller.authentication.RegisterController;
 import io.vertx.core.http.HttpServerRequest;
 
 /**
@@ -23,7 +24,8 @@ import io.vertx.core.http.HttpServerRequest;
  * 
  */
 public class RegisterClaim extends PasswordLostClaim {
-  public String password;
+  private String password;
+  private String destinationUrl;
 
   public RegisterClaim() {
   }
@@ -36,6 +38,45 @@ public class RegisterClaim extends PasswordLostClaim {
   public RegisterClaim(String email, String password, HttpServerRequest request) {
     super(email, request);
     this.password = password;
+    destinationUrl = request.getParam(RegisterController.REG_CONFIRM_SUCCESS_URL_PROP);
+  }
+
+  /**
+   * The password is added into the new user account after successfull conformation
+   * 
+   * @return the password
+   */
+  public String getPassword() {
+    return password;
+  }
+
+  /**
+   * The password is added into the new user account after successfull conformation
+   * 
+   * @param password
+   *          the password to set
+   */
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  /**
+   * If the destinationUrl is set, then a redirect is sent to the defined url after a successfull confirmation
+   * 
+   * @return the destinationUrl
+   */
+  public String getDestinationUrl() {
+    return destinationUrl;
+  }
+
+  /**
+   * If the destinationUrl is set, then a redirect is sent to the defined url after a successfull confirmation
+   * 
+   * @param destinationUrl
+   *          the destinationUrl to set
+   */
+  public void setDestinationUrl(String destinationUrl) {
+    this.destinationUrl = destinationUrl;
   }
 
 }

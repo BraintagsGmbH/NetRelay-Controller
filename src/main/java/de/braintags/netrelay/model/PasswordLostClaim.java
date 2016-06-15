@@ -28,10 +28,10 @@ import io.vertx.core.http.HttpServerRequest;
  * 
  */
 public class PasswordLostClaim extends AbstractRecord {
-  public String email;
-  public boolean active = true;
+  private String email;
+  private boolean active = true;
   private IAuthenticatable user;
-  public Map<String, String> requestParameter = new HashMap<>();
+  private Map<String, String> requestParameter = new HashMap<>();
 
   /**
    * 
@@ -52,6 +52,53 @@ public class PasswordLostClaim extends AbstractRecord {
 
   private void transfer(MultiMap mm, Map<String, String> destination) {
     mm.entries().forEach(entry -> destination.put(entry.getKey(), entry.getValue()));
+  }
+
+  /**
+   * The email address used to send the mail
+   * 
+   * @return the email
+   */
+  public String getEmail() {
+    return email;
+  }
+
+  /**
+   * @param email
+   *          the email to set
+   */
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  /**
+   * @return the active
+   */
+  public boolean isActive() {
+    return active;
+  }
+
+  /**
+   * @param active
+   *          the active to set
+   */
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
+  /**
+   * @return the requestParameter
+   */
+  public Map<String, String> getRequestParameter() {
+    return requestParameter;
+  }
+
+  /**
+   * @param requestParameter
+   *          the requestParameter to set
+   */
+  public void setRequestParameter(Map<String, String> requestParameter) {
+    this.requestParameter = requestParameter;
   }
 
 }

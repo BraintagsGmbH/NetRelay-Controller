@@ -268,7 +268,7 @@ public class PasswordLostController extends AbstractController {
   }
 
   private void addParameterToContext(RoutingContext context, PasswordLostClaim claim) {
-    claim.requestParameter.entrySet().forEach(entry -> context.put(entry.getKey(), entry.getValue()));
+    claim.getRequestParameter().entrySet().forEach(entry -> context.put(entry.getKey(), entry.getValue()));
   }
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
@@ -281,7 +281,7 @@ public class PasswordLostController extends AbstractController {
         List<PasswordLostClaim> cl = (List<PasswordLostClaim>) qr.result();
         if (!cl.isEmpty()) {
           IWrite<PasswordLostClaim> write = getNetRelay().getDatastore().createWrite(PasswordLostClaim.class);
-          cl.forEach(rc -> rc.active = false);
+          cl.forEach(rc -> rc.setActive(false));
           write.addAll(cl);
           write.save(wr -> {
             if (wr.failed()) {
@@ -354,7 +354,7 @@ public class PasswordLostController extends AbstractController {
             context.reroute(failConfirmUrl);
           } else {
             PasswordLostClaim rc = (PasswordLostClaim) cr.result();
-            getUser(rc.email, acRes -> {
+            getUser(rc.getEmail(), acRes -> {
               if (acRes.failed()) {
                 LOGGER.error("", acRes.cause());
                 context.put(RESET_ERROR_PARAM, acRes.cause().getMessage());
@@ -382,7 +382,7 @@ public class PasswordLostController extends AbstractController {
    * @param handler
    */
   private void deactivateClaim(PasswordLostClaim claim) {
-    claim.active = false;
+    claim.setActive(false);
     IWrite<PasswordLostClaim> write = getNetRelay().getDatastore().createWrite(PasswordLostClaim.class);
     write.add(claim);
     write.save(wr -> {

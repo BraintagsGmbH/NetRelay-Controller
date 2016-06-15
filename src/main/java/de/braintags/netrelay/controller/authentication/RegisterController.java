@@ -93,7 +93,8 @@ import io.vertx.ext.web.RoutingContext;
  * Under this address the mail should be sent, where the confirmation link is integrated, like described up.
  * <LI>{@value #REG_START_FAIL_URL_PROP} - defines the url which is used, when the registration claim raised an error
  * <LI>{@value #REG_CONFIRM_SUCCESS_URL_PROP} - defines the url which is used, when the registration confirmation was
- * successfull
+ * successfull. This parameter can be set as Request-Parameter either, so that it will be stored in the RegisterClaim to
+ * perform a redirect after a successfull confirmation
  * <LI>{@value #REG_CONFIRM_FAIL_URL_PROP} - defines the url which is used, when the registration confirmation raised an
  * error
  * <LI>{@value #AUTHENTICATABLE_CLASS_PROP} - the property name, which defines the class, which will be used to generate
@@ -110,6 +111,8 @@ import io.vertx.ext.web.RoutingContext;
  * <UL>
  * <LI>email
  * <LI>password
+ * <LI>{@value #REG_CONFIRM_SUCCESS_URL_PROP} - can be set as config-parameter as default AND as request parameter
+ * additionally, if needed.
  * </UL>
  * additional fields can be set by fields with the structure mapper.fieldName
  * <LI>confirmation of a registration: the parameter {@value #VALIDATION_ID_PARAM} must contain the id transported
@@ -265,7 +268,7 @@ public class RegisterController extends AbstractAuthProviderController {
   }
 
   private void addParameterToContext(RoutingContext context, RegisterClaim claim) {
-    claim.requestParameter.entrySet().forEach(entry -> context.put(entry.getKey(), entry.getValue()));
+    claim.getRequestParameter().entrySet().forEach(entry -> context.put(entry.getKey(), entry.getValue()));
   }
 
   private void createRegisterClaim(RoutingContext context, String email, String password,
@@ -302,7 +305,7 @@ public class RegisterController extends AbstractAuthProviderController {
         List<RegisterClaim> cl = (List<RegisterClaim>) qr.result();
         if (!cl.isEmpty()) {
           IWrite<RegisterClaim> write = getNetRelay().getDatastore().createWrite(RegisterClaim.class);
-          cl.forEach(rc -> rc.active = false);
+          cl.forEach(rc -> rc.setActive(false));
           write.addAll(cl);
           write.save(wr -> {
             if (wr.failed()) {
@@ -383,7 +386,8 @@ public class RegisterController extends AbstractAuthProviderController {
         context.put(REGISTER_ERROR_PARAM, acRes.cause().getMessage());
         context.reroute(failConfirmUrl);
       } else {
-        RequestUtil.sendRedirect(context.response(), successConfirmUrl);
+        RequestUtil.sendRedirect(context.response(),
+            rc.getDestinationUrl() != null ? rc.getDestinationUrl() : successConfirmUrl);
       }
     });
   }
@@ -391,14 +395,15 @@ public class RegisterController extends AbstractAuthProviderController {
   @SuppressWarnings({ "unchecked" })
   private void toAuthenticatable(RoutingContext context, RegisterClaim rc, Handler<AsyncResult<Void>> handler) {
     NetRelayMapperFactory mapperFactory = (NetRelayMapperFactory) getNetRelay().getNetRelayMapperFactory();
-    Map<String, String> props = extractPropertiesFromMap(mapper.getMapperClass().getSimpleName(), rc.requestParameter);
+    Map<String, String> props = extractPropertiesFromMap(mapper.getMapperClass().getSimpleName(),
+        rc.getRequestParameter());
     mapperFactory.getStoreObjectFactory().createStoreObject(props, mapper, result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));
       } else {
         IAuthenticatable user = (IAuthenticatable) result.result().getEntity();
-        user.setEmail(rc.email);
-        user.setPassword(rc.password);
+        user.setEmail(rc.getEmail());
+        user.setPassword(rc.getPassword());
         IWrite<IAuthenticatable> write = (IWrite<IAuthenticatable>) getNetRelay().getDatastore()
             .createWrite(authenticatableCLass);
         write.add(user);
@@ -454,7 +459,7 @@ public class RegisterController extends AbstractAuthProviderController {
 
   // let it run async and don't wait
   private void deactivateRegisterClaim(RegisterClaim claim) {
-    claim.active = false;
+    claim.setActive(false);
     IWrite<RegisterClaim> write = getNetRelay().getDatastore().createWrite(RegisterClaim.class);
     write.add(claim);
     write.save(wr -> {
