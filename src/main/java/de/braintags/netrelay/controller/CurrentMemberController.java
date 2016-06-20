@@ -50,7 +50,7 @@ public class CurrentMemberController extends AbstractController {
    */
   @Override
   public final void handle(RoutingContext context) {
-    LOGGER.info("Session-ID: " + context.session().id());
+    LOGGER.debug("Session-ID: " + context.session().id() + " for request " + context.request().path());
     loadMember(context, result -> {
       if (result.failed()) {
         context.fail(result.cause());

@@ -12,6 +12,7 @@
  */
 package de.braintags.netrelay.controller.authentication;
 
+import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
@@ -32,7 +33,7 @@ import io.vertx.ext.web.handler.FormLoginHandler;
  */
 public class FormLoginHandlerBt implements FormLoginHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(FormLoginHandlerBt.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(FormLoginHandlerBt.class);
 
   public static final String DEFAULT_AUTHENTICATION_ERROR_PARAM = "authenticationError";
 
@@ -119,14 +120,15 @@ public class FormLoginHandlerBt implements FormLoginHandler {
       String username = params.get(usernameParam);
       String password = params.get(passwordParam);
       if (username == null || password == null) {
-        log.warn("No username or password provided in form - did you forget to include a BodyHandler?");
+        LOGGER.warn("No username or password provided in form - did you forget to include a BodyHandler?");
         context.fail(400);
       } else {
         JsonObject authInfo = new JsonObject().put("username", username).put("password", password);
         authProvider.authenticate(authInfo, res -> {
           if (res.succeeded()) {
             User user = res.result();
-            context.setUser(user);
+            LOGGER.info("Login success, found user " + user);
+            MemberUtil.setContextUser(context, user);
             if (redirectBySession(context)) {
               return;
             }
@@ -136,7 +138,7 @@ public class FormLoginHandlerBt implements FormLoginHandler {
               req.response().end(DEFAULT_DIRECT_LOGGED_IN_OK_PAGE);
             }
           } else {
-            log.info("authentication failed: " + res.cause());
+            LOGGER.info("authentication failed: " + res.cause());
             handleAuthenticationError(context, res.cause());
           }
         });
