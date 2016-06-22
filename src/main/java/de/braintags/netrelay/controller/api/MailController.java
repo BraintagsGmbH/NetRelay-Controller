@@ -63,6 +63,7 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
  * <LI>{@value #HOSTNAME_PROP}
  * <LI>{@value #PORT_PROP}
  * <LI>{@value #SCHEME_PROP}
+ * <LI>{@value #STORE_RESULT_VARIABLE_PARAMETER}
  * </UL>
  * <br>
  * 
@@ -91,6 +92,12 @@ public class MailController extends AbstractController {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(MailController.class);
   private static final Pattern IMG_PATTERN = Pattern.compile("(<img [^>]*src=\")([^\"]+)(\"[^>]*>)");
+
+  /**
+   * If this parameter is defined, the result of the mail sending will be stored under the variable in the context.
+   * Otherwise the result will be returned as page request
+   */
+  public static final String STORE_RESULT_VARIABLE_PARAMETER = "storeResultVariable";
 
   /**
    * The name of the parameter, by which the sender of mails is defined. Ii is read from properties or request.
@@ -169,8 +176,14 @@ public class MailController extends AbstractController {
   }
 
   private void sendReply(RoutingContext context, MailSendResult result) {
-    HttpServerResponse response = context.response();
-    response.putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(result));
+    String varname = readProperty(STORE_RESULT_VARIABLE_PARAMETER, null, false);
+    if (varname == null) {
+      HttpServerResponse response = context.response();
+      response.putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(result));
+    } else {
+      context.put(varname, Json.encodePrettily(result));
+      context.next();
+    }
   }
 
   /**
