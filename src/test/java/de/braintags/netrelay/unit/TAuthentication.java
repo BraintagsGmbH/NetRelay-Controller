@@ -38,6 +38,23 @@ public class TAuthentication extends NetRelayBaseConnectorTest {
       .getLogger(TAuthentication.class);
 
   /**
+   * Call protected page without login
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testProtectedPageWithoutLogin(TestContext context) throws Exception {
+    Member member = createMember(context);
+    resetRoutes(null);
+    String url = PROTECTED_URL;
+    testRequest(context, HttpMethod.POST, url, httpConn -> {
+    }, resp -> {
+      improveRedirect(AuthenticationController.DEFAULT_LOGIN_ACTION_URL, context, resp);
+    }, 302, "Found", null);
+  }
+
+  /**
    * Send a direct, successful login and - cause no parameter
    * {@link AuthenticationController#DIRECT_LOGGED_IN_OK_URL_PROP} is set -
    * check, that the standard reply is sent

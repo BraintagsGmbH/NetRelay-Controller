@@ -12,7 +12,12 @@
  */
 package de.braintags.netrelay.controller.authentication;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import de.braintags.netrelay.RequestUtil;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AuthProvider;
@@ -24,7 +29,9 @@ import io.vertx.ext.web.handler.impl.RedirectAuthHandlerImpl;
 
 /**
  * Implementation of AuthHandler based on vertx {@link RedirectAuthHandlerImpl}, which adds the url parameters into the
- * page, which is aimed after a successful login
+ * page, which is aimed after a successful login.
+ * Additionally the method authorise is overwritten, cause the default implementation expects ALL permissions to be
+ * true, this implementation expects ONE permission to be true
  * 
  * @author Michael Remme
  * 
@@ -60,4 +67,40 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
     }
 
   }
+
+  @Override
+  protected void authorise(User user, RoutingContext context) {
+    int requiredcount = authorities.size();
+    if (requiredcount > 0) {
+      AtomicInteger count = new AtomicInteger();
+      AtomicBoolean stopLoop = new AtomicBoolean();
+
+      Handler<AsyncResult<Boolean>> authHandler = res -> {
+        if (res.failed()) {
+          stopLoop.set(true);
+          context.fail(res.cause());
+        } else {
+          if (res.result()) {
+            // Has ONE required authorities
+            stopLoop.set(true);
+            context.next();
+          } else if (count.incrementAndGet() == requiredcount) {
+            // Has none of the required authorities
+            context.fail(403);
+          }
+        }
+      };
+
+      for (String authority : authorities) {
+        user.isAuthorised(authority, authHandler);
+        if (stopLoop.get()) {
+          break;
+        }
+      }
+    } else {
+      // No auth required
+      context.next();
+    }
+  }
+
 }

@@ -20,6 +20,7 @@ import de.braintags.io.vertx.util.CounterObject;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.controller.AbstractCaptureController;
 import de.braintags.netrelay.controller.Action;
+import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.netrelay.routing.CaptureDefinition;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -68,6 +69,12 @@ import io.vertx.ext.web.RoutingContext;
 public class PersistenceController extends AbstractCaptureController {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(PersistenceController.class);
+
+  /**
+   * The name of a permission entry, which can be used in the configuration of {@link AuthenticationController} to set
+   * permissions for one or more {@link Action}
+   */
+  public static final String PERMISSION_PROP_NAME = "permAction";
 
   /**
    * The name of the property, which defines the directory, where uploaded files are transferred into.

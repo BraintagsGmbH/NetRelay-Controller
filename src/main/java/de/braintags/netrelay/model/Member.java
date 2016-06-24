@@ -12,11 +12,15 @@
  */
 package de.braintags.netrelay.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.braintags.io.vertx.pojomapper.annotation.Entity;
 import de.braintags.io.vertx.pojomapper.annotation.field.Id;
+import de.braintags.netrelay.controller.authentication.AuthenticationController;
 
 /**
- * 
+ * Defines a member, which can be used inside a web application for authorization and authentication
  * 
  * @author Michael Remme
  * 
@@ -32,6 +36,7 @@ public class Member implements IAuthenticatable {
   private String email;
   private String password;
   private String gender;
+  private List<String> roles = new ArrayList<>();
 
   /**
    * @return the userName
@@ -140,6 +145,27 @@ public class Member implements IAuthenticatable {
    */
   public final void setId(String id) {
     this.id = id;
+  }
+
+  /**
+   * Defines the roles of a member, like admin, users etc. Roles are used by {@link AuthenticationController} for
+   * instance to grant access to pages and other resources.
+   * 
+   * @return the roles
+   */
+  public List<String> getRoles() {
+    return roles;
+  }
+
+  /**
+   * Defines the roles of a member, like admin, users etc. Roles are used by {@link AuthenticationController} for
+   * instance to grant access to pages and other resources.
+   * 
+   * @param roles
+   *          the roles to set
+   */
+  public void setRoles(List<String> roles) {
+    this.roles = roles;
   }
 
 }

@@ -16,6 +16,7 @@ import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
+import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.mongo.MongoAuth;
@@ -27,14 +28,30 @@ import io.vertx.ext.web.handler.RedirectAuthHandler;
 import io.vertx.ext.web.handler.UserSessionHandler;
 
 /**
+ * 
+ * This controller performs authentication ( login / logout ) and authorization ( role access, action access etc. ).
  * All routes, which are covered by this controller are protected. The controller takes automatically care about login
  * and logout of users.
+ * If called, the controller stores the internal {@link AuthHandler} into the context under the property
+ * "{@value #AUTH_HANDLER_PROP}", from where it can be called and reused by other Controllers. The
+ * {@link PersistenceController}, for instance, calls the AuthHandler to clear the permissions of the current user on
+ * the action(s), which shall be processed.
+ * 
  * If a call to a protected page is performed, a 302-redirect to the defined login page is processed
  * If the login failed, then the controller tries to reroute the call to the defined login page again. Before it is
  * setting the parameter {@value #AUTHENTICATION_ERROR_PARAM}. If this page is not defined, then a 403 error is sent.
  * 
  * Logout: performs logout and stores message in context with key LOGOUT_MESSAGE_PROP
  * 
+ * Setting permissions:
+ * Permissions can be defined by adding the property {@value #PERMISSIONS_PROP} to the configuration for the scope of
+ * the current instance. One entry can look like
+ * 
+ * "role:user, admin; {@value PersistenceController#PERMISSION_PROP_NAME}: DISPLAY, INSERT, UPDATE"
+ * for instance, which would define, that access is granted for all users with the role user or admin. Additionally, if
+ * a request would be processed by a {@link PersistenceController} as well, the {@link PersistenceController} would
+ * check, wether the action(s) to be processed are one of DISPLAY, INSERT or UPDATE. If at least one action would be
+ * processed as DELETE, the complete request would be refused with an authorization error.
  * 
  * Config-Parameter:<br/>
  * <UL>
@@ -47,6 +64,7 @@ import io.vertx.ext.web.handler.UserSessionHandler;
  * <LI>{@value #AUTH_HANDLER_PROP} - the name of the property, which defines the {@link AuthHandler} to be used.
  * Possible values are:
  * {@link AuthHandlerEnum#BASIC}, {@link AuthHandlerEnum#REDIRECT}
+ * <LI>{@value #PERMISSIONS_PROP}
  * <LI>additionally add the properties of {@link AbstractAuthProviderController}
  * </UL>
  * <br>
@@ -109,12 +127,17 @@ public class AuthenticationController extends AbstractAuthProviderController {
   public static final String DEFAULT_LOGOUT_DESTINATION = "/index.html";
 
   /**
-   * This property name is used as key, to store a logout message into the context
+   * When a logout was processed successfully and the page for a successfull logout is called, a
+   * parameter is attached to that request, which will be then like:
+   * logoutDestinationURL?{@value #LOGOUT_MESSAGE_PROP}=success;
    */
   public static final String LOGOUT_MESSAGE_PROP = "logoutMessage";
 
   /**
-   * Defines the name of the {@link AuthHandler} to be used
+   * Defines the name of the property by which the {@link AuthHandler} to be used is defined inside the configuration
+   * properties. Additionally this property name is used to store the instance of {@link AuthHandler} into the context,
+   * from where it can be called from other Controllers, like the {@link PersistenceController} is doing the clear the
+   * rights on a requested action
    */
   public static final String AUTH_HANDLER_PROP = "authHandler";
 
@@ -123,6 +146,12 @@ public class AuthenticationController extends AbstractAuthProviderController {
    * which contains the form, by which a user can enter his username and password
    */
   public static final String LOGIN_PAGE_PROP = "loginPage";
+
+  /**
+   * By this property the permissions can be defined, which are required inside the scope of the
+   * AuthenticationController, which is defined by the routes.
+   */
+  public static final String PERMISSIONS_PROP = "permissions";
 
   protected AuthHandler authHandler;
   private String loginPage;
@@ -134,6 +163,7 @@ public class AuthenticationController extends AbstractAuthProviderController {
    */
   @Override
   public void handle(RoutingContext context) {
+    context.put(AUTH_HANDLER_PROP, authHandler);
     MemberUtil.recoverContextUser(context);
     authHandler.handle(context);
   }
@@ -146,6 +176,35 @@ public class AuthenticationController extends AbstractAuthProviderController {
     initUserSessionHandler();
     initLoginAction();
     initLogoutAction();
+    initPermissions();
+  }
+
+  /**
+   * permissions are defined as csv list like
+   * role:user, admin; {@value PersistenceController#PERMISSION_PROP_NAME}: DISPLAY, INSERT, UPDATE
+   * 
+   */
+  private void initPermissions() {
+    String permissions = readProperty(PERMISSIONS_PROP, null, false);
+    if (permissions != null) {
+      String[] perms = permissions.split(";");
+      for (String perm : perms) {
+        addOnePermissionType(perm);
+      }
+    }
+  }
+
+  private void addOnePermissionType(String permission) {
+    String[] kv = permission.split(":");
+    if (kv.length != 2) {
+      throw new IllegalArgumentException("Wrong format of permission definition " + permission
+          + ". The format must be permissionName: value1, value2");
+    }
+    String key = kv[0].trim();
+    String[] vals = kv[1].split(",");
+    for (String val : vals) {
+      authHandler.addAuthority(key + ":" + val.trim());
+    }
   }
 
   private void initUserSessionHandler() {
