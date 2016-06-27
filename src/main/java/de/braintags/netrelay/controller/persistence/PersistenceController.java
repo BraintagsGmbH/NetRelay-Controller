@@ -29,6 +29,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.file.FileSystem;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.AuthHandler;
 
 /**
  * The PersistenceController is the instance, which translates the parameters and data of a request into a datastore
@@ -137,6 +138,7 @@ public class PersistenceController extends AbstractCaptureController {
   protected void handle(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
       Handler<AsyncResult<Void>> handler) {
     CounterObject<Void> co = new CounterObject<>(resolvedCaptureCollections.size(), handler);
+    checkAuthentication(context, resolvedCaptureCollections, handler);
 
     for (CaptureMap map : resolvedCaptureCollections) {
       handle(context, map, result -> {
@@ -152,6 +154,13 @@ public class PersistenceController extends AbstractCaptureController {
         return;
       }
     }
+  }
+
+  private void checkAuthentication(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
+      Handler<AsyncResult<Void>> handler) {
+    AuthHandler auth = context.get(AuthenticationController.AUTH_HANDLER_PROP);
+    if (auth != null)
+      handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 
   private void handle(RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler) {

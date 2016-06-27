@@ -31,28 +31,46 @@ import io.vertx.ext.web.handler.UserSessionHandler;
  * 
  * This controller performs authentication ( login / logout ) and authorization ( role access, action access etc. ).
  * All routes, which are covered by this controller are protected. The controller takes automatically care about login
- * and logout of users.
+ * and logout of users.<br/>
  * If called, the controller stores the internal {@link AuthHandler} into the context under the property
  * "{@value #AUTH_HANDLER_PROP}", from where it can be called and reused by other Controllers. The
  * {@link PersistenceController}, for instance, calls the AuthHandler to clear the permissions of the current user on
- * the action(s), which shall be processed.
+ * the action(s), which shall be processed.<br/>
  * 
  * If a call to a protected page is performed, a 302-redirect to the defined login page is processed
  * If the login failed, then the controller tries to reroute the call to the defined login page again. Before it is
  * setting the parameter {@value #AUTHENTICATION_ERROR_PARAM}. If this page is not defined, then a 403 error is sent.
+ * <br/>
  * 
- * Logout: performs logout and stores message in context with key LOGOUT_MESSAGE_PROP
+ * Logout: performs logout and stores message in context with key LOGOUT_MESSAGE_PROP<br/>
  * 
- * Setting permissions:
+ * Setting permissions:<br/>
  * Permissions can be defined by adding the property {@value #PERMISSIONS_PROP} to the configuration for the scope of
- * the current instance. One entry can look like
+ * the current instance. The structure of one entry is defined like:<br/>
  * 
- * "role:user, admin; {@value PersistenceController#PERMISSION_PROP_NAME}: DISPLAY, INSERT, UPDATE"
- * for instance, which would define, that access is granted for all users with the role user or admin. Additionally, if
- * a request would be processed by a {@link PersistenceController} as well, the {@link PersistenceController} would
- * check, wether the action(s) to be processed are one of DISPLAY, INSERT or UPDATE. If at least one action would be
- * processed as DELETE, the complete request would be refused with an authorization error.
+ * <pre>
+ * permissionType: permissionDefinition; permissionType2: permissionData2
+ * </pre>
  * 
+ * As a concrete example, a role definition for the pure authorization for a template or a path could be:
+ * 
+ * <pre>
+ * role: user, admin
+ * </pre>
+ * 
+ * To define permissions on CRUD actions, a role definition can be extended like that:
+ * 
+ * <pre>
+ * role: user{RU}, admin{CRUD}, *{R}
+ * </pre>
+ * 
+ * This would give the same permissions to the pure template or path usage like above ( the * would not be used here).
+ * Additionally, if a request would be processed by a PersistenceController as well, the PersistenceController would
+ * check, wether all actions processed would be granted by this definition. The above definition would grant a
+ * read/update right to the role user, Create / Read / Update / Delete rights to the role admin and READ right to any
+ * group. If at least one action would not be covered by the used definition, the complete request would be rejected
+ * with a 403 error.<br/>
+ * <br/>
  * Config-Parameter:<br/>
  * <UL>
  * <LI>{@value #LOGIN_ACTION_URL_PROP}
@@ -137,8 +155,7 @@ public class AuthenticationController extends AbstractAuthProviderController {
    * Defines the name of the property by which the {@link AuthHandler} to be used is defined inside the configuration
    * properties. Additionally this property name is used to store the instance of {@link AuthHandler} into the context,
    * from where it can be called from other Controllers, like the {@link PersistenceController} is doing when checking
-   * the
-   * rights on a requested action
+   * the rights on a requested action
    */
   public static final String AUTH_HANDLER_PROP = "authHandler";
 

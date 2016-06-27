@@ -15,6 +15,7 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.braintags.io.vertx.util.security.CRUDPermissionMap;
 import de.braintags.netrelay.RequestUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -24,6 +25,7 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
+import io.vertx.ext.web.handler.AuthHandler;
 import io.vertx.ext.web.handler.impl.AuthHandlerImpl;
 import io.vertx.ext.web.handler.impl.RedirectAuthHandlerImpl;
 
@@ -41,6 +43,7 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
 
   private final String loginRedirectURL;
   private final String returnURLParam;
+  private CRUDPermissionMap permissionMap;
 
   public RedirectAuthHandlerBt(AuthProvider authProvider, String loginRedirectURL, String returnURLParam) {
     super(authProvider);
@@ -101,6 +104,37 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
       // No auth required
       context.next();
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see io.vertx.ext.web.handler.impl.AuthHandlerImpl#addAuthority(java.lang.String)
+   */
+  @Override
+  public AuthHandler addAuthority(String authority) {
+    if (authority.startsWith("role:")) {
+      return super.addAuthority(addRoleAuthority(authority.substring(4)));
+    } else {
+      return super.addAuthority(authority);
+    }
+  }
+
+  private String addRoleAuthority(String permission) {
+    CRUDPermissionMap cm = getPermissionMap();
+    return cm.addPermissionEntry(permission);
+  }
+
+  /**
+   * Get the permission map
+   * 
+   * @return the permissionMap
+   */
+  public CRUDPermissionMap getPermissionMap() {
+    if (permissionMap == null) {
+      permissionMap = new CRUDPermissionMap();
+    }
+    return permissionMap;
   }
 
 }
