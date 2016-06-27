@@ -136,7 +136,8 @@ public class AuthenticationController extends AbstractAuthProviderController {
   /**
    * Defines the name of the property by which the {@link AuthHandler} to be used is defined inside the configuration
    * properties. Additionally this property name is used to store the instance of {@link AuthHandler} into the context,
-   * from where it can be called from other Controllers, like the {@link PersistenceController} is doing the clear the
+   * from where it can be called from other Controllers, like the {@link PersistenceController} is doing when checking
+   * the
    * rights on a requested action
    */
   public static final String AUTH_HANDLER_PROP = "authHandler";
