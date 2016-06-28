@@ -39,7 +39,7 @@ import io.vertx.ext.web.handler.impl.RedirectAuthHandlerImpl;
  * 
  */
 public class RedirectAuthHandlerBt extends AuthHandlerImpl {
-  private static final Logger log = LoggerFactory.getLogger(RedirectAuthHandlerImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RedirectAuthHandlerImpl.class);
 
   private final String loginRedirectURL;
   private final String returnURLParam;
@@ -86,9 +86,11 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
           if (res.result()) {
             // Has ONE required authorities
             stopLoop.set(true);
+            LOGGER.info("one authority fits: access granted");
             context.next();
           } else if (count.incrementAndGet() == requiredcount) {
             // Has none of the required authorities
+            LOGGER.info("none of the authorities was fitting - access forbidden");
             context.fail(403);
           }
         }
@@ -114,7 +116,9 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
   @Override
   public AuthHandler addAuthority(String authority) {
     if (authority.startsWith("role:")) {
-      return super.addAuthority(addRoleAuthority(authority.substring(4)));
+      // this creates the pure role authority without permissions: role:admin{CRUD} -> role:admin
+      String rolePermission = "role:" + addRoleAuthority(authority.substring(5));
+      return super.addAuthority(rolePermission);
     } else {
       return super.addAuthority(authority);
     }

@@ -15,8 +15,7 @@ package de.braintags.netrelay.controller;
 import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
-import de.braintags.netrelay.controller.authentication.AuthenticationController;
-import de.braintags.netrelay.model.Member;
+import de.braintags.netrelay.model.IAuthenticatable;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -51,11 +50,11 @@ public class CurrentMemberController extends AbstractController {
   @Override
   public final void handle(RoutingContext context) {
     LOGGER.debug("Session-ID: " + context.session().id() + " for request " + context.request().path());
-    loadMember(context, result -> {
-      if (result.failed()) {
-        context.fail(result.cause());
+    MemberUtil.getCurrentUser(context, getNetRelay(), res -> {
+      if (res.failed()) {
+        context.fail(res.cause());
       } else {
-        Member member = context.get(Member.CURRENT_USER_PROPERTY);
+        IAuthenticatable member = res.result();
         loadMemberData(member, context, dataResult -> {
           if (dataResult.failed()) {
             context.fail(dataResult.cause());
@@ -77,51 +76,8 @@ public class CurrentMemberController extends AbstractController {
    * @param handler
    *          the handler to be informed
    */
-  protected void loadMemberData(Member member, RoutingContext context, Handler<AsyncResult<Void>> handler) {
+  protected void loadMemberData(IAuthenticatable member, RoutingContext context, Handler<AsyncResult<Void>> handler) {
     handler.handle(Future.succeededFuture());
-  }
-
-  /**
-   * Loads the data of a logged in member and stores them in the context
-   * 
-   * @param context
-   * @param handler
-   */
-  private final void loadMember(RoutingContext context, Handler<AsyncResult<Void>> handler) {
-    MemberUtil.recoverContextUser(context);
-    if (context.user() != null) {
-      try {
-        Class<? extends Member> mapperClass = getMapperClass(context);
-        MemberUtil.getCurrentUser(context, getNetRelay().getDatastore(), mapperClass, res -> {
-          if (res.failed()) {
-            handler.handle(Future.failedFuture(res.cause()));
-          } else {
-            Member user = res.result();
-            context.put(Member.CURRENT_USER_PROPERTY, user);
-            MemberUtil.setCurrentUser(user, context);
-            handler.handle(Future.succeededFuture());
-          }
-        });
-      } catch (Exception e) {
-        handler.handle(Future.failedFuture(e));
-      }
-    } else {
-      handler.handle(Future.succeededFuture());
-    }
-  }
-
-  private Class<? extends Member> getMapperClass(RoutingContext context) {
-    String mapperName = context.user().principal().getString(AuthenticationController.MAPPERNAME_IN_PRINCIPAL);
-    if (mapperName == null) {
-      throw new IllegalArgumentException("No mapper definition found in principal");
-    }
-
-    Class<? extends Member> mapperClass = getNetRelay().getSettings().getMappingDefinitions()
-        .getMapperClass(mapperName);
-    if (mapperClass == null) {
-      throw new IllegalArgumentException("No MapperClass definition for: " + mapperName);
-    }
-    return mapperClass;
   }
 
   /**

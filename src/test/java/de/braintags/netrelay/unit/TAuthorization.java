@@ -16,6 +16,8 @@ import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.controller.persistence.PersistenceController;
+import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -33,6 +35,7 @@ import io.vertx.ext.unit.TestContext;
 public class TAuthorization extends NetRelayBaseConnectorTest {
 
   public static final String PROTECTED_URL = "/private/privatePage.html";
+  public static final String PROTECTED_PERSISTENCE_URL = "/private/persistence/privatePage.html";
 
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TAuthorization.class);
@@ -46,7 +49,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   @Test
   public void testRole_HasInsertPermission(TestContext context) throws Exception {
     Member member = createMember(context, "TestUser3", "admin", "users");
-    testExpectsOK(context, member, "role: admin{CRUD}, users, bookers");
+    testExpectsPeristenceOK(context, member, "role: admin{CRUD}, users, bookers", "INSERT");
   }
 
   /**
@@ -139,6 +142,33 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
+  public void testExpectsPeristenceOK(TestContext context, Member member, String permissions, String action)
+      throws Exception {
+    resetRoutes(permissions);
+    String cookie = login(context, member);
+    if (cookie != null) {
+      String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", action,
+          NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+      testRequest(context, HttpMethod.POST, url, httpConn -> {
+        httpConn.headers().set("Cookie", cookie.toString());
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        context.assertTrue(resp.content.contains("PRIVAT"), "protected page should be read, but was not");
+        String setCookie = resp.headers.get("Set-Cookie");
+        context.assertNull(setCookie, "Cookie should not be sent here");
+      }, 200, "OK", null);
+    } else {
+      context.fail("Expected a cookie here");
+    }
+  }
+
+  /**
+   * Test expects that permissions and user rights are fitting, so that user has the right for the request
+   * 
+   * @param context
+   * @throws Exception
+   */
   public void testExpectsOK(TestContext context, Member member, String permissions) throws Exception {
     resetRoutes(permissions);
     String cookie = login(context, member);
@@ -153,6 +183,8 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
         String setCookie = resp.headers.get("Set-Cookie");
         context.assertNull(setCookie, "Cookie should not be sent here");
       }, 200, "OK", null);
+    } else {
+      context.fail("Expected a cookie here");
     }
   }
 
@@ -197,18 +229,23 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   private void resetRoutes(String permissions) throws Exception {
-    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
+    RouterDefinition def1 = netRelay.getSettings().getRouterDefinitions()
         .getNamedDefinition(AuthenticationController.class.getSimpleName());
-    def.setRoutes(new String[] { "/private/*" });
-    def.getHandlerProperties().put("collectionName", "Member");
-    def.getHandlerProperties().put("passwordField", "password");
-    def.getHandlerProperties().put("usernameField", "userName");
-    def.getHandlerProperties().put("roleField", "roles");
+    def1.setRoutes(new String[] { "/private/*" });
+    def1.getHandlerProperties().put("collectionName", "Member");
+    def1.getHandlerProperties().put("passwordField", "password");
+    def1.getHandlerProperties().put("usernameField", "userName");
+    def1.getHandlerProperties().put("roleField", "roles");
     if (permissions != null) {
-      def.getHandlerProperties().put(AuthenticationController.PERMISSIONS_PROP, permissions);
+      def1.getHandlerProperties().put(AuthenticationController.PERMISSIONS_PROP, permissions);
     } else {
-      def.getHandlerProperties().remove(AuthenticationController.PERMISSIONS_PROP);
+      def1.getHandlerProperties().remove(AuthenticationController.PERMISSIONS_PROP);
     }
+
+    RouterDefinition def2 = netRelay.getSettings().getRouterDefinitions()
+        .remove(PersistenceController.class.getSimpleName());
+    def2.setRoutes(new String[] { PROTECTED_PERSISTENCE_URL });
+    netRelay.getSettings().getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(), def2);
     netRelay.resetRoutes();
   }
 

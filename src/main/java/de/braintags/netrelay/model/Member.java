@@ -27,7 +27,6 @@ import de.braintags.netrelay.controller.authentication.AuthenticationController;
  */
 @Entity
 public class Member implements IAuthenticatable {
-  public static final String CURRENT_USER_PROPERTY = "currentUser";
   @Id
   private String id;
   private String userName;
@@ -153,6 +152,7 @@ public class Member implements IAuthenticatable {
    * 
    * @return the roles
    */
+  @Override
   public List<String> getRoles() {
     return roles;
   }
@@ -164,6 +164,7 @@ public class Member implements IAuthenticatable {
    * @param roles
    *          the roles to set
    */
+  @Override
   public void setRoles(List<String> roles) {
     this.roles = roles;
   }

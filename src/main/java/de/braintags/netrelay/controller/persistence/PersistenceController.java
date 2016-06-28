@@ -18,9 +18,13 @@ import java.util.Properties;
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
 import de.braintags.io.vertx.util.CounterObject;
 import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.io.vertx.util.security.CRUDPermissionMap;
+import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.controller.authentication.RedirectAuthHandlerBt;
+import de.braintags.netrelay.model.IAuthenticatable;
 import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.netrelay.routing.CaptureDefinition;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -137,9 +141,25 @@ public class PersistenceController extends AbstractCaptureController {
   @Override
   protected void handle(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
       Handler<AsyncResult<Void>> handler) {
-    CounterObject<Void> co = new CounterObject<>(resolvedCaptureCollections.size(), handler);
-    checkAuthentication(context, resolvedCaptureCollections, handler);
+    checkAuthorization(context, resolvedCaptureCollections, res -> {
+      if (res.failed()) {
+        handler.handle(Future.failedFuture(res.cause()));
+      } else if (!res.result()) {
+        context.fail(403);
+      } else {
+        handlePersistence(context, resolvedCaptureCollections, handler);
+      }
+    });
+  }
 
+  /**
+   * @param context
+   * @param resolvedCaptureCollections
+   * @param handler
+   */
+  private void handlePersistence(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
+      Handler<AsyncResult<Void>> handler) {
+    CounterObject<Void> co = new CounterObject<>(resolvedCaptureCollections.size(), handler);
     for (CaptureMap map : resolvedCaptureCollections) {
       handle(context, map, result -> {
         if (result.failed()) {
@@ -151,16 +171,82 @@ public class PersistenceController extends AbstractCaptureController {
         }
       });
       if (co.isError()) {
-        return;
+        break;
       }
     }
   }
 
-  private void checkAuthentication(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
-      Handler<AsyncResult<Void>> handler) {
+  /**
+   * Check wether current user has the rights for all actions to be processed
+   * 
+   * @param context
+   * @param resolvedCaptureCollections
+   * @param handler
+   *          is getting true, if rights to all actions are granted or if no Authentication handler is active;
+   *          false, if right for only one action is not granted
+   */
+  private void checkAuthorization(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
+      Handler<AsyncResult<Boolean>> handler) {
     AuthHandler auth = context.get(AuthenticationController.AUTH_HANDLER_PROP);
-    if (auth != null)
-      handler.handle(Future.failedFuture(new UnsupportedOperationException()));
+    if (auth != null && auth instanceof RedirectAuthHandlerBt) {
+      MemberUtil.getCurrentUser(context, getNetRelay(), result -> {
+        if (result.failed()) {
+          handler.handle(Future.failedFuture(result.cause()));
+        } else {
+          IAuthenticatable member = result.result();
+          if (member == null) {
+            // this is an error
+            handler.handle(Future.failedFuture(
+                new IllegalArgumentException("This should not happen, we need an instance of IAuthenticatable here")));
+          } else {
+            checkAuthorization(resolvedCaptureCollections, auth, member, handler);
+          }
+        }
+      });
+    } else {
+      handler.handle(Future.succeededFuture(true));
+    }
+  }
+
+  /**
+   * @param resolvedCaptureCollections
+   * @param auth
+   * @param member
+   * @param handler
+   */
+  private void checkAuthorization(List<CaptureMap> resolvedCaptureCollections, AuthHandler auth,
+      IAuthenticatable member, Handler<AsyncResult<Boolean>> handler) {
+    boolean granted = true;
+    for (CaptureMap map : resolvedCaptureCollections) {
+      if (!checkAuthorization(auth, member, map)) {
+        granted = false;
+        break;
+      }
+    }
+    handler.handle(Future.succeededFuture(granted));
+  }
+
+  /**
+   * @param auth
+   * @param member
+   * @param map
+   */
+  private boolean checkAuthorization(AuthHandler auth, IAuthenticatable member, CaptureMap map) {
+    char crud = resolveCRUD(map);
+    if (member.getRoles() == null || member.getRoles().isEmpty()) {
+      if (((RedirectAuthHandlerBt) auth).getPermissionMap().hasPermission(CRUDPermissionMap.DEFAULT_PERMISSION_KEY_NAME,
+          crud)) {
+        return true;
+      }
+    } else {
+      for (String group : member.getRoles()) {
+        if (((RedirectAuthHandlerBt) auth).getPermissionMap().hasPermission(group, crud)) {
+          return true;
+        }
+      }
+    }
+    LOGGER.info("No permission granted for action " + crud);
+    return false;
   }
 
   private void handle(RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler) {
@@ -171,6 +257,13 @@ public class PersistenceController extends AbstractCaptureController {
     LOGGER.info("REQUEST-PARAMS: " + context.request().params().toString());
     LOGGER.info("FORM_PARAMS: " + context.request().formAttributes().toString());
     action.handle(mapperName, context, map, handler);
+  }
+
+  private char resolveCRUD(CaptureMap map) {
+    String actionKey = map.get(ACTION_CAPTURE_KEY);
+    Action action = actionKey == null ? Action.DISPLAY : Action.valueOf(actionKey);
+    LOGGER.info("action is " + action);
+    return action.getCRUD();
   }
 
   private AbstractAction resolveAction(CaptureMap map) {

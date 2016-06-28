@@ -12,14 +12,13 @@
  */
 package de.braintags.netrelay;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.exception.NoSuchRecordException;
-import de.braintags.netrelay.model.Member;
+import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.model.IAuthenticatable;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.mongo.impl.MongoUser;
 import io.vertx.ext.web.RoutingContext;
@@ -78,54 +77,88 @@ public class MemberUtil {
   }
 
   /**
-   * This method searches for a logged in User and returns it
+   * If a user is logged in, this method fetches the fitting instance of {@link IAuthenticatable} from the datastore,
+   * stores it in the context, so that it can be fetched again by this method or by the method
+   * {@link #getCurrentUser(RoutingContext)}. Additionally the IAuthenticatable is stored as result in the result
+   * handler
    * 
    * @param context
-   * @param mongoClient
-   * @param collectionName
+   *          the current context
+   * @param netRelay
+   *          the instance of NetRelay
+   * @param resultHandler
+   *          the result habndler, which is getting a found instance of IAuthenticatable or null, if no user is logged
+   *          in
+   */
+  public static final void getCurrentUser(RoutingContext context, NetRelay netRelay,
+      Handler<AsyncResult<IAuthenticatable>> resultHandler) {
+    IAuthenticatable member = getCurrentUser(context);
+    if (member != null) {
+      resultHandler.handle(Future.succeededFuture(member));
+    } else {
+      recoverContextUser(context);
+      User user = context.user();
+      if (user == null) {
+        resultHandler.handle(Future.succeededFuture(null));
+      } else {
+        readUser(context, netRelay, user, resultHandler);
+      }
+    }
+  }
+
+  /**
+   * Fetch the instance of IAuthenticatable from the datastore and store it into the context
+   * 
+   * @param context
+   * @param netRelay
+   * @param user
    * @param resultHandler
    */
-  public static final void getCurrentUser(RoutingContext context, IDataStore datastore, Class mapperClass,
-      Handler<AsyncResult<Member>> resultHandler) {
-    User user = context.user();
-
-    if (user == null) {
-      UnsupportedOperationException ex = new UnsupportedOperationException(
-          "To call this method a user must be logged in");
-      resultHandler.handle(Future.failedFuture(ex));
-      return;
-    }
-
-    if (user instanceof Member) {
-      resultHandler.handle(Future.succeededFuture((Member) user));
-    } else if (user instanceof MongoUser) {
-      JsonObject principal = user.principal();
+  private static void readUser(RoutingContext context, NetRelay netRelay, User user,
+      Handler<AsyncResult<IAuthenticatable>> resultHandler) {
+    Class<? extends IAuthenticatable> mapperClass = getMapperClass(context, netRelay);
+    if (user instanceof MongoUser) {
       String id = user.principal().getString("_id");
-      IQuery<Member> query = datastore.createQuery(mapperClass);
+      IQuery<? extends IAuthenticatable> query = netRelay.getDatastore().createQuery(mapperClass);
       query.field(query.getMapper().getIdField().getName()).is(id);
       query.execute(qr -> {
         if (qr.failed()) {
           resultHandler.handle(Future.failedFuture(qr.cause()));
         } else {
           if (qr.result().size() <= 0) {
-            resultHandler
-                .handle(Future.failedFuture(new NoSuchRecordException("no record found for principal with id " + id)));
+            resultHandler.handle(Future.failedFuture(new NoSuchRecordException(
+                "no record found for principal with id " + id + " in mapper " + mapperClass.getName())));
           }
           qr.result().iterator().next(ir -> {
             if (ir.failed()) {
               resultHandler.handle(Future.failedFuture(ir.cause()));
             } else {
-              resultHandler.handle(Future.succeededFuture(ir.result()));
+              IAuthenticatable auth = ir.result();
+              setCurrentUser(auth, context);
+              resultHandler.handle(Future.succeededFuture(auth));
             }
           });
         }
       });
     } else {
-      Future<Member> future = Future
+      Future<IAuthenticatable> future = Future
           .failedFuture(new UnsupportedOperationException("user type not supported: " + user.getClass().getName()));
       resultHandler.handle(future);
-      return;
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Class<? extends IAuthenticatable> getMapperClass(RoutingContext context, NetRelay netRelay) {
+    String mapperName = context.user().principal().getString(AuthenticationController.MAPPERNAME_IN_PRINCIPAL);
+    if (mapperName == null) {
+      throw new IllegalArgumentException("No mapper definition found in principal");
+    }
+    Class<? extends IAuthenticatable> mapperClass = netRelay.getSettings().getMappingDefinitions()
+        .getMapperClass(mapperName);
+    if (mapperClass == null) {
+      throw new IllegalArgumentException("No MapperClass definition for: " + mapperName);
+    }
+    return mapperClass;
   }
 
   /**
@@ -134,8 +167,8 @@ public class MemberUtil {
    * @param context
    * @return
    */
-  public static Member getCurrentUser(RoutingContext context) {
-    return context.session().get(Member.CURRENT_USER_PROPERTY);
+  public static IAuthenticatable getCurrentUser(RoutingContext context) {
+    return context.session().get(IAuthenticatable.CURRENT_USER_PROPERTY);
   }
 
   /**
@@ -144,8 +177,8 @@ public class MemberUtil {
    * @param user
    * @param context
    */
-  public static final void setCurrentUser(Member user, RoutingContext context) {
-    context.session().put(Member.CURRENT_USER_PROPERTY, user);
+  public static final void setCurrentUser(IAuthenticatable user, RoutingContext context) {
+    context.session().put(IAuthenticatable.CURRENT_USER_PROPERTY, user);
   }
 
   /**
@@ -154,7 +187,7 @@ public class MemberUtil {
    * @param context
    */
   public static final void removeCurrentUser(RoutingContext context) {
-    context.session().remove(Member.CURRENT_USER_PROPERTY);
+    context.session().remove(IAuthenticatable.CURRENT_USER_PROPERTY);
   }
 
 }
