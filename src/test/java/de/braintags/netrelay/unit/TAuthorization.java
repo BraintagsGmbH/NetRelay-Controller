@@ -15,10 +15,12 @@ package de.braintags.netrelay.unit;
 import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
+import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
+import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
@@ -47,13 +49,163 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasInsertPermission(TestContext context) throws Exception {
-    Member member = createMember(context, "TestUser3", "admin", "users");
-    testExpectsPeristenceOK(context, member, "role: admin{CRUD}, users, bookers", "INSERT");
+  public void testRole_HasNoUpdatePermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "users");
+    SimpleNetRelayMapper mapper = createInstance(context, true);
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "UPDATE",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
+    testExpectsPeristenceNOK(context, member, "role: admin{U}", url);
   }
 
   /**
-   * role admin is required, user has no role
+   * A call to a template is performed to insert a record and the template has defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasUpdatePermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
+    SimpleNetRelayMapper mapper = createInstance(context, true);
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "UPDATE",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
+    testExpectsPeristenceOK(context, member, "role: admin{U}", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasNoDeletePermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "users");
+    SimpleNetRelayMapper mapper = createInstance(context, true);
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DELETE",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
+    testExpectsPeristenceNOK(context, member, "role: admin{D}", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasDeletePermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
+    SimpleNetRelayMapper mapper = createInstance(context, true);
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DELETE",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
+    testExpectsPeristenceOK(context, member, "role: admin{D}", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasNoReadPermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "users");
+    SimpleNetRelayMapper mapper = createInstance(context, true);
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DISPLAY",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
+    testExpectsPeristenceNOK(context, member, "role: admin{R}", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasReadPermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
+    SimpleNetRelayMapper mapper = createInstance(context, true);
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DISPLAY",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
+    testExpectsPeristenceOK(context, member, "role: admin{R}", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasWildcardPermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+    testExpectsPeristenceOK(context, member, "role: *{C}", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has not defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_CheckTwoMembers(TestContext context) throws Exception {
+    Member admin = createMember(context, true, "TestUser3", "admin", "users");
+    Member user = createMember(context, false, "TestUser4", "users");
+
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+    testExpectsPeristenceOK(context, admin, "role: admin{C}, users, bookers", url);
+    testExpectsPeristenceNOK(context, user, "role: admin{C}, users, bookers", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has not defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasNoInsertPermission(TestContext context) throws Exception {
+    Member admin = createMember(context, true, "TestUser3", "admin", "users");
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+    testExpectsPeristenceNOK(context, admin, "role: admin, users, bookers", url);
+  }
+
+  /**
+   * A call to a template is performed to insert a record and the template has defined this permission
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_HasInsertPermission(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
+        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+    testExpectsPeristenceOK(context, member, "role: admin{C}, users, bookers", url);
+  }
+
+  /**
+   * Wildcard role is set, expecting ok
+   * We are expecting OK
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testRole_Wildcard(TestContext context) throws Exception {
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
+    testExpectsOK(context, member, "role: *");
+  }
+
+  /**
+   * role admin is required, user has it
    * We are expecting OK
    * 
    * @param context
@@ -61,7 +213,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    */
   @Test
   public void testRole_UserHasRole3(TestContext context) throws Exception {
-    Member member = createMember(context, "TestUser3", "admin", "users");
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsOK(context, member, "role: admin, users, bookers");
   }
 
@@ -74,7 +226,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    */
   @Test
   public void testRole_UserHasRole2(TestContext context) throws Exception {
-    Member member = createMember(context, "TestUser3", "admin", "users");
+    Member member = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsOK(context, member, "role: admin");
   }
 
@@ -87,7 +239,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    */
   @Test
   public void testRole_UserHasRole(TestContext context) throws Exception {
-    Member member = createMember(context, "TestUser3", "admin");
+    Member member = createMember(context, true, "TestUser3", "admin");
     testExpectsOK(context, member, "role: admin");
   }
 
@@ -100,7 +252,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    */
   @Test
   public void testRole_UserNoRole(TestContext context) throws Exception {
-    Member member = createMember(context, "TestUser2", null);
+    Member member = createMember(context, true, "TestUser2", null);
     testExpectsForbidden(context, member, "role: admin");
   }
 
@@ -112,7 +264,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    */
   @Test
   public void testNoPermissions(TestContext context) throws Exception {
-    Member member = createMember(context, "TestUser1", null);
+    Member member = createMember(context, true, "TestUser1", null);
     testExpectsOK(context, member, null);
   }
 
@@ -142,13 +294,35 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
-  public void testExpectsPeristenceOK(TestContext context, Member member, String permissions, String action)
+  public void testExpectsPeristenceNOK(TestContext context, Member member, String templatePermissions, String url)
       throws Exception {
-    resetRoutes(permissions);
+    resetRoutes(templatePermissions);
     String cookie = login(context, member);
     if (cookie != null) {
-      String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", action,
-          NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+      testRequest(context, HttpMethod.POST, url, httpConn -> {
+        httpConn.headers().set("Cookie", cookie.toString());
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        String setCookie = resp.headers.get("Set-Cookie");
+        context.assertNull(setCookie, "Cookie should not be sent here");
+      }, 403, "Forbidden", null);
+    } else {
+      context.fail("Expected a cookie here");
+    }
+  }
+
+  /**
+   * Test expects that permissions and user rights are fitting, so that user has the right for the request
+   * 
+   * @param context
+   * @throws Exception
+   */
+  public void testExpectsPeristenceOK(TestContext context, Member member, String templatePermissions, String url)
+      throws Exception {
+    resetRoutes(templatePermissions);
+    String cookie = login(context, member);
+    if (cookie != null) {
       testRequest(context, HttpMethod.POST, url, httpConn -> {
         httpConn.headers().set("Cookie", cookie.toString());
       }, resp -> {
@@ -253,8 +427,10 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @return
    */
-  private Member createMember(TestContext context, String username, String... roles) {
-    DatastoreBaseTest.clearTable(context, Member.class);
+  private Member createMember(TestContext context, boolean clearTable, String username, String... roles) {
+    if (clearTable) {
+      DatastoreBaseTest.clearTable(context, Member.class);
+    }
     Member member = new Member();
     member.setUserName(username);
     member.setPassword("testpassword");
@@ -283,6 +459,19 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
     settings.getMappingDefinitions().addMapperDefinition(Member.class);
+  }
+
+  private SimpleNetRelayMapper createInstance(TestContext context, boolean resetTable) {
+    if (resetTable) {
+      DatastoreBaseTest.clearTable(context, SimpleNetRelayMapper.class);
+    }
+    SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
+    ResultContainer cont = DatastoreBaseTest.saveRecord(context, mapper);
+    if (cont.assertionError != null) {
+      throw cont.assertionError;
+    } else {
+      return mapper;
+    }
   }
 
 }

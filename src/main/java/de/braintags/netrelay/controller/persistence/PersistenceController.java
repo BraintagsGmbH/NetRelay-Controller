@@ -43,9 +43,6 @@ import io.vertx.ext.web.handler.AuthHandler;
  * 
  * To understand the configuration, you should read the section "Capture Collection" inside the NetRelay documentation
  * 
- * The PersistenceController is the frame, which defines the logics of a request, so that mapper objects can be fetched
- * from a datastore, inserted or updated by request or form parameters and deleted from the datastore.
- * 
  * <br/>
  * <br/>
  * possible paramters are:

@@ -97,7 +97,14 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
       };
 
       for (String authority : authorities) {
-        user.isAuthorised(authority, authHandler);
+        if ("role:*".equals(authority)) {
+          // Wildcard role - grant access
+          stopLoop.set(true);
+          LOGGER.info("Wildcard role authority found: access granted");
+          context.next();
+        } else {
+          user.isAuthorised(authority, authHandler);
+        }
         if (stopLoop.get()) {
           break;
         }
