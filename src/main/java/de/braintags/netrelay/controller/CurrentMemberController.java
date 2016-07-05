@@ -55,6 +55,7 @@ public class CurrentMemberController extends AbstractController {
         context.fail(res.cause());
       } else {
         IAuthenticatable member = res.result();
+        context.put(IAuthenticatable.CURRENT_USER_PROPERTY, member);
         loadMemberData(member, context, dataResult -> {
           if (dataResult.failed()) {
             context.fail(dataResult.cause());
