@@ -45,6 +45,6 @@ public class TestAllNetRelayController {
 
   // -DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=500
   // -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4jLogDelegateFactory
-  // -DmailClientUserName=dev-test@braintags.net -DmailClientPassword=quolap9r
+  // -DmailClientUserName=dev-test@braintags.net -DmailClientPassword=
 
 }
