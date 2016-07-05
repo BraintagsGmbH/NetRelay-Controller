@@ -237,11 +237,12 @@ public class MailController extends AbstractController {
     LOGGER.info("Going to send message");
     mailClient.sendMail(email, result -> {
       if (result.failed()) {
-        LOGGER.error("", result.cause());
+        LOGGER.error("Error in sending Mail occured", result.cause());
         MailSendResult msResult = new MailSendResult(result);
         handler.handle(Future.succeededFuture(msResult));
       } else {
         MailSendResult msResult = new MailSendResult(result);
+        LOGGER.info(msResult.toString());
         handler.handle(Future.succeededFuture(msResult));
       }
     });
@@ -656,6 +657,15 @@ public class MailController extends AbstractController {
       } else {
         success = true;
         mailResult = result.result();
+      }
+    }
+
+    @Override
+    public String toString() {
+      if (success) {
+        return "Mail successfully sent: " + mailResult.toJson();
+      } else {
+        return "Error occured on sending mail: " + errorMessage;
       }
     }
   }

@@ -15,5 +15,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="de.braintags.netrelay.TestAllNetRelayController"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="NetRelay-Controller"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=20000   -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4jLogDelegateFactory -DmailClientUserName=dev-test@braintags.net -DmailClientPassword=quolap9r"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=20000   -Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.Log4jLogDelegateFactory -DmailClientUserName=dev-test@braintags.net -DmailClientPassword=quolap9r   -DstartMongoLocal=true -DlocalPort=27018  -Dconnection_string=mongodb://localhost:27018 -DNetRelayPort=9898"/>
 </launchConfiguration>
