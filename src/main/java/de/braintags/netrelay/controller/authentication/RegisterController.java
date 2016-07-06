@@ -360,8 +360,7 @@ public class RegisterController extends AbstractAuthProviderController {
           context.fail(cr.cause());
         } else {
           if (cr.result() == null) {
-            context.put(REGISTER_ERROR_PARAM, RegistrationCode.CONFIRMATION_FAILURE);
-            context.reroute(failConfirmUrl);
+            setRegisterError(context, RegistrationCode.CONFIRMATION_FAILURE);
           } else {
             finishConfirm(context, cr);
           }
@@ -374,22 +373,31 @@ public class RegisterController extends AbstractAuthProviderController {
     }
   }
 
+  private void setRegisterError(RoutingContext context, RegistrationCode code) {
+    context.put(REGISTER_ERROR_PARAM, RegistrationCode.CONFIRMATION_FAILURE);
+    context.reroute(failConfirmUrl);
+  }
+
   /**
    * @param context
    * @param cr
    */
   private void finishConfirm(RoutingContext context, AsyncResult<?> cr) {
     RegisterClaim rc = (RegisterClaim) cr.result();
-    toAuthenticatable(context, rc, acRes -> {
-      if (acRes.failed()) {
-        LOGGER.error("", acRes.cause());
-        context.put(REGISTER_ERROR_PARAM, acRes.cause().getMessage());
-        context.reroute(failConfirmUrl);
-      } else {
-        RequestUtil.sendRedirect(context.response(),
-            rc.getDestinationUrl() != null ? rc.getDestinationUrl() : successConfirmUrl);
-      }
-    });
+    if (!rc.isActive()) {
+      setRegisterError(context, RegistrationCode.CONFIRMATION_FAILURE);
+    } else {
+      toAuthenticatable(context, rc, acRes -> {
+        if (acRes.failed()) {
+          LOGGER.error("", acRes.cause());
+          context.put(REGISTER_ERROR_PARAM, acRes.cause().getMessage());
+          context.reroute(failConfirmUrl);
+        } else {
+          RequestUtil.sendRedirect(context.response(),
+              rc.getDestinationUrl() != null ? rc.getDestinationUrl() : successConfirmUrl);
+        }
+      });
+    }
   }
 
   @SuppressWarnings({ "unchecked" })

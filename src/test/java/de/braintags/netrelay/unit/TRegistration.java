@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
+import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
 import de.braintags.netrelay.controller.CurrentMemberController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
@@ -125,8 +126,42 @@ public class TRegistration extends NetRelayBaseConnectorTest {
       RegisterClaim claim = validateNoMultipleRequests(context, email);
       performConfirmation(context, claim);
       performRegistrationExpectEmailExistsError(context, USER_BRAINTAGS_DE);
+      // This must not create a second member
+      performDuplicateConfirmation(context, claim);
     } catch (Exception e) {
       context.fail(e);
+    }
+  }
+
+  /**
+   * @param context
+   * @param email
+   * @throws Exception
+   */
+  private Buffer performDuplicateConfirmation(TestContext context, RegisterClaim claim) throws Exception {
+    Buffer cookie = Buffer.buffer();
+    LOGGER.info("PERFORMING CONFIRMATION");
+    String url = CUSTOMER_DO_CONFIRMATION + "?" + RegisterController.VALIDATION_ID_PARAM + "=" + claim.id;
+    testRequest(context, HttpMethod.GET, url, req -> {
+
+    }, resp -> {
+      LOGGER.info("RESPONSE: " + resp.content);
+      LOGGER.info("HEADERS: " + resp.headers);
+      context.assertTrue(resp.content.contains(RegistrationCode.CONFIRMATION_FAILURE.toString()),
+          "The error code is not set: " + RegistrationCode.CONFIRMATION_FAILURE);
+    }, 200, "OK", null);
+
+    IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
+    query.field("email").is(USER_BRAINTAGS_DE);
+    ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
+    context.assertNotNull(qres, "No result returned");
+    if (qres.assertionError != null) {
+      throw qres.assertionError;
+    } else {
+      Member member = (Member) DatastoreBaseTest.findFirst(context, query);
+      context.assertNotNull(member, "Member was not created");
+      context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
+      return cookie;
     }
   }
 
@@ -155,10 +190,16 @@ public class TRegistration extends NetRelayBaseConnectorTest {
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
     query.field("email").is(USER_BRAINTAGS_DE);
-    Member member = (Member) DatastoreBaseTest.findFirst(context, query);
-    context.assertNotNull(member, "Member was not created");
-    context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
-    return cookie;
+    ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
+    context.assertNotNull(qres, "No result returned");
+    if (qres.assertionError != null) {
+      throw qres.assertionError;
+    } else {
+      Member member = (Member) DatastoreBaseTest.findFirst(context, query);
+      context.assertNotNull(member, "Member was not created");
+      context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
+      return cookie;
+    }
   }
 
   /**
