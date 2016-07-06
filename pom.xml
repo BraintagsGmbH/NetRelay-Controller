@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>NetRelayController</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name> NetRelay-Controller </name>
@@ -15,7 +15,7 @@
 	</parent>
 
 	<properties>
-		<netrelay.version>10.0.1</netrelay.version>
+		<netrelay.version>10.0.0</netrelay.version>
 		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.skip>false</maven.test.skip>
