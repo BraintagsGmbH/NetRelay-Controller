@@ -33,6 +33,9 @@ import io.vertx.ext.web.handler.VirtualHostHandler;
  * 
  */
 public class VirtualHostController extends AbstractController {
+  private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
+      .getLogger(VirtualHostController.class);
+
   /**
    * The name of the property which defines the host name
    */
@@ -87,6 +90,7 @@ public class VirtualHostController extends AbstractController {
         path = path == null ? "" : path.startsWith("/") ? path : "/" + path;
         newDestination += path;
       }
+      LOGGER.info("redirecting to " + newDestination);
       RequestUtil.sendRedirect(context.response(), context.request(), newDestination, true);
     });
   }
