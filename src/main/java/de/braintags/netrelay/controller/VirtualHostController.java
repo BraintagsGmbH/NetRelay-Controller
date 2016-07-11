@@ -29,6 +29,27 @@ import io.vertx.ext.web.handler.VirtualHostHandler;
  * none
  * <br/>
  * 
+ * Example configuration:<br/>
+ * 
+ * <pre>
+ * {
+      "name" : "VirtualHostController",
+      "routes" : null,
+      "blocking" : false,
+      "failureDefinition" : false,
+      "controller" : "de.braintags.netrelay.controller.VirtualHostController",
+      "httpMethod" : null,
+      "handlerProperties" : {
+        "hostName" : "127.0.0.1",
+        "destination" : "http://localhost",
+        "appendPath" : "true"
+       },
+      "captureCollection" : null
+    }
+ * </pre>
+ * 
+ * 
+ * 
  * @author Michael Remme
  * 
  */
