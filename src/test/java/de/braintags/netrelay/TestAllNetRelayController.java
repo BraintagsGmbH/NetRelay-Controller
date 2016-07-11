@@ -27,6 +27,7 @@ import de.braintags.netrelay.unit.TPasswordLost;
 import de.braintags.netrelay.unit.TPersistenceSuite;
 import de.braintags.netrelay.unit.TRegistration;
 import de.braintags.netrelay.unit.TTemplateController;
+import de.braintags.netrelay.unit.TVirtualHostController;
 
 /**
  * LET TSettings the last class
@@ -37,7 +38,7 @@ import de.braintags.netrelay.unit.TTemplateController;
 @RunWith(Suite.class)
 @SuiteClasses({ TestAllNetRelay.class, TFailureController.class, TTemplateController.class, TCaptureParameters.class,
     TMailProcessor.class, TPersistenceSuite.class, TAuthentication.class, TAuthorization.class, TRegistration.class,
-    TPasswordLost.class, TDataTablesController.class, TMailController.class, })
+    TPasswordLost.class, TDataTablesController.class, TMailController.class, TVirtualHostController.class })
 
 public class TestAllNetRelayController {
   // -DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=5
