@@ -65,6 +65,44 @@ import io.vertx.ext.web.handler.AuthHandler;
  * </UL>
  * Further parameters {@link AbstractCaptureController}
  * 
+ * 
+ * Example configuration:<br/>
+ * This example configuration defines the Persistence-Controller to be active under the url /article/detail and will
+ * let run the above described actions.
+ * "http://localhost/article/detail?ID=5&entity=article" will load the article for display,
+ * "http://localhost/article/detail?ID=5&entity=article&actio=DELETE" will delete this article from the datastore<br/>
+ * 
+ * Example configuration: <br/>
+ * 
+ * <pre>
+   {
+      "name" : "PersistenceController",
+      "routes" : [   "/article/detail" ],
+      "controller" : "de.braintags.netrelay.controller.persistence.PersistenceController",
+      "handlerProperties" : {
+        "reroute" : "false",
+        "cleanPath" : "true",
+        "uploadDirectory" : "webroot/upload/",
+        "uploadRelativePath" : "upload/"
+      },
+      "captureCollection" : [ {
+        "captureDefinitions" : [ {
+          "captureName" : "entity",
+          "controllerKey" : "entity",
+          "required" : false
+        }, {
+          "captureName" : "ID",
+          "controllerKey" : "ID",
+          "required" : false
+        }, {
+          "captureName" : "action",
+          "controllerKey" : "action",
+          "required" : false
+        } ]
+      } ]
+    }
+ * </pre>
+ * 
  * @author Michael Remme
  * 
  */

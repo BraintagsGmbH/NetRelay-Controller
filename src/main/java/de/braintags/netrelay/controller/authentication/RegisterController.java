@@ -45,7 +45,7 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * This controller performs a registration by using double-opt-in.
- * The first is a form, you will create, which must contain minimal two fields with the field names
+ * The first part is a form, you will create, which must contain minimal two fields with the field names
  * {@value #EMAIL_FIELD_NAME} and {@value #PASSWORD_FIELD_NAME}. Additional fields can be defined by using the same
  * structure than in the {@link PersistenceController}, like mapperName.fieldName ( for example: "customer.lastName" )
  * <br/>
@@ -130,6 +130,32 @@ import io.vertx.ext.web.RoutingContext;
  * confirmatino id, which must be integrated into the link
  * </UL>
  * <br/>
+ * 
+ * 
+ * Example configuration<br/>
+ * 
+ * <pre>
+
+    {
+      "name" : "RegisterCustomerController",
+      "routes" : [ "/customer/doRegister","/my-account/verifyRegistration"],
+      "controller" : "de.braintags.netrelay.controller.authentication.RegisterController",
+      "handlerProperties" : {
+        "regStartFailUrl" : "/mein-konto/registration.html",
+        "regStartSuccessUrl" : "/mein-konto/confirmRegistration.html",
+        "regConfirmSuccessUrl" : "/mein-konto/verifyRegistration.html",
+        "regConfirmFailUrl" : "/mein-konto/failureRegistration.html",
+          "templateDirectory" : "templates",
+          "template": "/mails/verifyEmail.html",
+          "mode" : "XHTML",
+          "from" : "service@xxx.com",
+          "bcc" : "service@xxx.com",
+          "subject": "Please verify your subscription",
+      }
+    }
+ * 
+ * </pre>
+ * 
  * 
  * @author Michael Remme
  *

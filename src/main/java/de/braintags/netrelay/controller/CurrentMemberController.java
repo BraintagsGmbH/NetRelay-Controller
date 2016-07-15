@@ -23,9 +23,12 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * If a user is logged in, the propriate record is fetched from the datastore and stored as
- * {@link Member#CURRENT_USER_PROPERTY} in the context. Extensions of this class may overwrite the method
- * {@link #loadMemberData(Member, RoutingContext, Handler)} to load additional data.
+ * If a user is logged in, the propriate record is fetched from the datastore and placed into the context with the
+ * property {@value de.braintags.netrelay.model.IAuthenticatable#CURRENT_USER_PROPERTY}. From there the instance can be
+ * accessed by other controllers like the {@link de.braintags.netrelay.controller.ThymeleafTemplateController}.
+ * 
+ * Extensions of this class may overwrite the method {@link #loadMemberData(Member, RoutingContext, Handler)} to load
+ * additional data.
  * 
  * <br>
  * <br>
@@ -35,6 +38,23 @@ import io.vertx.ext.web.RoutingContext;
  * <br/>
  * Result-Parameter:<br/>
  * {@link Member#CURRENT_USER_PROPERTY} in the context<br/>
+ * 
+ * Example configuration:<br/>
+ * 
+ * <pre>
+ * {
+      "name" : "CurrentMemberController",
+      "routes" : null,
+      "blocking" : false,
+      "failureDefinition" : false,
+      "controller" : "de.braintags.netrelay.controller.CurrentMemberController",
+      "httpMethod" : null,
+      "handlerProperties" : { },
+      "captureCollection" : null
+    }
+ * </pre>
+ * 
+ * 
  * 
  * @author Michael Remme
  */

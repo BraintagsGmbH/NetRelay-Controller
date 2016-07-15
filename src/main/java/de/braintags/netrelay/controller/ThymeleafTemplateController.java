@@ -42,6 +42,24 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
  * Result-Parameter:<br/>
  * <br/>
  * 
+ * 
+ * Example configuration:<br/>
+ * 
+ * <pre>
+  {
+      "name" : "ThymeleafTemplateController",
+      "routes" : [ "/*" ],
+      "controller" : "de.braintags.netrelay.controller.ThymeleafTemplateController",
+      "handlerProperties" : {
+        "templateDirectory" : "templates",
+        "mode" : "XHTML",
+        "contentType" : "text/html",
+        "cacheEnabled" : "false"
+      }
+    }
+ * </pre>
+ * 
+ * 
  * @author Michael Remme
  */
 public class ThymeleafTemplateController extends AbstractController {

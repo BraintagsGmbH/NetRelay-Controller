@@ -21,8 +21,8 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * The RedirectController redirects fitting routes to the page, specified by property
- * {@link RedirectController#DESTINATION_PROPERTY}
+ * The RedirectController redirects fitting routes to the page specified by property
+ * {@value RedirectController#DESTINATION_PROPERTY}
  * 
  * <br>
  * <br>
@@ -35,6 +35,19 @@ import io.vertx.ext.web.RoutingContext;
  * <br/>
  * Result-Parameter:<br/>
  * <br/>
+ * 
+ * Example configuration:<br/>
+ * 
+ * <pre>
+ * {
+      "name" : "RedirectController",
+      "routes" : [ "/" ],
+      "controller" : "de.braintags.netrelay.controller.RedirectController",
+      "handlerProperties" : {
+        "destination" : "/index.html"
+      },
+    }
+ * </pre>
  * 
  * @author Michael Remme
  */

@@ -32,7 +32,7 @@ import io.vertx.ext.web.handler.VirtualHostHandler;
  * Example configuration:<br/>
  * 
  * <pre>
- * {
+  {
       "name" : "VirtualHostController",
       "routes" : null,
       "blocking" : false,

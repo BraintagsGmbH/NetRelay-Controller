@@ -34,15 +34,16 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * The PasswordLostController is used to manage the process for a user, if he lost his password.<br/>
- * The entry is an http-form, which you will create and which contains a field to enter an email address. The name of
- * this field must be the same, like you defined in the controller properties with the property
- * {@value #EMAIL_FIELD_NAME_PROP}, which by default is "email". The destination of the form must be a route, which is
- * covered by the current controller ( for instance /customer/passwordLost ). <br/>
+ * The PasswordLostController is used to manage the process for a user who lost his password.<br/>
+ * 
+ * The entry point for the usage of this controller is an http-form, which you will create and which contains a field to
+ * enter an email address. The name of this field must be the same, like you defined in the controller properties with
+ * the property {@value #EMAIL_FIELD_NAME_PROP}, which by default is "email". The destination of the form must be a
+ * route, which is covered by the current controller ( for instance /customer/passwordLost ). <br/>
  * 
  * The controller knows two actions:<br/>
  * - the start of the password lost process<br/>
- * where a user filled out a the email address and sends the form. The start of the
+ * where a user filled out a the email address and sent the form. The start of the
  * password lost is activated, when the request contains a form parameter {@value #EMAIL_FIELD_NAME_PROP}<br/>
  * - the confirmation of a password lost<br/>
  * which is typically performed when a user clicked a link in a confirmation mail and is activated, when the request
@@ -51,7 +52,7 @@ import io.vertx.ext.web.RoutingContext;
  * for password lost process<br/>
  * <br/>
  * <br/>
- * At first, for the reset process, the system chechs the existence of an account for the given email address. If found,
+ * At first, for the reset process, the system checks the existence of an account for the given email address. If found,
  * the controller creates a new instance of {@link PasswordLostClaim}, which contains all needed data to finish the
  * process in step 2. Previously created instances of PasswordLostClaim with the same email address are deactivated.
  * <br/>
@@ -131,6 +132,27 @@ import io.vertx.ext.web.RoutingContext;
  * </UL>
  * <br/>
  * 
+ * Example configuration<br/>
+ * 
+ * <pre>
+    {
+      "name" : "PasswordLostController",
+      "routes" : [ "/customer/passwordLost","/customer/passwordReset"],
+      "controller" : "de.braintags.netrelay.controller.authentication.PasswordLostController",
+      "handlerProperties" : {
+        "pwLostFailUrl" : "/mein-konto/passwordLost.html",
+        "pwLostSuccessUrl" : "/mein-konto/confirmReset.html",
+        "pwResetSuccessUrl" : "/mein-konto/verifyReset.html",
+        "pwResetFailUrl" : "/mein-konto/failureReset.html",
+          "template": "/mails/passwordLostEmail.html",
+          "mode" : "XHTML",
+          "cacheEnabled" : "false",
+          "from" : "service@xxx.com",
+          "bcc" : "service@xxx.com",          
+          "subject": "password lost"
+      }
+    }
+ * </pre>
  * 
  * @author Michael Remme
  * 

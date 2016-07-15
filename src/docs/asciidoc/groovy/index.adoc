@@ -26,7 +26,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 <dependency>
   <groupId>de.braintags</groupId>
   <artifactId>NetRelayController</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -35,7 +35,7 @@ To use this project, add the following dependency to the _dependencies_ section 
 [source,groovy,subs="+attributes"]
 ----
 dependencies {
-  compile 'de.braintags:NetRelayController:1.1.0'
+  compile 'de.braintags:NetRelayController:1.2.0-SNAPSHOT'
 }
 ----
 
@@ -47,15 +47,275 @@ Description of the function of existing controllers.
 More detailed information about the configuration parameters,
 return values etc. can be found inside the javadoc of the corresponding implementation.
 
-=== `RedirectController`
-The RedirectController redirects fitting routes to a configurable destination
-
 === `CurrentMemberController`
-If a user is logged in, the propriate record is fetched from the datastore and stored in the context, so that it can
-be used by following controllers, like a template controller, for instance
+If a user is logged in, the corresponding record is fetched from the datastore and placed into the context with the
+property . From there the instance can be
+accessed by other controllers like the `ThymeleafTemplateController`.
+
+[source, json]
+----
+{
+"name" : "CurrentMemberController",
+"routes" : null,
+"blocking" : false,
+"failureDefinition" : false,
+"controller" : "de.braintags.netrelay.controller.CurrentMemberController",
+"httpMethod" : null,
+"handlerProperties" : { },
+"captureCollection" : null
+}
+----
+
+=== `ProtocolController`
+The ProtocolController forces the use of a certain protocol, like https for instance, for the defined routes. If for
+a fitting route the required protocol is not used, a redirect will be sent
+
+[source, json]
+----
+{
+"name" : "ProtocolController",
+"routes" : [ "/checkout/*", "/backend/*", "/myAccount/*" ],
+"blocking" : false,
+"failureDefinition" : false,
+"controller" : "de.braintags.netrelay.controller.ProtocolController",
+"handlerProperties" : {
+"protocol" : "https",
+"port" : "647"
+},
+}
+----
+
+=== `RedirectController`
+The RedirectController redirects fitting routes to the page specified by property
+
+
+
+[source, json]
+----
+{
+"name" : "RedirectController",
+"routes" : [ "/" ],
+"controller" : "de.braintags.netrelay.controller.RedirectController",
+"handlerProperties" : {
+"destination" : "/index.html"
+},
+}
+----
 
 === `ThymeleafTemplateController`
 This controller is used to process templates based on the template engine Thymeleaf
+
+[source, json]
+----
+{
+"name" : "ThymeleafTemplateController",
+"routes" : [ "/*" ],
+"controller" : "de.braintags.netrelay.controller.ThymeleafTemplateController",
+"handlerProperties" : {
+"templateDirectory" : "templates",
+"mode" : "XHTML",
+"contentType" : "text/html",
+"cacheEnabled" : "false"
+}
+}
+----
+
+=== `VirtualHostController`
+The VirtualHostController integrates the VirtualHostHandler from vertx. Like that it will verify, wether the hostname
+of a request matches the defined hostName parameter. If so, it will send a redirect to the defined destination with
+the defined http code.
+
+
+[source, json]
+----
+{
+"name" : "VirtualHostController",
+"routes" : null,
+"controller" : "de.braintags.netrelay.controller.VirtualHostController",
+"handlerProperties" : {
+"hostName" : "127.0.0.1",
+"destination" : "http://localhost",
+"appendPath" : "true"
+},
+"captureCollection" : null
+}
+
+----
+
+
+=== Authentication and registration
+This package contains several controllers, which can be used to configure and use the complete process of
+authentication, authorization ( permissions ), registration etc.
+
+==== `AuthenticationController`
+This controller performs authentication ( login / logout ) and authorization ( permission handling, role access,
+action access etc. ).
+
+All routes, which are covered by this controller are protected. The controller takes
+automatically care about login and logout of users. Please read further documentation inside the javadoc of the
+controller.
+
+The configuration below protects all urls starting with /backend/system/ and /backend/dashboard/. Access is granted
+for users with one of the roles marketing and admin, where marketing has the right to read and update records; admin
+has the right to all actions
+
+[source, json]
+----
+{
+"name" : "AuthenticationBackendController",
+"routes" : [ "/backend/system/*", "/backend/dashboard/*" ],
+"controller" : "de.braintags.netrelay.controller.authentication.AuthenticationController",
+"handlerProperties" : {
+"loginPage" : "/backend/login.html",
+"logoutAction" : "/member/logout",
+"roleField" : "roles",
+"collectionName" : "Member",
+"loginAction" : "/member/login",
+"passwordField" : "password",
+"usernameField" : "userName",
+"authProvider" : "MongoAuth",
+"permissions" : "role: marketing{RU}, admin{CRUD}"
+}
+}
+----
+
+
+The configuration below protects the url /my-account/memberdata for users of any role. Users with the role "user" can
+read and update records, users with the role "admin" can handle all actions on records and users with any other role
+are only allowed to display records
+
+[source, json]
+----
+{
+"name" : "AuthenticationMemberdataController",
+"routes" : [ "/my-account/memberdata" ],
+"controller" : "de.braintags.netrelay.controller.authentication.AuthenticationController",
+"handlerProperties" : {
+"loginPage" : "/backend/login.html",
+"logoutAction" : "/member/logout",
+"roleField" : "roles",
+"collectionName" : "Member",
+"loginAction" : "/member/login",
+"passwordField" : "password",
+"usernameField" : "userName",
+"authProvider" : "MongoAuth",
+"permissions" : "role: user{RU}, admin{CRUD}, *{R}"
+}
+}
+
+----
+
+
+
+==== `RegisterController`
+This controller performs a user registration with an integrated automatic double opt in process.
+To use this controller, you will have to create some templates:
+
+* start of the registration process +
+This template contains a form, which contains minimal two fields "email" and "password". Additional fields may be
+defined by using the same structure than in the PersistenceController, like mapperName.fieldName ( for
+example: "customer.lastName" ). The action of the form must point to a route, which is covered by the controller
+definition ( here "/customer/doRegister" )
+
+* register start success +
+When the user sent the above form and the registration mail could be successfully sent, this template will be called.
+
+* register start failed +
+when the user sent the above form and the process could not be started ( cause the email exists already in the system
+for instance ), then this template is called. The variable "registerError" contains an error variable.
+
+* registration confirmation mail +
+When the above form was sent, an email is sent to the customer, which contains a link, by which the validation is
+processed. The link should be created like that ( Thymeleaf syntax): +
+`<a th:href="${host}+'/my-account/verifyRegistration?validationId='+${context.get('validationId')}" target="_blank">
+reset password</a>`
+
+* registration confirmation success +
+When the user clicks the link inside the confirmation mail, the controller tries to finish the process. If this is
+successfull, this template will be called
+
+* registration confirmation failed +
+When the above process failed, this template will be called
+
+
+[source, json]
+----
+{
+"name" : "RegisterCustomerController",
+"routes" : [ "/customer/doRegister","/my-account/verifyRegistration"],
+"controller" : "de.braintags.netrelay.controller.authentication.RegisterController",
+"handlerProperties" : {
+"regStartFailUrl" : "/my-account/registration.html",
+"regStartSuccessUrl" : "/my-account/confirmRegistration.html",
+"regConfirmSuccessUrl" : "/my-account/verifyRegistration.html",
+"regConfirmFailUrl" : "/my-account/failureRegistration.html",
+"templateDirectory" : "templates",
+"template": "/mails/verifyEmail.html",
+"mode" : "XHTML",
+"from" : "service@xxx.com",
+"bcc" : "service@xxx.com",
+"subject": "Please verify your subscription",
+}
+}
+
+
+----
+
+
+==== `PasswordLostController`
+The PasswordLostController is used to manage the process for a user, who doesn't remember his password. The process
+integrates automatically double opt in.
+To use this controller, you will have to create some templates:
+
+* Activation of password lost +
+This template contains a form, by which the email adress of the member or customer shall be sent. The address of the
+form will be something like "/customer/passwordLost" - so one of the routes, which are covered by the controller.
+
+* success url password lost
+When the user sends the above form, the system tries to find his data and to send a mail with the link to finish the
+process. If this was successful, then this template is called
+
+* failed url password lost
+if the above process failed for any reason, this template will be called, the property "resetError" contains some
+information about the error
+
+* Password lost mail +
+The mail, which is sent to the customer, when his data are found, is generated by a template. This mail contains the
+confirmation link, which will finish the password lost process. The link should be created like that ( Thymeleaf
+syntax): +
+`<a th:href="${host}+'/customer/passwordReset?validationId='+${context.get('validationId')}" target="_blank">reset
+password</a>`
+
+* Password reset success +
+When the user clicks the link inside the confirmation mail, the controller tries to finish the process. If this is
+successfull, this template will be called
+
+* Password reset failed +
+When the above process failed, this template will be called
+
+
+[source, json]
+----
+{
+"name" : "PasswordLostController",
+"routes" : [ "/customer/passwordLost","/customer/passwordReset"],
+"controller" : "de.braintags.netrelay.controller.authentication.PasswordLostController",
+"handlerProperties" : {
+"pwLostFailUrl" : "/mein-konto/passwordLost.html",
+"pwLostSuccessUrl" : "/mein-konto/confirmReset.html",
+"pwResetSuccessUrl" : "/mein-konto/verifyReset.html",
+"pwResetFailUrl" : "/mein-konto/failureReset.html",
+"template": "/mails/passwordLostEmail.html",
+"mode" : "XHTML",
+"cacheEnabled" : "false",
+"from" : "service@xxx.com",
+"bcc" : "service@xxx.com",
+"subject": "password lost"
+}
+}
+
+
+----
 
 === `PersistenceController`
 The PersistenceController is the instance, which translates the parameters and data of a request into a datastore
@@ -65,29 +325,98 @@ A request like "http://localhost/article/detail?ID=5&entity=article" will be int
 controller to fetch the article with the id 5 from the datastore and to store it inside the context, so that is can
 be displayed by a template engine.
 
-=== Authentication and registration
-This package contains several controllers, which can be used to configure and use the complete process of
-authentication, registration etc.
+The example configuration below defines the Persistence-Controller to be active under the url /article/detail and
+will
+let run the above described actions.
+"http://localhost/article/detail?ID=5&entity=article" will load the article for display,
+"http://localhost/article/detail?ID=5&entity=article&actio=DELETE" will delete this article from the datastore
 
-==== `AuthenticationController`
-All routes, which are covered by this controller are protected and require a valid login.
+[source, json]
+----
+{
+"name" : "PersistenceController",
+"routes" : [ "/article/detail" ],
+"controller" : "de.braintags.netrelay.controller.persistence.PersistenceController",
+"handlerProperties" : {
+"reroute" : "false",
+"cleanPath" : "true",
+"uploadDirectory" : "webroot/upload/",
+"uploadRelativePath" : "upload/"
+},
+"captureCollection" : [ {
+"captureDefinitions" : [ {
+"captureName" : "entity",
+"controllerKey" : "entity",
+"required" : false
+}, {
+"captureName" : "ID",
+"controllerKey" : "ID",
+"required" : false
+}, {
+"captureName" : "action",
+"controllerKey" : "action",
+"required" : false
+} ]
+} ]
+}
 
-The controller takes
-automatically care about login and logout of users.
+----
 
-==== `RegisterController`
-This controller performs a user registration with an integrated automatic double opt in process.
+=== `RequestLoggingController`
+This controller logs the request data into the logger and can be used for debugging purpose
 
-==== `PasswordLostController`
-The PasswordLostController is used to manage the process for a user, who doesn't remember his password. The process
-integrates automatically double opt in.
+[source, json]
+----
+{
+"name" : "RequestLoggingController",
+"routes" : [ "/testtemplate/*", "/backend/*" ],
+"controller" : "de.braintags.netrelay.controller.logging.RequestLoggingController"
+}
+----
 
 === `MailController`
-A controller which is sending mails by using the mail cloient, which is defined by NetRelay.
+A controller which is sending mails by using the mail client, which is defined by NetRelay.
 
 The
 controller can compose the content of the mail by using a static text, which will be set inside the configuration. Or
 - if a template is defined by the configuration - the content will be created dynamic.
 
+[source, json]
+----
+{
+"name" : "MailControllerCustomerContact",
+"routes" : [ "/api/sendmailcustomercontact" ],
+"controller" : "de.braintags.netrelay.controller.api.MailController",
+"handlerProperties" : {
+"templateDirectory" : "templates",
+"template" : "mails/contactCustomer.html",
+"mode" : "XHTML",
+"from" : "service@xxx.com",
+"bcc": "service@xxx.com"
+}
+}
+----
+
+
 === `DataTablesController`
-A controller, which generates the input for a jquery datatable
+A controller, which generates the input for a jquery datatable. The mapper, which shall be used, is specified by a
+request parameter with the name 
+
+[source, json]
+----
+{
+"name" : "DataTableController",
+"routes" : [ "/api/datatables" ],
+"controller" : "de.braintags.netrelay.controller.api.DataTablesController",
+"handlerProperties" : {
+"cacheEnabled" : "false"
+}
+}
+----
+
+
+
+[source, json]
+----
+
+----

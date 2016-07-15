@@ -52,6 +52,20 @@ import io.vertx.ext.web.RoutingContext;
  * sends the result as Json in the required form
  * <br/>
  * 
+ * <pre>
+ 
+     {
+      "name" : "DataTableController",
+      "routes" : [ "/api/datatables" ],
+      "controller" : "de.braintags.netrelay.controller.api.DataTablesController",
+      "handlerProperties" : {
+        "cacheEnabled" : "false"
+      }
+    }
+ * 
+ * </pre>
+ * 
+ * 
  * 
  * @author Michael Remme
  * 

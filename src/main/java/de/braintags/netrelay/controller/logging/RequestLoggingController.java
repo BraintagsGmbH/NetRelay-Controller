@@ -9,7 +9,18 @@ import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
 
 /**
+ * This controller logs the request data into the logger and can be used for debugging purpose
  * 
+ * Example configuration:
+ * 
+ * <pre>
+     {
+      "name" : "RequestLoggingController",
+      "routes" : [ "/testtemplate/*", "/backend/*" ],
+      "controller" : "de.braintags.netrelay.controller.logging.RequestLoggingController"
+    }
+ * 
+ * </pre>
  * 
  * @author Michael Remme
  * 

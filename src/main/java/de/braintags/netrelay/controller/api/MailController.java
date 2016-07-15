@@ -82,6 +82,25 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
  * Result-Parameter:<br/>
  * The controller sends back a json reply with the information success ( true / false ), errorMessage and
  * {@link MailSendResult}
+ * <br/>
+ * 
+ * Example configuration:
+ * 
+ * <pre>
+    {
+      "name" : "MailControllerCustomerContact",
+      "routes" : [ "/api/sendmailcustomercontact" ],
+      "controller" : "de.braintags.netrelay.controller.api.MailController",
+      "handlerProperties" : {
+        "templateDirectory" : "templates",
+        "template" : "mails/contactCustomer.html",
+        "mode" : "XHTML",
+        "from" : "service@xxx.com", 
+        "bcc": "service@xxx.com"      
+      },
+     }
+ * </pre>
+ *
  *
  * @author Michael Remme
  * 

@@ -93,6 +93,56 @@ import io.vertx.ext.web.handler.UserSessionHandler;
  * the context
  * <br/>
  * 
+ * Example configuration: <br/>
+ * 
+ * The configuration below protects the url /my-account/memberdata for users of any role. Users with the role "user" can
+ * read and update records, users with the role "admin" can handle all actions on records and users with any other role
+ * are only allowed to display records
+ * 
+ * <pre>
+    {
+      "name" : "AuthenticationMemberdataController",
+      "routes" : [ "/my-account/memberdata" ],
+      "controller" : "de.braintags.netrelay.controller.authentication.AuthenticationController",
+      "handlerProperties" : {
+        "loginPage" : "/backend/login.html",
+        "logoutAction" : "/member/logout",
+        "roleField" : "roles",
+        "collectionName" : "Member",
+        "loginAction" : "/member/login",
+        "passwordField" : "password",
+        "usernameField" : "userName",
+        "authProvider" : "MongoAuth",
+        "permissions" : "role: user{RU}, admin{CRUD}, *{R}"
+      }
+    }
+ * 
+ * </pre>
+ * 
+ * 
+ * The configuration below protects all urls starting with /backend/system/ and /backend/dashboard/. Access is granted
+ * for users with one of the roles marketing and admin, where marketing has the right to read and update records; admin
+ * has the right to all actions
+ * 
+ * <pre>
+    {
+      "name" : "AuthenticationBackendController",
+      "routes" : [ "/backend/system/*", "/backend/dashboard/*" ],
+      "controller" : "de.braintags.netrelay.controller.authentication.AuthenticationController",
+      "handlerProperties" : {
+        "loginPage" : "/backend/login.html",
+        "logoutAction" : "/member/logout",
+        "roleField" : "roles",
+        "collectionName" : "Member",
+        "loginAction" : "/member/login",
+        "passwordField" : "password",
+        "usernameField" : "userName",
+        "authProvider" : "MongoAuth",
+        "permissions" : "role: marketing{RU}, admin{CRUD}"
+      }
+    }
+ * 
+ * </pre>
  * 
  * @author mremme
  * 
