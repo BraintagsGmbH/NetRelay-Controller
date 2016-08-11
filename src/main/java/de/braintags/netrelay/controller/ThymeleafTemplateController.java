@@ -13,12 +13,8 @@
 package de.braintags.netrelay.controller;
 
 import java.util.Properties;
-import java.util.Set;
 
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.extras.conditionalcomments.dialect.ConditionalCommentsDialect;
-import org.thymeleaf.templateresolver.ITemplateResolver;
-import org.thymeleaf.templateresolver.TemplateResolver;
+import org.thymeleaf.templatemode.TemplateMode;
 
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.web.RoutingContext;
@@ -132,7 +128,9 @@ public class ThymeleafTemplateController extends AbstractController {
    */
   public static ThymeleafTemplateEngine createTemplateEngine(Properties properties) {
     ThymeleafTemplateEngine thEngine = ThymeleafTemplateEngine.create();
-    thEngine.setMode(properties.getProperty(TEMPLATE_MODE_PROPERTY, ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE));
+    String tms = properties.getProperty(TEMPLATE_MODE_PROPERTY, ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE.name());
+    TemplateMode tm = TemplateMode.valueOf(tms);
+    thEngine.setMode(tm);
     setCachable(thEngine, properties);
     return thEngine;
   }
@@ -153,16 +151,7 @@ public class ThymeleafTemplateController extends AbstractController {
   }
 
   private static void setCachable(ThymeleafTemplateEngine thEngine, Properties properties) {
-    if (properties.containsKey(CACHE_ENABLED_PROPERTY)) {
-      boolean cachable = Boolean.parseBoolean(properties.getProperty(CACHE_ENABLED_PROPERTY));
-      TemplateEngine te = thEngine.getThymeleafTemplateEngine();
-      ConditionalCommentsDialect ccd = new ConditionalCommentsDialect();
-      te.addDialect(ccd);
-      Set<ITemplateResolver> trs = te.getTemplateResolvers();
-      for (ITemplateResolver tr : trs) {
-        ((TemplateResolver) tr).setCacheable(cachable);
-      }
-    }
+    LOGGER.warn("CACHING property currently unsupported since version 3 of Thymeleaf");
   }
 
   /**
@@ -188,7 +177,6 @@ public class ThymeleafTemplateController extends AbstractController {
   public static Properties getDefaultProperties() {
     Properties json = new Properties();
     json.put(TEMPLATE_MODE_PROPERTY, ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE);
-    json.put(CACHE_ENABLED_PROPERTY, "true");
     json.put(CONTENT_TYPE_PROPERTY, DEFAULT_CONTENT_TYPE);
     json.put(TEMPLATE_DIRECTORY_PROPERTY, DEFAULT_TEMPLATE_DIRECTORY);
     return json;

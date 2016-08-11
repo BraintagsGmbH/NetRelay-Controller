@@ -16,6 +16,7 @@
 
 	<properties>
 		<netrelay.version>10.2.0-SNAPSHOT</netrelay.version>
+		<thymeleaf.version>3.0.1.RELEASE</thymeleaf.version>
 		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.skip>false</maven.test.skip>
@@ -42,8 +43,12 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-mail-client</artifactId>
-			<version>3.3.0</version>
 		</dependency>
+	    <dependency>
+	      <groupId>org.thymeleaf</groupId>
+	      <artifactId>thymeleaf</artifactId>
+	      <version>${thymeleaf.version}</version>
+	    </dependency>
 	</dependencies>
 
 	<build>
