@@ -16,7 +16,7 @@
 
 	<properties>
 		<netrelay.version>${NETRELAY_VERSION}</netrelay.version>
-		<thymeleaf.version>3.0.1.RELEASE</thymeleaf.version>
+		<thymeleaf.version>${THYMELEAF_VERSION}</thymeleaf.version>
 		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.skip>false</maven.test.skip>
