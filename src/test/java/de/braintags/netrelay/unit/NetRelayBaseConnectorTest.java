@@ -81,11 +81,7 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
     Member returnMember = (Member) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       ResultContainer cont = DatastoreBaseTest.saveRecord(context, member);
-      if (cont.assertionError != null) {
-        throw cont.assertionError;
-      } else {
-        returnMember = member;
-      }
+      returnMember = member;
     }
     return returnMember;
   }

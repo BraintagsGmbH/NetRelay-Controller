@@ -43,9 +43,6 @@ public class TPersistenceController_Update extends AbstractPersistenceController
     mapper.child = true;
     mapper.name = "testmapper for update";
     ResultContainer rc = DatastoreBaseTest.saveRecord(context, mapper);
-    if (rc.assertionError != null)
-      throw rc.assertionError;
-
     Object id = rc.writeResult.iterator().next().getId();
     LOGGER.info("ID: " + id);
 
@@ -85,9 +82,6 @@ public class TPersistenceController_Update extends AbstractPersistenceController
     mapper.child = true;
     mapper.name = "testmapper for update";
     ResultContainer rc = DatastoreBaseTest.saveRecord(context, mapper);
-    if (rc.assertionError != null)
-      throw rc.assertionError;
-
     Object id = rc.writeResult.iterator().next().getId();
     LOGGER.info("ID: " + id);
 

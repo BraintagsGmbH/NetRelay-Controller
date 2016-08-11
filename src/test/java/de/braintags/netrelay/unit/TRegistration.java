@@ -155,14 +155,10 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     query.field("email").is(USER_BRAINTAGS_DE);
     ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
     context.assertNotNull(qres, "No result returned");
-    if (qres.assertionError != null) {
-      throw qres.assertionError;
-    } else {
-      Member member = (Member) DatastoreBaseTest.findFirst(context, query);
-      context.assertNotNull(member, "Member was not created");
-      context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
-      return cookie;
-    }
+    Member member = (Member) DatastoreBaseTest.findFirst(context, query);
+    context.assertNotNull(member, "Member was not created");
+    context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
+    return cookie;
   }
 
   /**
@@ -192,14 +188,10 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     query.field("email").is(USER_BRAINTAGS_DE);
     ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
     context.assertNotNull(qres, "No result returned");
-    if (qres.assertionError != null) {
-      throw qres.assertionError;
-    } else {
-      Member member = (Member) DatastoreBaseTest.findFirst(context, query);
-      context.assertNotNull(member, "Member was not created");
-      context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
-      return cookie;
-    }
+    Member member = (Member) DatastoreBaseTest.findFirst(context, query);
+    context.assertNotNull(member, "Member was not created");
+    context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
+    return cookie;
   }
 
   /**

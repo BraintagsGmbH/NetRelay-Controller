@@ -467,11 +467,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
     }
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
     ResultContainer cont = DatastoreBaseTest.saveRecord(context, mapper);
-    if (cont.assertionError != null) {
-      throw cont.assertionError;
-    } else {
-      return mapper;
-    }
+    return mapper;
   }
 
 }
