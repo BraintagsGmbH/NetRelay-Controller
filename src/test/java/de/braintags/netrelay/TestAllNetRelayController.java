@@ -24,11 +24,11 @@ import de.braintags.netrelay.unit.TFailureController;
 import de.braintags.netrelay.unit.TMailController;
 import de.braintags.netrelay.unit.TMailProcessor;
 import de.braintags.netrelay.unit.TPasswordLost;
-import de.braintags.netrelay.unit.TPersistenceSuite;
 import de.braintags.netrelay.unit.TProtocolController;
 import de.braintags.netrelay.unit.TRegistration;
 import de.braintags.netrelay.unit.TTemplateController;
 import de.braintags.netrelay.unit.TVirtualHostController;
+import de.braintags.netrelay.unit.peristence.TPersistenceSuite;
 
 /**
  * LET TSettings the last class
