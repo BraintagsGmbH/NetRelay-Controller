@@ -10,7 +10,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-package de.braintags.netrelay.unit;
+package de.braintags.netrelay.unit.peristence;
 
 import org.junit.Test;
 
@@ -19,6 +19,7 @@ import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.netrelay.unit.AbstractPersistenceControllerTest;
 import de.braintags.netrelay.util.MultipartUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;

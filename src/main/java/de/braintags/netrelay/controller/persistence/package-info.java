@@ -6,10 +6,9 @@
  * be displayed by a template engine.
  * 
  * The example configuration below defines the Persistence-Controller to be active under the url /article/detail and
- * will
- * let run the above described actions.
+ * will let run the above described actions.
  * "http://localhost/article/detail?ID=5&entity=article" will load the article for display,
- * "http://localhost/article/detail?ID=5&entity=article&actio=DELETE" will delete this article from the datastore
+ * "http://localhost/article/detail?ID=5&entity=article&action=DELETE" will delete this article from the datastore
  * 
  * [source, json]
  * ----
