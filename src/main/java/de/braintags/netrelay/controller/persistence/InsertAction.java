@@ -1,15 +1,3 @@
-/*
- * #%L
- * netrelay
- * %%
- * Copyright (C) 2015 Braintags GmbH
- * %%
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * #L%
- */
 package de.braintags.netrelay.controller.persistence;
 
 import java.util.HashMap;
@@ -18,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.exception.FileNameException;
@@ -31,9 +18,7 @@ import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * InsertAction is called from {@link PersistenceController} to insert new records into the {@link IDataStore}. New
- * instances, which are successfully saved, are added under their entity name in the context and contain already the
- * generated ID
+ * 
  * 
  * @author Michael Remme
  * 
@@ -45,7 +30,7 @@ public class InsertAction extends AbstractAction {
   public static final String MOVE_MESSAGE = "moved uploaded file from %s to %s";
 
   /**
-   * 
+   * @param persitenceController
    */
   public InsertAction(PersistenceController persitenceController) {
     super(persitenceController);

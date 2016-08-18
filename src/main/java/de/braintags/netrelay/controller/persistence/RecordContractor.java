@@ -1,4 +1,4 @@
-package de.braintags.netrelay.controller.persist;
+package de.braintags.netrelay.controller.persistence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class RecordContractor {
    * @return the entity name
    */
   public static String extractEntityName(CaptureMap map) {
-    String mapperName = map.get(PersistenceControllerNew.MAPPER_CAPTURE_KEY);
+    String mapperName = map.get(PersistenceController.MAPPER_CAPTURE_KEY);
     if (mapperName == null) {
       throw new NullPointerException("no entity name specified");
     }
@@ -76,7 +76,7 @@ public class RecordContractor {
    * @return a list whith key/value pairs, where the key is the fieldname
    */
   public static List<String[]> extractIds(IMapper mapper, CaptureMap map) {
-    String mapperSpec = map.get(PersistenceControllerNew.MAPPER_CAPTURE_KEY);
+    String mapperSpec = map.get(PersistenceController.MAPPER_CAPTURE_KEY);
     if (mapperSpec == null) {
       throw new NullPointerException("no entity name specified");
     }
@@ -122,7 +122,7 @@ public class RecordContractor {
    * Creates the parameter sequence for a URL to reference a record
    * 
    * @param captureCollection
-   *          the CaptureCollection from a {@link PersistenceControllerNew}
+   *          the CaptureCollection from a {@link PersistenceController}
    * @param action
    *          the action to be executed
    * @param mapper
@@ -134,10 +134,10 @@ public class RecordContractor {
    */
   public static String generateReferenceParameter(CaptureCollection captureCollection, Action action, IMapper mapper,
       Object record) {
-    String entityParameterName = captureCollection.getCaptureName(PersistenceControllerNew.MAPPER_CAPTURE_KEY);
-    Assert.notNull("CaptureDefinition " + PersistenceControllerNew.MAPPER_CAPTURE_KEY, entityParameterName);
-    String actionParameterName = captureCollection.getCaptureName(PersistenceControllerNew.ACTION_CAPTURE_KEY);
-    Assert.notNull("CaptureDefinition " + PersistenceControllerNew.ACTION_CAPTURE_KEY, actionParameterName);
+    String entityParameterName = captureCollection.getCaptureName(PersistenceController.MAPPER_CAPTURE_KEY);
+    Assert.notNull("CaptureDefinition " + PersistenceController.MAPPER_CAPTURE_KEY, entityParameterName);
+    String actionParameterName = captureCollection.getCaptureName(PersistenceController.ACTION_CAPTURE_KEY);
+    Assert.notNull("CaptureDefinition " + PersistenceController.ACTION_CAPTURE_KEY, actionParameterName);
     return actionParameterName + "=" + action + "&" + generateReferenceParameter(mapper, entityParameterName, record);
   }
 

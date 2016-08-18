@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
+import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
@@ -38,6 +39,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
 
   public static final String PROTECTED_URL = "/private/privatePage.html";
   public static final String PROTECTED_PERSISTENCE_URL = "/private/persistence/privatePage.html";
+  protected RouterDefinition persistenceDefinition;
 
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TAuthorization.class);
@@ -52,9 +54,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void testRole_HasNoUpdatePermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "UPDATE",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
-    testExpectsPeristenceNOK(context, member, "role: admin{U}", url);
+    testExpectsPersistenceNOK(context, member, mapper, "role: admin{U}", PROTECTED_PERSISTENCE_URL, Action.UPDATE);
   }
 
   /**
@@ -67,9 +67,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void testRole_HasUpdatePermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "UPDATE",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
-    testExpectsPeristenceOK(context, member, "role: admin{U}", url);
+    testExpectsPersistenceOK(context, member, mapper, "role: admin{U}", PROTECTED_PERSISTENCE_URL, Action.UPDATE);
   }
 
   /**
@@ -82,9 +80,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void testRole_HasNoDeletePermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DELETE",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
-    testExpectsPeristenceNOK(context, member, "role: admin{D}", url);
+    testExpectsPersistenceNOK(context, member, mapper, "role: admin{D}", PROTECTED_PERSISTENCE_URL, Action.DISPLAY);
   }
 
   /**
@@ -97,9 +93,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void testRole_HasDeletePermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DELETE",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
-    testExpectsPeristenceOK(context, member, "role: admin{D}", url);
+    testExpectsPersistenceOK(context, member, mapper, "role: admin{D}", PROTECTED_PERSISTENCE_URL, Action.DELETE);
   }
 
   /**
@@ -112,9 +106,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void testRole_HasNoReadPermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DISPLAY",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
-    testExpectsPeristenceNOK(context, member, "role: admin{R}", url);
+    testExpectsPersistenceNOK(context, member, mapper, "role: admin{R}", PROTECTED_PERSISTENCE_URL, Action.DISPLAY);
   }
 
   /**
@@ -127,9 +119,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void testRole_HasReadPermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s&ID=%s", "DISPLAY",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME, String.valueOf(mapper.id));
-    testExpectsPeristenceOK(context, member, "role: admin{R}", url);
+    testExpectsPersistenceOK(context, member, mapper, "role: admin{R}", PROTECTED_PERSISTENCE_URL, Action.DISPLAY);
   }
 
   /**
@@ -141,9 +131,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   @Test
   public void testRole_HasWildcardPermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
-    testExpectsPeristenceOK(context, member, "role: *{C}", url);
+    testExpectsPersistenceOK(context, member, null, "role: *{C}", PROTECTED_PERSISTENCE_URL, Action.INSERT);
   }
 
   /**
@@ -156,11 +144,10 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   public void testRole_CheckTwoMembers(TestContext context) throws Exception {
     Member admin = createMember(context, true, "TestUser3", "admin", "users");
     Member user = createMember(context, false, "TestUser4", "users");
-
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
-    testExpectsPeristenceOK(context, admin, "role: admin{C}, users, bookers", url);
-    testExpectsPeristenceNOK(context, user, "role: admin{C}, users, bookers", url);
+    testExpectsPersistenceOK(context, admin, null, "role: admin{C}, users, bookers", PROTECTED_PERSISTENCE_URL,
+        Action.INSERT);
+    testExpectsPersistenceNOK(context, user, null, "role: admin{C}, users, bookers", PROTECTED_PERSISTENCE_URL,
+        Action.INSERT);
   }
 
   /**
@@ -172,9 +159,8 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   @Test
   public void testRole_HasNoInsertPermission(TestContext context) throws Exception {
     Member admin = createMember(context, true, "TestUser3", "admin", "users");
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
-    testExpectsPeristenceNOK(context, admin, "role: admin, users, bookers", url);
+    testExpectsPersistenceNOK(context, admin, null, "role: admin, users, bookers", PROTECTED_PERSISTENCE_URL,
+        Action.INSERT);
   }
 
   /**
@@ -186,9 +172,8 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   @Test
   public void testRole_HasInsertPermission(TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
-    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=%s&entity=%s", "INSERT",
-        NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
-    testExpectsPeristenceOK(context, member, "role: admin{C}, users, bookers", url);
+    testExpectsPersistenceOK(context, member, null, "role: admin{C}, users, bookers", PROTECTED_PERSISTENCE_URL,
+        Action.INSERT);
   }
 
   /**
@@ -294,9 +279,15 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
-  public void testExpectsPeristenceNOK(TestContext context, Member member, String templatePermissions, String url)
-      throws Exception {
+  public void testExpectsPersistenceNOK(TestContext context, Member member, SimpleNetRelayMapper mapper,
+      String templatePermissions, String url, Action action) throws Exception {
     resetRoutes(templatePermissions);
+    if (action.equals(Action.INSERT)) {
+      url = String.format(url + "?action=%s&entity=%s", "INSERT", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+    } else {
+      url = url + "?" + AbstractPersistenceControllerTest.createReferenceAsParameter(context, persistenceDefinition,
+          action, mapper);
+    }
     String cookie = login(context, member);
     if (cookie != null) {
       testRequest(context, HttpMethod.POST, url, httpConn -> {
@@ -318,9 +309,15 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
-  public void testExpectsPeristenceOK(TestContext context, Member member, String templatePermissions, String url)
-      throws Exception {
+  public void testExpectsPersistenceOK(TestContext context, Member member, SimpleNetRelayMapper mapper,
+      String templatePermissions, String url, Action action) throws Exception {
     resetRoutes(templatePermissions);
+    if (action.equals(Action.INSERT)) {
+      url = String.format(url + "?action=%s&entity=%s", "INSERT", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+    } else {
+      url = url + "?" + AbstractPersistenceControllerTest.createReferenceAsParameter(context, persistenceDefinition,
+          action, mapper);
+    }
     String cookie = login(context, member);
     if (cookie != null) {
       testRequest(context, HttpMethod.POST, url, httpConn -> {
@@ -416,10 +413,11 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
       def1.getHandlerProperties().remove(AuthenticationController.PERMISSIONS_PROP);
     }
 
-    RouterDefinition def2 = netRelay.getSettings().getRouterDefinitions()
+    persistenceDefinition = netRelay.getSettings().getRouterDefinitions()
         .remove(PersistenceController.class.getSimpleName());
-    def2.setRoutes(new String[] { PROTECTED_PERSISTENCE_URL });
-    netRelay.getSettings().getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(), def2);
+    persistenceDefinition.setRoutes(new String[] { PROTECTED_PERSISTENCE_URL });
+    netRelay.getSettings().getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(),
+        persistenceDefinition);
     netRelay.resetRoutes();
   }
 

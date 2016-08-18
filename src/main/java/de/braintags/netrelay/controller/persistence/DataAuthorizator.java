@@ -1,4 +1,4 @@
-package de.braintags.netrelay.controller.persist;
+package de.braintags.netrelay.controller.persistence;
 
 import java.util.List;
 
@@ -96,7 +96,7 @@ public class DataAuthorizator {
   }
 
   private static char resolveCRUD(CaptureMap map) {
-    String actionKey = map.get(PersistenceControllerNew.ACTION_CAPTURE_KEY);
+    String actionKey = map.get(PersistenceController.ACTION_CAPTURE_KEY);
     Action action = actionKey == null ? Action.DISPLAY : Action.valueOf(actionKey);
     LOGGER.info("action is " + action);
     return action.getCRUD();

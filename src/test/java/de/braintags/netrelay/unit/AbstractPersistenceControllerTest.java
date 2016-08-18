@@ -14,7 +14,7 @@ package de.braintags.netrelay.unit;
 
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.netrelay.controller.Action;
-import de.braintags.netrelay.controller.persist.RecordContractor;
+import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -46,7 +46,7 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
    * @param record
    * @return
    */
-  protected String createReferenceAsCapturePart(TestContext context, SimpleNetRelayMapper record) {
+  public static String createReferenceAsCapturePart(TestContext context, SimpleNetRelayMapper record) {
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(SimpleNetRelayMapper.class);
     String reference = RecordContractor.generateEntityReference(mapper, record);
     context.assertTrue(reference.contains("SimpleNetRelayMapper"), "mapper not referenced");
@@ -58,7 +58,8 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
    * @param record
    * @return
    */
-  protected String createReferenceAsParameter(TestContext context, Action action, SimpleNetRelayMapper record) {
+  public static String createReferenceAsParameter(TestContext context, RouterDefinition persistenceDefinition,
+      Action action, SimpleNetRelayMapper record) {
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(record.getClass());
     String reference = RecordContractor.generateReferenceParameter(persistenceDefinition.getCaptureCollection()[0],
         action, mapper, record);

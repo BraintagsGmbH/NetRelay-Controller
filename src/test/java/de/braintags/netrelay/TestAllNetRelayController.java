@@ -28,7 +28,6 @@ import de.braintags.netrelay.unit.TProtocolController;
 import de.braintags.netrelay.unit.TRegistration;
 import de.braintags.netrelay.unit.TTemplateController;
 import de.braintags.netrelay.unit.TVirtualHostController;
-import de.braintags.netrelay.unit.peristence.TPersistenceSuite;
 import de.braintags.netrelay.unit.persist.TPersistSuite;
 
 /**
@@ -39,9 +38,9 @@ import de.braintags.netrelay.unit.persist.TPersistSuite;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ TestAllNetRelay.class, TFailureController.class, TTemplateController.class, TCaptureParameters.class,
-    TMailProcessor.class, TPersistenceSuite.class, TPersistSuite.class, TAuthentication.class, TAuthorization.class,
-    TRegistration.class, TPasswordLost.class, TDataTablesController.class, TMailController.class,
-    TVirtualHostController.class, TProtocolController.class })
+    TMailProcessor.class, TPersistSuite.class, TAuthentication.class, TAuthorization.class, TRegistration.class,
+    TPasswordLost.class, TDataTablesController.class, TMailController.class, TVirtualHostController.class,
+    TProtocolController.class })
 
 public class TestAllNetRelayController {
   // -DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=5
