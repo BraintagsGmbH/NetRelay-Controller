@@ -25,7 +25,7 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * 
+ * Executes the commands to search for a record or for records and to put them into the context.
  * 
  * @author Michael Remme
  * 
@@ -48,45 +48,86 @@ public class DisplayAction extends AbstractAction {
   @Override
   void handle(String entityName, RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler) {
     IMapper mapper = getMapper(entityName);
-    String id = map.get(PersistenceController.ID_CAPTURE_KEY);
-    if (id == null) {
-      handleList(entityName, context, map, mapper, id, handler);
-    } else {
-      handleSingleRecord(entityName, context, mapper, id, handler);
-    }
+    IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
+    RecordContractor.extractId(mapper, map, query);
+    addQueryCritera(query, map);
+    handleQuery(query, entityName, context, map, mapper, handler);
   }
 
-  protected void handleList(String entityName, RoutingContext context, CaptureMap map, IMapper mapper, String id,
+  protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map, IMapper mapper,
       Handler<AsyncResult<Void>> handler) {
-    IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
     try {
-      if (map.containsKey(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)) {
-        query.setLimit(Integer.parseInt(map.get(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)));
-      }
-      if (map.containsKey(PersistenceController.SELECTION_START_CAPTURE_KEY)) {
-        query.setStart(Integer.parseInt(map.get(PersistenceController.SELECTION_START_CAPTURE_KEY)));
-      }
-      if (map.containsKey(PersistenceController.ORDERBY_CAPTURE_KEY)) {
-        addSortDefintions(query, map);
-      }
-
       query.execute(result -> {
         if (result.failed()) {
           handler.handle(Future.failedFuture(result.cause()));
         } else {
           IQueryResult<?> qr = result.result();
-          qr.toArray(arr -> {
-            if (arr.failed()) {
-              handler.handle(Future.failedFuture(arr.cause()));
-            } else {
-              addToContext(context, entityName, Arrays.asList(arr.result()));
-              handler.handle(Future.succeededFuture());
-            }
-          });
+          if (query.hasQueryArguments()) {
+            storeSingleResult(entityName, context, handler, qr);
+          } else {
+            storeListResult(entityName, context, handler, qr);
+          }
         }
       });
     } catch (Exception e) {
       handler.handle(Future.failedFuture(e));
+    }
+  }
+
+  /**
+   * @param entityName
+   * @param context
+   * @param handler
+   * @param qr
+   */
+  private void storeListResult(String entityName, RoutingContext context, Handler<AsyncResult<Void>> handler,
+      IQueryResult<?> qr) {
+    qr.toArray(arr -> {
+      if (arr.failed()) {
+        handler.handle(Future.failedFuture(arr.cause()));
+      } else {
+        addToContext(context, entityName, Arrays.asList(arr.result()));
+        handler.handle(Future.succeededFuture());
+      }
+    });
+  }
+
+  /**
+   * @param entityName
+   * @param context
+   * @param handler
+   * @param qr
+   */
+  private void storeSingleResult(String entityName, RoutingContext context, Handler<AsyncResult<Void>> handler,
+      IQueryResult<?> qr) {
+    if (qr.isEmpty()) {
+      handler.handle(Future.failedFuture(
+          new NoSuchRecordException(String.format(ERRORMESSAGE_RECNOTFOUND, qr.getOriginalQuery().toString()))));
+    } else {
+      qr.iterator().next(ir -> {
+        if (ir.failed()) {
+          handler.handle(Future.failedFuture(ir.cause()));
+        } else {
+          addToContext(context, entityName, ir.result());
+          handler.handle(Future.succeededFuture());
+        }
+      });
+    }
+  }
+
+  /**
+   * @param query
+   * @param map
+   */
+  private void addQueryCritera(IQuery<?> query, CaptureMap map) {
+    if (map.containsKey(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)) {
+      query.setLimit(Integer.parseInt(map.get(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)));
+    }
+    if (map.containsKey(PersistenceController.SELECTION_START_CAPTURE_KEY)) {
+      query.setStart(Integer.parseInt(map.get(PersistenceController.SELECTION_START_CAPTURE_KEY)));
+    }
+    if (map.containsKey(PersistenceController.ORDERBY_CAPTURE_KEY)) {
+      addSortDefintions(query, map);
     }
   }
 
@@ -110,31 +151,6 @@ public class DisplayAction extends AbstractAction {
       }
     }
 
-  }
-
-  protected void handleSingleRecord(String entityName, RoutingContext context, IMapper mapper, String id,
-      Handler<AsyncResult<Void>> handler) {
-    IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
-    query.field(mapper.getIdField().getName()).is(id);
-    query.execute(result -> {
-      if (result.failed()) {
-        handler.handle(Future.failedFuture(result.cause()));
-      } else {
-        IQueryResult<?> qr = result.result();
-        if (qr.isEmpty()) {
-          handler.handle(Future.failedFuture(new NoSuchRecordException(String.format(ERRORMESSAGE_RECNOTFOUND, id))));
-        } else {
-          qr.iterator().next(ir -> {
-            if (ir.failed()) {
-              handler.handle(Future.failedFuture(ir.cause()));
-            } else {
-              addToContext(context, entityName, ir.result());
-              handler.handle(Future.succeededFuture());
-            }
-          });
-        }
-      }
-    });
   }
 
 }

@@ -10,6 +10,10 @@
  * "http://localhost/article/detail?ID=5&entity=article" will load the article for display,
  * "http://localhost/article/detail?ID=5&entity=article&action=DELETE" will delete this article from the datastore
  * 
+ * add documentation:
+ * authorization
+ * requires AuthenticationController to be executed BEFORE this controller
+ * 
  * [source, json]
  * ----
  * {

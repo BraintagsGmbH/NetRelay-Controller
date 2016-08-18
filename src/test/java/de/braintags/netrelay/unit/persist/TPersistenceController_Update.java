@@ -10,12 +10,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-package de.braintags.netrelay.unit.peristence;
+package de.braintags.netrelay.unit.persist;
 
 import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
+import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
@@ -37,6 +38,8 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TPersistenceController_Update.class);
 
+  // Test neu: Aufruf mit Feld als Update, das keine ID ist
+
   @Test
   public void testUpdate(TestContext context) {
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
@@ -48,9 +51,8 @@ public class TPersistenceController_Update extends AbstractPersistenceController
     LOGGER.info("ID: " + id);
 
     try {
-      String url = String.format("/products/%s/UPDATE/%s/update.html", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME,
-          id);
-
+      String reference = createReferenceAsCapturePart(context, mapper);
+      String url = String.format("/products/%s/UPDATE/update.html", reference);
       testRequest(context, HttpMethod.POST, url, req -> {
         Buffer buffer = Buffer.buffer();
         buffer.appendString("origin=junit-testUserAlias&login=admin%40foo.bar&pass+word=admin");
@@ -87,9 +89,8 @@ public class TPersistenceController_Update extends AbstractPersistenceController
     LOGGER.info("ID: " + id);
 
     try {
-
-      String url = "/products/update2.html?action=UPDATE&entity=" + NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME
-          + "&ID=" + id;
+      String url = "/products/update2.html?"
+          + createReferenceAsParameter(context, persistenceDefinition, Action.UPDATE, mapper);
       testRequest(context, HttpMethod.POST, url, req -> {
         Buffer buffer = Buffer.buffer();
         buffer.appendString("origin=junit-testUserAlias&login=admin%40foo.bar&pass+word=admin");
@@ -123,10 +124,14 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    RouterDefinition def = settings.getRouterDefinitions().remove(PersistenceController.class.getSimpleName());
-    def.setRoutes(new String[] { "/products/:entity/:action/:ID/update.html", "/products/update2.html" });
-
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
+    persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/update.html", "/products/update2.html" });
+    persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
+        "webroot/images/productImages");
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    RouterDefinition rd = new RouterDefinition();
+    rd.setController(CheckController.class);
+    settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }
 
 }

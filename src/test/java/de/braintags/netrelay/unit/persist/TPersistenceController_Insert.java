@@ -10,7 +10,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-package de.braintags.netrelay.unit.peristence;
+package de.braintags.netrelay.unit.persist;
 
 import org.junit.Test;
 
@@ -133,11 +133,15 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    RouterDefinition def = settings.getRouterDefinitions().remove(PersistenceController.class.getSimpleName());
-    def.setRoutes(
+    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
+    persistenceDefinition.setRoutes(
         new String[] { "/products/:entity/:action/insert.html", "/products/insert2.html", "/products/insert3.html" });
-    def.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP, "webroot/images/productImages");
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
+        "webroot/images/productImages");
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    RouterDefinition rd = new RouterDefinition();
+    rd.setController(CheckController.class);
+    settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }
 
 }

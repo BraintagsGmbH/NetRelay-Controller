@@ -15,7 +15,7 @@ package de.braintags.netrelay.unit.persist;
 import org.junit.Test;
 
 import de.braintags.netrelay.controller.BodyController;
-import de.braintags.netrelay.controller.persist.PersistenceControllerNew;
+import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.unit.AbstractPersistenceControllerTest;
@@ -28,9 +28,9 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  * 
  */
-public class TNewPersistenceController_None extends AbstractPersistenceControllerTest {
+public class TPersistenceController_None extends AbstractPersistenceControllerTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
-      .getLogger(TNewPersistenceController_None.class);
+      .getLogger(TPersistenceController_None.class);
 
   @Test
   public void testHandleAction_None(TestContext context) {
@@ -54,10 +54,10 @@ public class TNewPersistenceController_None extends AbstractPersistenceControlle
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    persistenceDefinition = PersistenceControllerNew.createDefaultRouterDefinition();
+    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/list.html",
         "/products/:entity/:action/detail.html", "/products/:entity/:action/list2.html", "/products/detail2.html" });
-    persistenceDefinition.getHandlerProperties().put(PersistenceControllerNew.UPLOAD_DIRECTORY_PROP,
+    persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
   }

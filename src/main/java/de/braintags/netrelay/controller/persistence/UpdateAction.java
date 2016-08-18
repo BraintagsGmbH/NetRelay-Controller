@@ -1,17 +1,6 @@
-/*
- * #%L
- * netrelay
- * %%
- * Copyright (C) 2015 Braintags GmbH
- * %%
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * #L%
- */
 package de.braintags.netrelay.controller.persistence;
 
+import java.util.List;
 import java.util.Map;
 
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
@@ -28,7 +17,7 @@ import io.vertx.ext.web.RoutingContext;
 public class UpdateAction extends InsertAction {
 
   /**
-   * 
+   * @param persitenceController
    */
   public UpdateAction(PersistenceController persitenceController) {
     super(persitenceController);
@@ -44,11 +33,17 @@ public class UpdateAction extends InsertAction {
   protected Map<String, String> extractProperties(String entityName, CaptureMap captureMap, RoutingContext context,
       IMapper mapper) {
     Map<String, String> map = super.extractProperties(entityName, captureMap, context, mapper);
-    String id = captureMap.get(PersistenceController.ID_CAPTURE_KEY);
-    if (id == null || id.hashCode() == 0) {
-      throw new ParameterRequiredException("ID");
+    List<String[]> ids = RecordContractor.extractIds(mapper, captureMap);
+    boolean idFieldFound = false;
+    for (String[] id : ids) {
+      if (id[0].equalsIgnoreCase(mapper.getIdField().getName())) {
+        idFieldFound = true;
+        map.put(mapper.getIdField().getName().toLowerCase(), id[1]);
+      }
     }
-    map.put(mapper.getIdField().getName().toLowerCase(), id);
+    if (!idFieldFound) {
+      throw new ParameterRequiredException("The update action needs the id field in the record reference");
+    }
     return map;
   }
 

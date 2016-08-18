@@ -17,7 +17,7 @@ import org.junit.Test;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
-import de.braintags.netrelay.controller.persist.PersistenceControllerNew;
+import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
@@ -32,9 +32,9 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  * 
  */
-public class TNewPersistenceController_Display extends AbstractPersistenceControllerTest {
+public class TPersistenceController_Display extends AbstractPersistenceControllerTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
-      .getLogger(TNewPersistenceController_Display.class);
+      .getLogger(TPersistenceController_Display.class);
 
   @Test
   public void testDisplaySingleRecord(TestContext context) {
@@ -66,7 +66,7 @@ public class TNewPersistenceController_Display extends AbstractPersistenceContro
       record.child = false;
       record.name = "testmapper for display";
       DatastoreBaseTest.saveRecord(context, record);
-      String reference = createReferenceAsParameter(context, Action.DISPLAY, record);
+      String reference = createReferenceAsParameter(context, persistenceDefinition, Action.DISPLAY, record);
       String url = "/products/detail2.html?" + reference;
 
       testRequest(context, HttpMethod.POST, url, null, resp -> {
@@ -159,14 +159,14 @@ public class TNewPersistenceController_Display extends AbstractPersistenceContro
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    persistenceDefinition = PersistenceControllerNew.createDefaultRouterDefinition();
+    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition
         .setRoutes(new String[] { "/products/:entity/:action/list.html", "/products/:entity/:action/detail.html",
             "/products/:entity/:action/list2.html", "/products/detail2.html", "/products/list.html" });
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
     RouterDefinition rd = new RouterDefinition();
     rd.setController(CheckController.class);
-    settings.getRouterDefinitions().addAfter(PersistenceControllerNew.class.getSimpleName(), rd);
+    settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }
 
   @Override

@@ -10,7 +10,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-package de.braintags.netrelay.unit.peristence;
+package de.braintags.netrelay.unit.persist;
 
 import org.junit.Test;
 
@@ -18,12 +18,11 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.dataaccess.write.IWrite;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.util.ResultObject;
+import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
-import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
-import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.unit.AbstractPersistenceControllerTest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.Async;
@@ -61,11 +60,11 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     });
     async1.await();
 
-    Async async2 = context.async();
     String id = mapper.id;
+    Async async2 = context.async();
     try {
-      String url = String.format("/products/%s/DELETE/%s/delete.html", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME,
-          id);
+      String reference = createReferenceAsCapturePart(context, mapper);
+      String url = String.format("/products/%s/DELETE/delete.html", reference);
       testRequest(context, HttpMethod.POST, url, null, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
         context.assertTrue(resp.content.toString().contains("deleteSuccess"), "Expected name not found");
@@ -106,8 +105,8 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     Async async2 = context.async();
     String id = mapper.id;
     try {
-      String url = "/products/delete2.html?action=DELETE&entity=" + NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME
-          + "&ID=" + id;
+      String url = "/products/delete2.html?"
+          + createReferenceAsParameter(context, persistenceDefinition, Action.DELETE, mapper);
       testRequest(context, HttpMethod.POST, url, null, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
         context.assertTrue(resp.content.toString().contains("deleteSuccess"), "Expected name not found");
@@ -131,10 +130,9 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    RouterDefinition def = settings.getRouterDefinitions().remove(PersistenceController.class.getSimpleName());
-    def.setRoutes(new String[] { "/products/:entity/:action/:ID/delete.html", "/products/delete2.html" });
-
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
+    persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/delete.html", "/products/delete2.html" });
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
   }
 
 }

@@ -1,15 +1,3 @@
-/*
- * #%L
- * netrelay
- * %%
- * Copyright (C) 2015 Braintags GmbH
- * %%
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * #L%
- */
 package de.braintags.netrelay.controller.persistence;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
@@ -23,7 +11,7 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * 
+ * Action is used to delete single records
  * 
  * @author Michael Remme
  * 
@@ -31,7 +19,7 @@ import io.vertx.ext.web.RoutingContext;
 public class DeleteAction extends AbstractAction {
 
   /**
-   * 
+   * @param persitenceController
    */
   public DeleteAction(PersistenceController persitenceController) {
     super(persitenceController);
@@ -40,12 +28,11 @@ public class DeleteAction extends AbstractAction {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   void handle(String entityName, RoutingContext context, CaptureMap captureMap, Handler<AsyncResult<Void>> handler) {
-    IMapper mapper = getMapper(entityName);
-    String id = captureMap.get(PersistenceController.ID_CAPTURE_KEY);
     IDataStore datastore = getPersistenceController().getNetRelay().getDatastore();
+    IMapper mapper = getMapper(entityName);
     IDelete<?> delete = datastore.createDelete(mapper.getMapperClass());
     IQuery query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
-    query.field(mapper.getIdField().getName()).is(id);
+    RecordContractor.extractId(mapper, captureMap, query);
     delete.setQuery(query);
     delete.delete(result -> {
       if (result.failed()) {
