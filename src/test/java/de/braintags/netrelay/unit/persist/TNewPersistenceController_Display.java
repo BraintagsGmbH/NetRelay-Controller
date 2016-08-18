@@ -15,8 +15,9 @@ package de.braintags.netrelay.unit.persist;
 import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
+import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
-import de.braintags.netrelay.controller.persistence.PersistenceController;
+import de.braintags.netrelay.controller.persist.PersistenceControllerNew;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
@@ -31,22 +32,21 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  * 
  */
-public class TPersistenceController_Display extends AbstractPersistenceControllerTest {
+public class TNewPersistenceController_Display extends AbstractPersistenceControllerTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
-      .getLogger(TPersistenceController_Display.class);
+      .getLogger(TNewPersistenceController_Display.class);
 
   @Test
   public void testDisplaySingleRecord(TestContext context) {
-    SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
-    mapper.age = 13;
-    mapper.child = false;
-    mapper.name = "testmapper for display";
-    DatastoreBaseTest.saveRecord(context, mapper);
+    SimpleNetRelayMapper record = new SimpleNetRelayMapper();
+    record.age = 13;
+    record.child = false;
+    record.name = "testmapper for display";
+    DatastoreBaseTest.saveRecord(context, record);
 
     try {
-      String id = mapper.id;
-      String url = String.format("/products/%s/DISPLAY/%s/detail.html", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME,
-          id);
+      String reference = createReferenceAsCapturePart(context, record);
+      String url = String.format("/products/%s/DISPLAY/detail.html", reference);
       testRequest(context, HttpMethod.POST, url, null, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
         context.assertTrue(resp.content.toString().contains("testmapper for display"), "Expected name not found");
@@ -60,23 +60,28 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
   @Test
   public void testDisplaySingleRecordAsParam(TestContext context) {
     try {
-      SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
-      mapper.age = 13;
-      mapper.child = false;
-      mapper.name = "testmapper for display";
-      DatastoreBaseTest.saveRecord(context, mapper);
+      CheckController.error = null;
+      SimpleNetRelayMapper record = new SimpleNetRelayMapper();
+      record.age = 13;
+      record.child = false;
+      record.name = "testmapper for display";
+      DatastoreBaseTest.saveRecord(context, record);
+      String reference = createReferenceAsParameter(context, Action.DISPLAY, record);
+      String url = "/products/detail2.html?" + reference;
 
-      String id = mapper.id;
-      String url = "/products/detail2.html?action=DISPLAY&entity=" + NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME
-          + "&ID=" + id;
       testRequest(context, HttpMethod.POST, url, null, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
         context.assertTrue(resp.content.toString().contains("testmapper for display"), "Expected name not found");
       }, 200, "OK", null);
+      if (CheckController.error != null) {
+        context.fail(CheckController.error);
+      }
     } catch (Exception e) {
       context.fail(e);
     }
   }
+
+  // weitere Tests: Feld "Name" als Parameter; mehrere Felder als Parameter
 
   @Test
   public void testDisplayListAll(TestContext context) {
@@ -154,11 +159,14 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    RouterDefinition def = settings.getRouterDefinitions().remove(PersistenceController.class.getSimpleName());
-    def.setRoutes(new String[] { "/products/:entity/:action/list.html", "/products/:entity/:action/:ID/detail.html",
-        "/products/:entity/:action/list2.html", "/products/detail2.html", "/products/list.html" });
-
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    persistenceDefinition = PersistenceControllerNew.createDefaultRouterDefinition();
+    persistenceDefinition
+        .setRoutes(new String[] { "/products/:entity/:action/list.html", "/products/:entity/:action/detail.html",
+            "/products/:entity/:action/list2.html", "/products/detail2.html", "/products/list.html" });
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    RouterDefinition rd = new RouterDefinition();
+    rd.setController(CheckController.class);
+    settings.getRouterDefinitions().addAfter(PersistenceControllerNew.class.getSimpleName(), rd);
   }
 
   @Override

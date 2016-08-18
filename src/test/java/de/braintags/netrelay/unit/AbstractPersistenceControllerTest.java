@@ -12,7 +12,12 @@
  */
 package de.braintags.netrelay.unit;
 
+import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.netrelay.controller.Action;
+import de.braintags.netrelay.controller.persist.RecordContractor;
 import de.braintags.netrelay.init.Settings;
+import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
+import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.unit.TestContext;
 
 /**
@@ -22,6 +27,7 @@ import io.vertx.ext.unit.TestContext;
  * 
  */
 public abstract class AbstractPersistenceControllerTest extends AbstractCaptureParameterTest {
+  protected RouterDefinition persistenceDefinition;
 
   /*
    * (non-Javadoc)
@@ -33,6 +39,31 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
     settings.getDatastoreSettings().setDatabaseName("TPersistenceController");
+  }
+
+  /**
+   * @param context
+   * @param record
+   * @return
+   */
+  protected String createReferenceAsCapturePart(TestContext context, SimpleNetRelayMapper record) {
+    IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(SimpleNetRelayMapper.class);
+    String reference = RecordContractor.generateEntityReference(mapper, record);
+    context.assertTrue(reference.contains("SimpleNetRelayMapper"), "mapper not referenced");
+    return reference;
+  }
+
+  /**
+   * @param context
+   * @param record
+   * @return
+   */
+  protected String createReferenceAsParameter(TestContext context, Action action, SimpleNetRelayMapper record) {
+    IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(record.getClass());
+    String reference = RecordContractor.generateReferenceParameter(persistenceDefinition.getCaptureCollection()[0],
+        action, mapper, record);
+    context.assertTrue(reference.contains(record.getClass().getSimpleName()), "mapper not referenced");
+    return reference;
   }
 
 }
