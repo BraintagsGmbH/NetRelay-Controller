@@ -24,8 +24,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ TPersistenceController_Display.class, TPersistenceController_Insert.class,
-    TPersistenceController_Delete.class, TPersistenceController_Update.class,
-    TPersistenceController_None.class })
+    TPersistenceController_Delete.class, TPersistenceController_Update.class, TPersistenceController_None.class })
 public class TPersistenceSuite {
 
 }

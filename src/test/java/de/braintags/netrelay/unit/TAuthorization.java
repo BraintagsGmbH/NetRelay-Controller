@@ -36,13 +36,24 @@ import io.vertx.ext.unit.TestContext;
  * 
  */
 public class TAuthorization extends NetRelayBaseConnectorTest {
+  private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
+      .getLogger(TAuthorization.class);
 
   public static final String PROTECTED_URL = "/private/privatePage.html";
   public static final String PROTECTED_PERSISTENCE_URL = "/private/persistence/privatePage.html";
   protected RouterDefinition persistenceDefinition;
 
-  private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
-      .getLogger(TAuthorization.class);
+  /**
+   * Check permissions on calls to subobjects like
+   * /private/persistence/privatePage.html?entity=Person{5}.phone&action=INSERT
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testSubobject_Role_HasNoUpdatePermission(TestContext context) throws Exception {
+    context.fail("unimplemented yet");
+  }
 
   /**
    * A call to a template is performed to insert a record and the template has defined this permission

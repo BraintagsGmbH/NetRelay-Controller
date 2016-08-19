@@ -47,6 +47,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
 
   @Test
   public void testInsertSubObject(TestContext context) throws Exception {
+    String newNumber = "222232323";
     CheckController.checkMapperName = TestCustomer.class.getSimpleName();
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
     TestCustomer customer = new TestCustomer();
@@ -61,7 +62,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
       String entityDef = RecordContractor.generateEntityReference(mapper, customer);
       String url = String.format(INSERT_CUSTOMER_URL + "?action=INSERT&entity=%s", entityDef + ".phoneNumbers");
       MultipartUtil mu = new MultipartUtil();
-      mu.addFormField("TestCustomer.phoneNumbers.phoneNumber", "222232323");
+      mu.addFormField("TestCustomer.phoneNumbers.phoneNumber", newNumber);
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
       }, resp -> {
@@ -71,6 +72,28 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     } catch (Exception e) {
       context.fail(e);
     }
+    // after this request the customer must contain the phone-number
+    TestCustomer savedCustomer = (TestCustomer) DatastoreBaseTest.findRecordByID(context, TestCustomer.class,
+        customer.getId());
+    context.assertEquals(2, savedCustomer.getPhoneNumbers().size(), "Expected two phone numbers");
+    boolean found = false;
+    for (TestPhone phone : savedCustomer.getPhoneNumbers()) {
+      if (phone.getPhoneNumber().equals(newNumber)) {
+        found = true;
+      }
+    }
+    context.assertTrue(found, "new phone number was not saved");
+    for (TestPhone phone : savedCustomer.getPhoneNumbers()) {
+      if (phone.id == null) {
+        context.fail("The id of a phone number was not set");
+        break;
+      }
+    }
+  }
+
+  @Test
+  public void testInsertSubSubObject(TestContext context) throws Exception {
+    context.fail("unimplemented test");
   }
 
   @Test

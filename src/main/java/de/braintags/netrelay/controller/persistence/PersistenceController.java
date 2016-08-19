@@ -40,6 +40,8 @@ import io.vertx.ext.web.RoutingContext;
  * To understand the configuration, you should read the section "Capture Collection" inside the NetRelay documentation.
  * For more infos about how to secure data access, see {@link AuthenticationController}
  * 
+ * Extended Contract to enable the PersistenceController to add embedded subobjects
+ * 
  * <br/>
  * <br/>
  * possible paramters are:
