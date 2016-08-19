@@ -10,14 +10,21 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-package de.braintags.netrelay.unit.persist;
+package de.braintags.netrelay.unit.persistence;
 
 import org.junit.Test;
 
+import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
+import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
+import de.braintags.io.vertx.pojomapper.testdatastore.mapper.SimpleMapper;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
+import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
+import de.braintags.netrelay.model.TestCustomer;
+import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.unit.AbstractPersistenceControllerTest;
 import de.braintags.netrelay.util.MultipartUtil;
@@ -36,6 +43,53 @@ import io.vertx.test.core.TestUtils;
 public class TPersistenceController_Insert extends AbstractPersistenceControllerTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TPersistenceController_Insert.class);
+  private static final String INSERT_CUSTOMER_URL = "/customer/insertCustomer.html";
+
+  @Test
+  public void testInsertSubObject(TestContext context) throws Exception {
+    CheckController.checkMapperName = TestCustomer.class.getSimpleName();
+    IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
+    TestCustomer customer = new TestCustomer();
+    customer.setLastName("testcustomer");
+    customer.getPhoneNumbers().add(new TestPhone("111111"));
+    ResultContainer rc = DatastoreBaseTest.saveRecord(context, customer);
+    Object id = rc.writeResult.iterator().next().getId();
+    LOGGER.info("ID: " + id);
+
+    try {
+      // insert.html?entity=Person{ID:1}.phoneNumbers&action=INSERT
+      String entityDef = RecordContractor.generateEntityReference(mapper, customer);
+      String url = String.format(INSERT_CUSTOMER_URL + "?action=INSERT&entity=%s", entityDef + ".phoneNumbers");
+      MultipartUtil mu = new MultipartUtil();
+      mu.addFormField("TestCustomer.phoneNumbers.phoneNumber", "222232323");
+      testRequest(context, HttpMethod.POST, url, req -> {
+        mu.finish(req);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        context.assertTrue(resp.content.toString().contains("testcustomer"), "Expected name not found in response");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+  }
+
+  @Test
+  public void testInsertAsParameter(TestContext context) throws Exception {
+    try {
+      String url = String.format("/products/insert2.html?action=INSERT&entity=%s",
+          NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+      MultipartUtil mu = new MultipartUtil();
+      addFields(mu);
+      testRequest(context, HttpMethod.POST, url, req -> {
+        mu.finish(req);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        context.assertTrue(resp.content.toString().contains("myFirstName"), "Expected name not found in response");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+  }
 
   @Test
   public void testInsertAsParameterWithFile(TestContext context) throws Exception {
@@ -44,8 +98,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
           NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
       MultipartUtil mu = new MultipartUtil();
       addFields(mu);
-
-      String uploadsDir = BodyHandler.DEFAULT_UPLOADS_DIRECTORY;
+      LOGGER.info("UploadDirectory: " + BodyHandler.DEFAULT_UPLOADS_DIRECTORY);
       String fieldName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".fileName";
       String fileName = "somefile.dat";
       String contentType = "application/octet-stream";
@@ -94,36 +147,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     mu.addFormField(NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".age", "18");
     mu.addFormField(NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".child", "true");
     mu.addFormField(NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME + ".geoPoint", "[52.666, 78,999]");
-
   }
-
-  @Test
-  public void testInsertAsParameter(TestContext context) throws Exception {
-    try {
-      String url = String.format("/products/insert2.html?action=INSERT&entity=%s",
-          NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
-      MultipartUtil mu = new MultipartUtil();
-      addFields(mu);
-      testRequest(context, HttpMethod.POST, url, req -> {
-        mu.finish(req);
-      }, resp -> {
-        LOGGER.info("RESPONSE: " + resp.content);
-        context.assertTrue(resp.content.toString().contains("myFirstName"), "Expected name not found in response");
-      }, 200, "OK", null);
-    } catch (Exception e) {
-      context.fail(e);
-    }
-  }
-
-  /*
-   * <td>Bild <br>
-   * <input class="inputField" name="logo" style="width: 100%" type="file">
-   * <input name="bt_PayType$$logo" style="width:100%" id="logo" type="hidden">
-   * <a target="_blank" href="/datafiles/"><img src="/datafiles/administration/iconLupe.gif" alt="Vorschau"
-   * title="Vorschau" border="0"></a>
-   * </td>
-   * 
-   */
 
   /*
    * (non-Javadoc)
@@ -134,13 +158,14 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
     persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
-    persistenceDefinition.setRoutes(
-        new String[] { "/products/:entity/:action/insert.html", "/products/insert2.html", "/products/insert3.html" });
+    persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/insert.html", "/products/insert2.html",
+        "/products/insert3.html", INSERT_CUSTOMER_URL });
     persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
     RouterDefinition rd = new RouterDefinition();
     rd.setController(CheckController.class);
+    CheckController.checkMapperName = SimpleMapper.class.getSimpleName();
     settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }
 

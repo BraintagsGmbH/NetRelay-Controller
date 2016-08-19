@@ -10,7 +10,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-package de.braintags.netrelay.unit.persist;
+package de.braintags.netrelay.unit.persistence;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -26,6 +26,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ TPersistenceController_Display.class, TPersistenceController_Insert.class,
     TPersistenceController_Delete.class, TPersistenceController_Update.class,
     TPersistenceController_None.class })
-public class TPersistSuite {
+public class TPersistenceSuite {
 
 }

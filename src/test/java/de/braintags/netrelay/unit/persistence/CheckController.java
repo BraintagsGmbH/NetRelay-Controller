@@ -1,13 +1,13 @@
-package de.braintags.netrelay.unit.persist;
+package de.braintags.netrelay.unit.persistence;
 
 import java.util.Properties;
 
 import de.braintags.netrelay.controller.AbstractController;
-import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
 import io.vertx.ext.web.RoutingContext;
 
 public class CheckController extends AbstractController {
   static Throwable error;
+  static String checkMapperName;
 
   /*
    * (non-Javadoc)
@@ -16,9 +16,9 @@ public class CheckController extends AbstractController {
    */
   @Override
   public void handle(RoutingContext context) {
-    Object o = context.get(SimpleNetRelayMapper.class.getSimpleName());
+    Object o = context.get(checkMapperName);
     if (o == null) {
-      error = new IllegalArgumentException("did not find an instance of SimpleNetRelayMapper in the context");
+      error = new IllegalArgumentException("did not find an instance of " + checkMapperName + " in the context");
       context.fail(error);
     } else {
       context.next();
