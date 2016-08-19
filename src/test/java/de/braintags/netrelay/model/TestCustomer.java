@@ -27,4 +27,15 @@ public class TestCustomer extends Member {
     this.phoneNumbers = phoneNumbers;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "TestCustomer [getFirstName()=" + getFirstName() + ", getLastName()=" + getLastName() + ", getId()="
+        + getId() + "]";
+  }
+
 }

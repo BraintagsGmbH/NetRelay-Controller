@@ -67,7 +67,7 @@ public abstract class AbstractAction {
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  protected void saveObjectInDatastore(Object ob, String entityName, RoutingContext context, IMapper mapper,
+  protected void saveObjectInDatastore(Object ob, RoutingContext context, IMapper mapper,
       Handler<AsyncResult<Void>> handler) {
     IWrite write = getPersistenceController().getNetRelay().getDatastore().createWrite(mapper.getMapperClass());
     write.add(ob);
@@ -76,6 +76,7 @@ public abstract class AbstractAction {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));
       } else {
+        String entityName = mapper.getMapperClass().getSimpleName();
         LOGGER.info("adding new entity to context with key " + entityName);
         addToContext(context, entityName, ob);
         handler.handle(Future.succeededFuture());

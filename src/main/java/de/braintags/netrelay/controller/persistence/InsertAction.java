@@ -18,7 +18,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.io.vertx.pojomapper.util.QueryHelper;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.exception.FileNameException;
 import io.vertx.core.AsyncResult;
@@ -42,25 +44,85 @@ public class InsertAction extends AbstractAction {
   public static final String MOVE_MESSAGE = "moved uploaded file from %s to %s";
 
   /**
-   * @param persitenceController
+   * @param persistenceController
    */
-  public InsertAction(PersistenceController persitenceController) {
-    super(persitenceController);
+  public InsertAction(PersistenceController persistenceController) {
+    super(persistenceController);
   }
 
   @Override
   final void handle(String entityName, RoutingContext context, CaptureMap captureMap,
       Handler<AsyncResult<Void>> handler) {
     IMapper mapper = getMapper(entityName);
+    if (RecordContractor.isSubobjectDefinition(captureMap)) {
+      handleSubobjectEntityDefinition(context, entityName, captureMap, mapper, handler);
+    } else {
+      handleRegularEntityDefinition(entityName, context, captureMap, handler, mapper);
+    }
+  }
+
+  private void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+    loadMainObject(captureMap, mapper, mor -> {
+      if (mor.failed()) {
+        handler.handle(Future.failedFuture(mor.cause()));
+      } else {
+        createSubObject(context, entityName, captureMap, mapper, handler, mor);
+      }
+    });
+  }
+
+  /**
+   * @param context
+   * @param captureMap
+   * @param mapper
+   * @param handler
+   * @param mor
+   */
+  private void createSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper mapper,
+      Handler<AsyncResult<Void>> handler, AsyncResult<?> mor) {
+    Object mainObject = mor.result(); // This will be saved
+    RecordContractor.InsertParameter ip = RecordContractor.resolveInsertParameter(mapper.getMapperFactory(), mainObject,
+        captureMap);
+    String subEntityName = ip.getFieldPath();
+    Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
+    handleFileUploads(subEntityName, context, params);
+    getPersistenceController().getMapperFactory().getStoreObjectFactory().createStoreObject(params,
+        ip.getSubObjectMapper(), result -> {
+          if (result.failed()) {
+            handler.handle(Future.failedFuture(result.cause()));
+          } else {
+            ip.getParentCollection().add(result.result().getEntity());
+            saveObjectInDatastore(mainObject, context, mapper, handler);
+          }
+        });
+  }
+
+  private void loadMainObject(CaptureMap map, IMapper mainMapper, Handler<AsyncResult<?>> handler) {
+    IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mainMapper.getMapperClass());
+    RecordContractor.extractId(mainMapper, map, query);
+    QueryHelper.executeToFirstRecord(query, true, handler);
+  }
+
+  /**
+   * The entity describes and handles a main object
+   * 
+   * @param entityName
+   * @param context
+   * @param captureMap
+   * @param handler
+   * @param mapper
+   */
+  private void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
+      Handler<AsyncResult<Void>> handler, IMapper mapper) {
     Map<String, String> params = extractProperties(entityName, captureMap, context, mapper);
     handleFileUploads(entityName, context, params);
-
     getPersistenceController().getMapperFactory().getStoreObjectFactory().createStoreObject(params, mapper, result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));
       } else {
         Object ob = result.result().getEntity();
-        saveObjectInDatastore(ob, entityName, context, mapper, handler);
+        saveObjectInDatastore(ob, context, mapper, handler);
       }
     });
   }
@@ -150,11 +212,11 @@ public class InsertAction extends AbstractAction {
   }
 
   private String cleanFileName(String fileName) {
-    fileName = fileName.replaceAll(" ", "_");
-    if (fileName.lastIndexOf("\\") >= 0) {
-      fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+    String returnName = fileName.replaceAll(" ", "_");
+    if (returnName.lastIndexOf("\\") >= 0) {
+      returnName = returnName.substring(returnName.lastIndexOf("\\") + 1);
     }
-    return fileName;
+    return returnName;
   }
 
   /**
