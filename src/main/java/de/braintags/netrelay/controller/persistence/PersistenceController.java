@@ -1,3 +1,15 @@
+/*
+ * #%L
+ * netrelay
+ * %%
+ * Copyright (C) 2015 Braintags GmbH
+ * %%
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * #L%
+ */
 package de.braintags.netrelay.controller.persistence;
 
 import java.util.List;
@@ -9,6 +21,7 @@ import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController;
 import de.braintags.netrelay.controller.Action;
+import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.netrelay.routing.CaptureDefinition;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -19,9 +32,71 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.ext.web.RoutingContext;
 
 /**
+ * The PersistenceController is the instance, which translates the parameters and data of a request into a datastore
+ * based action. A request like "http://localhost/article/detail?entity=article{ID:5}" will be interpreted by the
+ * controller to fetch the article with the id 5 from the datastore and to store it inside the context, so that is can
+ * be displayed by a template engine.
  * 
+ * To understand the configuration, you should read the section "Capture Collection" inside the NetRelay documentation.
+ * For more infos about how to secure data access, see {@link AuthenticationController}
+ * 
+ * <br/>
+ * <br/>
+ * possible paramters are:
+ * <UL>
+ * <LI>{@value #MAPPER_CAPTURE_KEY} - the name of the parameter, which specifies the mapper to be used<br/>
+ * <LI>{@value #ACTION_CAPTURE_KEY} - possible actions are defined by {@link Action}<br/>
+ * <LI>{@value #UPLOAD_DIRECTORY_PROP} - The name of the property, which defines the directory, where uploaded files are
+ * transferred into. This can be "webroot/images/" for instance<br/>
+ * <LI>{@value #UPLOAD_RELATIVE_PATH_PROP} - The name of the property, which defines the relative path for uploaded
+ * files.
+ * If the {@link #UPLOAD_DIRECTORY_PROP} is defined as "webroot/images/" for instance, then the relative path here could
+ * be "images/"
+ * <LI>{@value #SELECTION_SIZE_CAPTURE_KEY} - the name of the parameter, which defines the maximum size of a resulting
+ * selection
+ * <LI>{@value #SELECTION_START_CAPTURE_KEY} - the name of the parameter, which defines the position of the first record
+ * in a selection
+ * <LI>{@value #ORDERBY_CAPTURE_KEY} - the name of the parameter, which defines the sort arguments as comma separated
+ * list in the form of fieldname asc / desc.
+ * </UL>
+ * Further parameters {@link AbstractCaptureController}
+ * 
+ * 
+ * Example configuration:<br/>
+ * This example configuration defines the Persistence-Controller to be active under the url /article/detail and will
+ * let run the above described actions.
+ * "http://localhost/article/detail?entity=article{ID:5}" will load the article for display,
+ * "http://localhost/article/detail?entity=article{ID:5}&action=DELETE" will delete this article from the datastore<br/>
+ * 
+ * Example configuration: <br/>
+ * 
+ * <pre>
+   {
+      "name" : "PersistenceController",
+      "routes" : [   "/article/detail" ],
+      "controller" : "de.braintags.netrelay.controller.persistence.PersistenceController",
+      "handlerProperties" : {
+        "reroute" : "false",
+        "cleanPath" : "true",
+        "uploadDirectory" : "webroot/upload/",
+        "uploadRelativePath" : "upload/"
+      },
+      "captureCollection" : [ {
+        "captureDefinitions" : [ {
+          "captureName" : "entity",
+          "controllerKey" : "entity",
+          "required" : false
+        }, {
+          "captureName" : "action",
+          "controllerKey" : "action",
+          "required" : false
+        } ]
+      } ]
+    }
+ * </pre>
  * 
  * @author Michael Remme
+ * 
  * 
  */
 public class PersistenceController extends AbstractCaptureController {

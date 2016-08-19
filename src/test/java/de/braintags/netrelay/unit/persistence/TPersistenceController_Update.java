@@ -10,12 +10,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-package de.braintags.netrelay.unit.persist;
+package de.braintags.netrelay.unit.persistence;
 
 import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
+import de.braintags.io.vertx.pojomapper.testdatastore.mapper.SimpleMapper;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -131,6 +132,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
     RouterDefinition rd = new RouterDefinition();
     rd.setController(CheckController.class);
+    CheckController.checkMapperName = SimpleMapper.class.getSimpleName();
     settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }
 
