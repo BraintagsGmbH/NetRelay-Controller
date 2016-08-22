@@ -15,6 +15,7 @@ package de.braintags.netrelay.controller.persistence;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.mapping.IField;
@@ -25,6 +26,7 @@ import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.exception.FieldNotFoundException;
+import de.braintags.netrelay.exception.ObjectRequiredException;
 import de.braintags.netrelay.routing.CaptureCollection;
 
 /**
@@ -82,17 +84,57 @@ public class RecordContractor {
       InsertParameter ip = new InsertParameter();
       IMapper mapper = mapperFactory.getMapper(parent.getClass());
       IField field = mapper.getField(entityDef);
-      if (!field.isCollection()) {
-        throw new UnsupportedOperationException(
-            "autmatic filling of subobjects is working only with fields, which are of type Collection");
-      }
-      ip.parentCollection = (Collection<?>) field.getPropertyAccessor().readData(parent);
+      ip.parentCollection = readCollection(parent, field);
       ip.subObjectMapper = mapperFactory.getMapper(field.getSubClass());
       return ip;
     } else {
-      throw new UnsupportedOperationException("implement sub-sub object");
+      String objectReference = entityDef.substring(0, index);
+      Object newParent = resolveNewParent(mapperFactory, parent, objectReference);
+      return resolveInsertParameter(mapperFactory, newParent, entityDef.substring(index));
     }
 
+  }
+
+  private static Object resolveNewParent(IMapperFactory mapperFactory, Object parent, String objectReference) {
+    List<String[]> ids = extractIds(objectReference);
+    String fieldName = extractEntityName(objectReference);
+    IMapper mapper = mapperFactory.getMapper(parent.getClass());
+    IField field = mapper.getField(fieldName);
+    Collection<?> collection = readCollection(parent, field);
+    if (collection == null || collection.isEmpty()) {
+      throw new NullPointerException("Could not find expected collection for object reference " + objectReference);
+    }
+    IMapper subMapper = mapperFactory.getMapper(field.getSubClass());
+    for (Object member : collection) {
+      if (doesObjectFit(subMapper, ids, member)) {
+        return member;
+      }
+    }
+    throw new ObjectRequiredException("Could not find expected object for object reference " + objectReference);
+  }
+
+  private static boolean doesObjectFit(IMapper subMapper, List<String[]> ids, Object object) {
+    for (String[] idDef : ids) {
+      IField fieldDef = subMapper.getField(idDef[0]);
+      if (fieldDef == null) {
+        throw new FieldNotFoundException(subMapper, idDef[0]);
+      }
+      Object value = fieldDef.getPropertyAccessor().readData(object);
+      if (value == null) {
+        return false;
+      } else if (!Objects.equals(String.valueOf(value), idDef[1])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static Collection<?> readCollection(Object parent, IField field) {
+    if (!field.isCollection()) {
+      throw new UnsupportedOperationException(
+          "autmatic filling of subobjects is working only with fields, which are of type Collection");
+    }
+    return (Collection<?>) field.getPropertyAccessor().readData(parent);
   }
 
   /**
@@ -260,20 +302,27 @@ public class RecordContractor {
   }
 
   /**
-   * Generates the reference sequence for a record, something like "mapperName{ID=8}"
+   * Generates the reference sequence for a record ( and the subrecords ), something like "mapperName{ID=8}".
+   * 
    * 
    * @param mapper
    *          the instance of {@link IMapper} which contains information of ID fields
    * @param record
-   *          the instance to be referenced
+   *          the instances to be referenced
    * @return a generated sequence
    */
   public static final String generateEntityReference(IMapper mapper, Object record) {
     return mapper.getMapperClass().getSimpleName() + createIdReference(mapper, record);
   }
 
-  // {ID:8}
-  private static final String createIdReference(IMapper mapper, Object record) {
+  /**
+   * Generates the pure ( encoded ) id sequence to reference a record, something like {ID:8}
+   * 
+   * @param mapper
+   * @param record
+   * @return
+   */
+  public static final String createIdReference(IMapper mapper, Object record) {
     IField idField = mapper.getIdField();
     Object id = idField.getPropertyAccessor().readData(record);
     Assert.notNull("id", id);

@@ -17,6 +17,7 @@ import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
+import de.braintags.netrelay.model.Country;
 import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.unit.TestContext;
@@ -41,6 +42,7 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
     super.modifySettings(context, settings);
     settings.getDatastoreSettings().setDatabaseName("TPersistenceController");
     settings.getMappingDefinitions().addMapperDefinition(TestCustomer.class);
+    settings.getMappingDefinitions().addMapperDefinition(Country.class);
   }
 
   /**

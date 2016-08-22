@@ -43,6 +43,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
 
   @Test
   public void testUpdate(TestContext context) {
+    CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
     mapper.age = 13;
     mapper.child = true;
@@ -81,6 +82,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
 
   @Test
   public void testUpdateAsParameter(TestContext context) {
+    CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
     mapper.age = 13;
     mapper.child = true;
