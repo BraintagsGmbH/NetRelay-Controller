@@ -39,6 +39,7 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
 
   @Test
   public void testDisplaySingleRecord(TestContext context) {
+    CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
     SimpleNetRelayMapper record = new SimpleNetRelayMapper();
     record.age = 13;
     record.child = false;
@@ -61,6 +62,7 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
   @Test
   public void testDisplaySingleRecordAsParam(TestContext context) {
     try {
+      CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
       CheckController.error = null;
       SimpleNetRelayMapper record = new SimpleNetRelayMapper();
       record.age = 13;

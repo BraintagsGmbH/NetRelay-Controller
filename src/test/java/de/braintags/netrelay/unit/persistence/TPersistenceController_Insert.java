@@ -23,6 +23,9 @@ import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
+import de.braintags.netrelay.model.City;
+import de.braintags.netrelay.model.Country;
+import de.braintags.netrelay.model.Street;
 import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -44,7 +47,73 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TPersistenceController_Insert.class);
   private static final String INSERT_CUSTOMER_URL = "/customer/insertCustomer.html";
+  private static final String INSERT_CITY_URL = "/country/insertCity.html";
 
+  @Test
+  public void testInsertSubSubObject(TestContext context) throws Exception {
+    CheckController.checkMapperName = Country.class.getSimpleName();
+    IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(Country.class);
+    IMapper cityMapper = netRelay.getDatastore().getMapperFactory().getMapper(City.class);
+    Country tmpCountry = initCountry(context);
+    String street = "Karl-August-Strasse";
+
+    try {
+      // insert.html?entity=Country{ID:1}.cities{ID:3}.streets&action=INSERT
+      String entityDef = RecordContractor.generateEntityReference(mapper, tmpCountry);
+      City city = tmpCountry.cities.get(0);
+      entityDef += ".cities" + RecordContractor.createIdReference(cityMapper, city) + ".streets";
+
+      String url = String.format(INSERT_CITY_URL + "?action=INSERT&entity=%s", entityDef);
+      MultipartUtil mu = new MultipartUtil();
+      mu.addFormField("Country.cities.streets.name", street);
+      testRequest(context, HttpMethod.POST, url, req -> {
+        mu.finish(req);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        context.assertTrue(resp.content.toString().contains("Germany"), "Expected name not found in response");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+
+    // after this request the customer must contain the phone-number
+    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
+    context.assertEquals(1, savedCountry.cities.size(), "Expected one city");
+    context.assertEquals(2, savedCountry.cities.get(0).streets.size(), "Expected two streets");
+    boolean found = false;
+    for (Street str : savedCountry.cities.get(0).streets) {
+      if (str.name.equals(street)) {
+        found = true;
+      }
+    }
+    context.assertTrue(found, "new street was not saved");
+  }
+
+  /**
+   * @param context
+   * @return
+   */
+  private Country initCountry(TestContext context) {
+    Country country = new Country();
+    country.name = "Germany";
+    City city = new City();
+    city.name = "Willich";
+    country.cities.add(city);
+    ResultContainer rc = DatastoreBaseTest.saveRecord(context, country);
+    Object id = rc.writeResult.iterator().next().getId();
+    LOGGER.info("ID: " + id);
+    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, country.id);
+    context.assertTrue(savedCountry.cities.size() == 1);
+    context.assertTrue(savedCountry.cities.get(0).id != null);
+    return savedCountry;
+  }
+
+  /**
+   * Insert subobject by form
+   * 
+   * @param context
+   * @throws Exception
+   */
   @Test
   public void testInsertSubObject(TestContext context) throws Exception {
     String newNumber = "222232323";
@@ -92,13 +161,9 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   }
 
   @Test
-  public void testInsertSubSubObject(TestContext context) throws Exception {
-    context.fail("unimplemented test");
-  }
-
-  @Test
   public void testInsertAsParameter(TestContext context) throws Exception {
     try {
+      CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
       String url = String.format("/products/insert2.html?action=INSERT&entity=%s",
           NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
       MultipartUtil mu = new MultipartUtil();
@@ -117,6 +182,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   @Test
   public void testInsertAsParameterWithFile(TestContext context) throws Exception {
     try {
+      CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
       String url = String.format("/products/insert3.html?action=INSERT&entity=%s",
           NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
       MultipartUtil mu = new MultipartUtil();
@@ -145,6 +211,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   @Test
   public void testInsertAsCapture(TestContext context) throws Exception {
     try {
+      CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
       String url = String.format("/products/%s/INSERT/insert.html", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
       MultipartUtil mu = new MultipartUtil();
       addFields(mu);
@@ -182,7 +249,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     super.modifySettings(context, settings);
     persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/insert.html", "/products/insert2.html",
-        "/products/insert3.html", INSERT_CUSTOMER_URL });
+        "/products/insert3.html", INSERT_CUSTOMER_URL, INSERT_CITY_URL });
     persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
