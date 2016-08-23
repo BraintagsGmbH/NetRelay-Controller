@@ -79,7 +79,8 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     // after this request the customer must contain the phone-number
     Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
     context.assertEquals(1, savedCountry.cities.size(), "Expected one city");
-    context.assertEquals(2, savedCountry.cities.get(0).streets.size(), "Expected two streets");
+    context.assertEquals(1, savedCountry.cities.get(0).streets.size(), "Expected one streets");
+
     boolean found = false;
     for (Street str : savedCountry.cities.get(0).streets) {
       if (str.name.equals(street)) {
@@ -105,6 +106,8 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, country.id);
     context.assertTrue(savedCountry.cities.size() == 1);
     context.assertTrue(savedCountry.cities.get(0).id != null);
+    context.assertTrue(savedCountry.cities.get(0).streets != null);
+    context.assertTrue(savedCountry.cities.get(0).streets.size() == 0);
     return savedCountry;
   }
 

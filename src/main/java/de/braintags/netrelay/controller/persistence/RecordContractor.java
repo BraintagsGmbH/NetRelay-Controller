@@ -90,7 +90,7 @@ public class RecordContractor {
     } else {
       String objectReference = entityDef.substring(0, index);
       Object newParent = resolveNewParent(mapperFactory, parent, objectReference);
-      return resolveInsertParameter(mapperFactory, newParent, entityDef.substring(index));
+      return resolveInsertParameter(mapperFactory, newParent, entityDef.substring(index + 1));
     }
 
   }
