@@ -37,7 +37,7 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(AbstractPersistenceControllerTest.class);
 
-  protected RouterDefinition persistenceDefinition;
+  private static RouterDefinition persistenceDef;
 
   /*
    * (non-Javadoc)
@@ -112,6 +112,21 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
     context.assertTrue(savedCustomer.getPhoneNumbers().size() == 1);
     context.assertTrue(savedCustomer.getPhoneNumbers().get(0).id != null);
     return savedCustomer;
+  }
+
+  /**
+   * @return the persistenceDef
+   */
+  public RouterDefinition getPersistenceDef() {
+    return persistenceDef;
+  }
+
+  /**
+   * @param persistenceDef
+   *          the persistenceDef to set
+   */
+  public void setPersistenceDef(RouterDefinition persistenceDef) {
+    this.persistenceDef = persistenceDef;
   }
 
 }

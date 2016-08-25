@@ -107,7 +107,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
 
     try {
       String url = "/products/update2.html?"
-          + createReferenceAsParameter(context, persistenceDefinition, Action.UPDATE, mapper);
+          + createReferenceAsParameter(context, getPersistenceDef(), Action.UPDATE, mapper);
       testRequest(context, HttpMethod.POST, url, req -> {
         Buffer buffer = Buffer.buffer();
         buffer.appendString("origin=junit-testUserAlias&login=admin%40foo.bar&pass+word=admin");
@@ -141,11 +141,13 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
+    RouterDefinition persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/update.html", "/products/update2.html" });
     persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    setPersistenceDef(persistenceDefinition);
+
     RouterDefinition rd = new RouterDefinition();
     rd.setController(CheckController.class);
     CheckController.checkMapperName = SimpleMapper.class.getSimpleName();
