@@ -37,11 +37,17 @@ public class DeleteAction extends AbstractAction {
     super(persitenceController);
   }
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.persistence.AbstractAction#handleRegularEntityDefinition(java.lang.String,
+   * io.vertx.ext.web.RoutingContext, de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap,
+   * de.braintags.io.vertx.pojomapper.mapping.IMapper, io.vertx.core.Handler)
+   */
   @Override
-  void handle(String entityName, RoutingContext context, CaptureMap captureMap, Handler<AsyncResult<Void>> handler) {
+  protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
     IDataStore datastore = getPersistenceController().getNetRelay().getDatastore();
-    IMapper mapper = getMapper(entityName);
     IDelete<?> delete = datastore.createDelete(mapper.getMapperClass());
     IQuery query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
     RecordContractor.extractId(mapper, captureMap, query);
@@ -53,6 +59,19 @@ public class DeleteAction extends AbstractAction {
         handler.handle(Future.succeededFuture());
       }
     });
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.persistence.AbstractAction#handleSubobjectEntityDefinition(io.vertx.ext.web.
+   * RoutingContext, java.lang.String, de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap,
+   * de.braintags.io.vertx.pojomapper.mapping.IMapper, io.vertx.core.Handler)
+   */
+  @Override
+  protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 
 }

@@ -39,19 +39,19 @@ public class DisplayAction extends AbstractAction {
     super(persitenceController);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.persistence.AbstractAction#handle(io.vertx.ext.web.RoutingContext,
-   * de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap)
-   */
   @Override
-  void handle(String entityName, RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler) {
-    IMapper mapper = getMapper(entityName);
+  protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
     IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
-    RecordContractor.extractId(mapper, map, query);
-    addQueryCritera(query, map);
-    handleQuery(query, entityName, context, map, mapper, handler);
+    RecordContractor.extractId(mapper, captureMap, query);
+    addQueryCritera(query, captureMap);
+    handleQuery(query, entityName, context, captureMap, mapper, handler);
+  }
+
+  @Override
+  protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 
   protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map, IMapper mapper,

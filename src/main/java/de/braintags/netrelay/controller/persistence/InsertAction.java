@@ -51,17 +51,7 @@ public class InsertAction extends AbstractAction {
   }
 
   @Override
-  final void handle(String entityName, RoutingContext context, CaptureMap captureMap,
-      Handler<AsyncResult<Void>> handler) {
-    IMapper mapper = getMapper(entityName);
-    if (RecordContractor.isSubobjectDefinition(captureMap)) {
-      handleSubobjectEntityDefinition(context, entityName, captureMap, mapper, handler);
-    } else {
-      handleRegularEntityDefinition(entityName, context, captureMap, handler, mapper);
-    }
-  }
-
-  private void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
+  protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
       IMapper mapper, Handler<AsyncResult<Void>> handler) {
     loadMainObject(captureMap, mapper, mor -> {
       if (mor.failed()) {
@@ -113,8 +103,9 @@ public class InsertAction extends AbstractAction {
    * @param handler
    * @param mapper
    */
-  private void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
-      Handler<AsyncResult<Void>> handler, IMapper mapper) {
+  @Override
+  protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
     Map<String, String> params = extractProperties(entityName, captureMap, context, mapper);
     handleFileUploads(entityName, context, params);
     getPersistenceController().getMapperFactory().getStoreObjectFactory().createStoreObject(params, mapper, result -> {
