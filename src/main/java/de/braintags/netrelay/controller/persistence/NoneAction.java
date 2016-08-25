@@ -12,6 +12,7 @@
  */
 package de.braintags.netrelay.controller.persistence;
 
+import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -34,15 +35,15 @@ public class NoneAction extends AbstractAction {
     super(persitenceController);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.persistence.AbstractAction#handle(java.lang.String,
-   * io.vertx.ext.web.RoutingContext, de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap,
-   * io.vertx.core.Handler)
-   */
   @Override
-  void handle(String entityName, RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler) {
+  protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+    handler.handle(Future.succeededFuture());
+  }
+
+  @Override
+  protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
+      IMapper mapper, Handler<AsyncResult<Void>> handler) {
     handler.handle(Future.succeededFuture());
   }
 

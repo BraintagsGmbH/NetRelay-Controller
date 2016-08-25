@@ -105,10 +105,52 @@ public abstract class AbstractAction {
    *          the name of the entity defined by the request
    * @param context
    *          the context, where to get the request data from for instance
-   * @param map
+   * @param captureMap
    *          the resolved {@link CaptureMap}
    * @param handler
    *          the handler to be informed about the result
    */
-  abstract void handle(String entityName, RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler);
+  final void handle(String entityName, RoutingContext context, CaptureMap captureMap,
+      Handler<AsyncResult<Void>> handler) {
+    IMapper mapper = getMapper(entityName);
+    if (RecordContractor.isSubobjectDefinition(captureMap)) {
+      handleSubobjectEntityDefinition(context, entityName, captureMap, mapper, handler);
+    } else {
+      handleRegularEntityDefinition(entityName, context, captureMap, mapper, handler);
+    }
+  }
+
+  /**
+   * The entity definition contains no reference onto a subobject, the main instance is handled directly
+   * 
+   * @param entityName
+   *          the name of the entity defined by the request
+   * @param context
+   *          the context, where to get the request data from for instance
+   * @param captureMap
+   *          the resolved {@link CaptureMap}
+   * @param mapper
+   *          the mapper of the main instance to be used
+   * @param handler
+   *          the handler to be informed about the result
+   */
+  protected abstract void handleRegularEntityDefinition(String entityName, RoutingContext context,
+      CaptureMap captureMap, IMapper mapper, Handler<AsyncResult<Void>> handler);
+
+  /**
+   * The entity definition contains a reference onto a subobject inside the main object, which shall be handled
+   * 
+   * @param entityName
+   *          the name of the entity defined by the request
+   * @param context
+   *          the context, where to get the request data from for instance
+   * @param captureMap
+   *          the resolved {@link CaptureMap}
+   * @param mapper
+   *          the mapper of the main instance to be used
+   * @param handler
+   *          the handler to be informed about the result
+   */
+  protected abstract void handleSubobjectEntityDefinition(RoutingContext context, String entityName,
+      CaptureMap captureMap, IMapper mapper, Handler<AsyncResult<Void>> handler);
 }

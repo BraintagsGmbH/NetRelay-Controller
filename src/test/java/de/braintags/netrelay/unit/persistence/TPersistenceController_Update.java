@@ -39,7 +39,21 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TPersistenceController_Update.class);
 
-  // Test neu: Aufruf mit Feld als Update, das keine ID ist
+  @Test
+  public void testUpdateSubRecord(TestContext context) {
+    context.fail("unimplemented test");
+  }
+
+  @Test
+  public void testUpdateSubSubRecord(TestContext context) {
+    context.fail("unimplemented test");
+  }
+
+  @Test
+  public void testUpdateNoIdField(TestContext context) {
+    // Test neu: Aufruf mit Feld als Update, das keine ID ist
+    context.fail("Test neu: Aufruf mit Feld als Update, das keine ID ist");
+  }
 
   @Test
   public void testUpdate(TestContext context) {

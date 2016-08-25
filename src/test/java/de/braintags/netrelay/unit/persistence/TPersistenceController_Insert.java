@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
-import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
 import de.braintags.io.vertx.pojomapper.testdatastore.mapper.SimpleMapper;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -91,27 +90,6 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   }
 
   /**
-   * @param context
-   * @return
-   */
-  private Country initCountry(TestContext context) {
-    Country country = new Country();
-    country.name = "Germany";
-    City city = new City();
-    city.name = "Willich";
-    country.cities.add(city);
-    ResultContainer rc = DatastoreBaseTest.saveRecord(context, country);
-    Object id = rc.writeResult.iterator().next().getId();
-    LOGGER.info("ID: " + id);
-    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, country.id);
-    context.assertTrue(savedCountry.cities.size() == 1);
-    context.assertTrue(savedCountry.cities.get(0).id != null);
-    context.assertTrue(savedCountry.cities.get(0).streets != null);
-    context.assertTrue(savedCountry.cities.get(0).streets.size() == 0);
-    return savedCountry;
-  }
-
-  /**
    * Insert subobject by form
    * 
    * @param context
@@ -122,11 +100,8 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     String newNumber = "222232323";
     CheckController.checkMapperName = TestCustomer.class.getSimpleName();
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
-    TestCustomer customer = new TestCustomer();
-    customer.setLastName("testcustomer");
-    customer.getPhoneNumbers().add(new TestPhone("111111"));
-    ResultContainer rc = DatastoreBaseTest.saveRecord(context, customer);
-    Object id = rc.writeResult.iterator().next().getId();
+    TestCustomer customer = initCustomer(context);
+    Object id = customer.getId();
     LOGGER.info("ID: " + id);
 
     try {
@@ -144,6 +119,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     } catch (Exception e) {
       context.fail(e);
     }
+
     // after this request the customer must contain the phone-number
     TestCustomer savedCustomer = (TestCustomer) DatastoreBaseTest.findRecordByID(context, TestCustomer.class,
         customer.getId());
@@ -256,6 +232,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+
     RouterDefinition rd = new RouterDefinition();
     rd.setController(CheckController.class);
     CheckController.checkMapperName = SimpleMapper.class.getSimpleName();
