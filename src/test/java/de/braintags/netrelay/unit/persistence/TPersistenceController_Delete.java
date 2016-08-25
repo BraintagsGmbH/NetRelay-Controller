@@ -25,6 +25,9 @@ import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
+import de.braintags.netrelay.model.City;
+import de.braintags.netrelay.model.Country;
+import de.braintags.netrelay.model.Street;
 import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.unit.AbstractPersistenceControllerTest;
@@ -43,6 +46,37 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
       .getLogger(TPersistenceController_Delete.class);
   private static final String DELETE_CUSTOMER_URL = "/customer/deleteCustomer.html";
   private static final String DELETE_CITY_URL = "/country/deleteCity.html";
+
+  @Test
+  public void testDeleteSubSubRecord(TestContext context) {
+    IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(Country.class);
+    IMapper cityMapper = netRelay.getDatastore().getMapperFactory().getMapper(City.class);
+    IMapper streetMapper = netRelay.getDatastore().getMapperFactory().getMapper(Street.class);
+    Country tmpCountry = initCountry(context);
+    City city = tmpCountry.cities.get(0);
+
+    try {
+      String entityDef = RecordContractor.generateEntityReference(mapper, tmpCountry);
+      entityDef += ".cities" + RecordContractor.createIdReference(cityMapper, city);
+      entityDef += ".streets" + RecordContractor.createIdReference(streetMapper, city.streets.get(0));
+      String url = String.format(DELETE_CITY_URL + "?action=DELETE&entity=%s", entityDef);
+
+      testRequest(context, HttpMethod.GET, url, null, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        context.assertTrue(resp.content.toString().contains("Germany"), "Expected name not found");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+
+    // after this request the customer must contain the phone-number
+    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
+    context.assertNotNull(savedCountry, "could not find City in datastore");
+    context.assertEquals(1, savedCountry.cities.size(), "Expected one city");
+    context.assertNotNull(savedCountry.cities.get(0).streets, "streets are null");
+    context.assertEquals(0, savedCountry.cities.get(0).streets.size(), "Expected zero city");
+
+  }
 
   @Test
   public void testDeleteSubRecord(TestContext context) {
@@ -70,11 +104,6 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     TestCustomer savedCustomer = (TestCustomer) DatastoreBaseTest.findRecordByID(context, TestCustomer.class, id);
     context.assertNotNull(savedCustomer, "could not find customer in datastore");
     context.assertEquals(0, savedCustomer.getPhoneNumbers().size(), "Expected zero phone numbers");
-  }
-
-  @Test
-  public void testDeleteSubSubRecord(TestContext context) {
-    context.fail("unimplemented test");
   }
 
   @Test

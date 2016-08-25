@@ -18,9 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.io.vertx.pojomapper.util.QueryHelper;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.exception.FileNameException;
 import io.vertx.core.AsyncResult;
@@ -57,22 +55,23 @@ public class InsertAction extends AbstractAction {
       if (mor.failed()) {
         handler.handle(Future.failedFuture(mor.cause()));
       } else {
-        createSubObject(context, entityName, captureMap, mapper, handler, mor);
+        createSubObject(context, entityName, captureMap, mapper, mor.result(), handler);
       }
     });
   }
 
   /**
    * @param context
+   * @param entityName
    * @param captureMap
    * @param mapper
+   * @param mainObject
+   *          this object will be saved after modification of the subobject
    * @param handler
-   * @param mor
    */
   private void createSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper mapper,
-      Handler<AsyncResult<Void>> handler, AsyncResult<?> mor) {
-    Object mainObject = mor.result(); // This will be saved
-    RecordContractor.InsertParameter ip = RecordContractor.resolveInsertParameter(mapper.getMapperFactory(), mainObject,
+      Object mainObject, Handler<AsyncResult<Void>> handler) {
+    InsertParameter ip = RecordContractor.resolveInsertParameter(mapper.getMapperFactory(), mainObject,
         captureMap);
     String subEntityName = ip.getFieldPath();
     Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
@@ -86,12 +85,6 @@ public class InsertAction extends AbstractAction {
             saveObjectInDatastore(mainObject, context, mapper, handler);
           }
         });
-  }
-
-  private void loadMainObject(CaptureMap map, IMapper mainMapper, Handler<AsyncResult<?>> handler) {
-    IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mainMapper.getMapperClass());
-    RecordContractor.extractId(mainMapper, map, query);
-    QueryHelper.executeToFirstRecord(query, true, handler);
   }
 
   /**

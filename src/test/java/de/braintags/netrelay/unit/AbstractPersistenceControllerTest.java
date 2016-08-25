@@ -21,6 +21,7 @@ import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
 import de.braintags.netrelay.model.City;
 import de.braintags.netrelay.model.Country;
+import de.braintags.netrelay.model.Street;
 import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -88,6 +89,7 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
     City city = new City();
     city.name = "Willich";
     country.cities.add(city);
+    city.streets.add(new Street("testsrteet"));
     ResultContainer rc = DatastoreBaseTest.saveRecord(context, country);
     Object id = rc.writeResult.iterator().next().getId();
     LOGGER.info("ID: " + id);
@@ -95,7 +97,7 @@ public abstract class AbstractPersistenceControllerTest extends AbstractCaptureP
     context.assertTrue(savedCountry.cities.size() == 1);
     context.assertTrue(savedCountry.cities.get(0).id != null);
     context.assertTrue(savedCountry.cities.get(0).streets != null);
-    context.assertTrue(savedCountry.cities.get(0).streets.size() == 0);
+    context.assertTrue(savedCountry.cities.get(0).streets.size() == 1);
     return savedCountry;
   }
 
