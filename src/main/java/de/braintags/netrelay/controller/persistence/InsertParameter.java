@@ -28,6 +28,7 @@ public class InsertParameter {
   private Collection parentCollection;
   private IMapper subObjectMapper;
   private String fieldPath = null;
+  private Object updateObject;
 
   /**
    * The colection, where a child object shall be handled
@@ -92,5 +93,20 @@ public class InsertParameter {
    */
   public void setFieldPath(String fieldPath) {
     this.fieldPath = fieldPath;
+  }
+
+  /**
+   * @return the updateObject
+   */
+  public Object getUpdateObject() {
+    return updateObject;
+  }
+
+  /**
+   * @param updateObject
+   *          the updateObject to set
+   */
+  public void setUpdateObject(Object updateObject) {
+    this.updateObject = updateObject;
   }
 }
