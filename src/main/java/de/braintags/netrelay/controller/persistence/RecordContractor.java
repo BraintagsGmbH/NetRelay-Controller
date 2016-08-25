@@ -53,6 +53,34 @@ public class RecordContractor {
     return mapperName.contains(".");
   }
 
+  public static final DeleteParameter resolveDeleteParameter(IMapperFactory mapperFactory, Object mainObject,
+      CaptureMap map) {
+    String mapperName = getEntityDefiniton(map);
+    int index = mapperName.indexOf('.');
+    if (index < 0) {
+      throw new IllegalArgumentException("the entity definition does not reference a subobject");
+    }
+    return resolveDeleteParameter(mapperFactory, mainObject, mapperName.substring(index + 1));
+  }
+
+  private static final DeleteParameter resolveDeleteParameter(IMapperFactory mapperFactory, Object parent,
+      String entityDef) {
+    int index = entityDef.indexOf('.');
+    if (index < 0) {
+      DeleteParameter dp = new DeleteParameter();
+      IMapper mapper = mapperFactory.getMapper(parent.getClass());
+      IField field = mapper.getField(extractEntityName(entityDef));
+      dp.setParentCollection(readCollection(parent, field));
+      dp.setDeleteObject(resolveNewParent(mapperFactory, parent, entityDef));
+      return dp;
+    } else {
+      String objectReference = entityDef.substring(0, index);
+      Object newParent = resolveNewParent(mapperFactory, parent, objectReference);
+      return resolveDeleteParameter(mapperFactory, newParent, entityDef.substring(index + 1));
+    }
+
+  }
+
   /**
    * If an insert of a subobject shall be executed by en entity definition like Person{4}.phoneNumbers, then this method
    * extracts the needed objects and informations to execute the insert
@@ -73,7 +101,7 @@ public class RecordContractor {
       throw new IllegalArgumentException("the entity definition does not reference a subobject");
     }
     InsertParameter ip = resolveInsertParameter(mapperFactory, mainObject, mapperName.substring(index + 1));
-    ip.fieldPath = extractEntityPath(map);
+    ip.setFieldPath(extractEntityPath(map));
     return ip;
   }
 
@@ -84,8 +112,8 @@ public class RecordContractor {
       InsertParameter ip = new InsertParameter();
       IMapper mapper = mapperFactory.getMapper(parent.getClass());
       IField field = mapper.getField(entityDef);
-      ip.parentCollection = readCollection(parent, field);
-      ip.subObjectMapper = mapperFactory.getMapper(field.getSubClass());
+      ip.setParentCollection(readCollection(parent, field));
+      ip.setSubObjectMapper(mapperFactory.getMapper(field.getSubClass()));
       return ip;
     } else {
       String objectReference = entityDef.substring(0, index);
@@ -327,61 +355,5 @@ public class RecordContractor {
     Object id = idField.getPropertyAccessor().readData(record);
     Assert.notNull("id", id);
     return RequestUtil.encodeText("{" + idField.getName() + ":" + id + "}");
-  }
-
-  @SuppressWarnings("rawtypes")
-  public static class InsertParameter {
-    private Collection parentCollection;
-    private IMapper subObjectMapper;
-    private String fieldPath = null;
-
-    /**
-     * @return the parentCollection
-     */
-    public Collection getParentCollection() {
-      return parentCollection;
-    }
-
-    /**
-     * @param parentCollection
-     *          the parentCollection to set
-     */
-    public void setParentCollection(Collection parentCollection) {
-      this.parentCollection = parentCollection;
-    }
-
-    /**
-     * @return the subObjectMapper
-     */
-    public IMapper getSubObjectMapper() {
-      return subObjectMapper;
-    }
-
-    /**
-     * @param subObjectMapper
-     *          the subObjectMapper to set
-     */
-    public void setSubObjectMapper(IMapper subObjectMapper) {
-      this.subObjectMapper = subObjectMapper;
-    }
-
-    /**
-     * Describes the pure path for a subobject, with out some record references. The first entry is the mapper name of
-     * the main object, the rest are fields and subfields
-     * Something like Person.phoneNumbers or Country.cities.streets
-     * 
-     * @return the fieldPath
-     */
-    public String getFieldPath() {
-      return fieldPath;
-    }
-
-    public void addFieldPath(String newPath) {
-      if (fieldPath == null) {
-        fieldPath = newPath;
-      } else {
-        fieldPath += "." + newPath;
-      }
-    }
   }
 }

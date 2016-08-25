@@ -12,10 +12,12 @@
  */
 package de.braintags.netrelay.controller.persistence;
 
+import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.dataaccess.write.IWrite;
 import de.braintags.io.vertx.pojomapper.dataaccess.write.IWriteResult;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
+import de.braintags.io.vertx.pojomapper.util.QueryHelper;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.exception.NoSuchMapperException;
 import de.braintags.netrelay.init.MappingDefinitions;
@@ -118,6 +120,19 @@ public abstract class AbstractAction {
     } else {
       handleRegularEntityDefinition(entityName, context, captureMap, mapper, handler);
     }
+  }
+
+  /**
+   * If the entity defines a subobject to be handled, this method loads the main instance
+   * 
+   * @param map
+   * @param mainMapper
+   * @param handler
+   */
+  protected void loadMainObject(CaptureMap map, IMapper mainMapper, Handler<AsyncResult<?>> handler) {
+    IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mainMapper.getMapperClass());
+    RecordContractor.extractId(mainMapper, map, query);
+    QueryHelper.executeToFirstRecord(query, true, handler);
   }
 
   /**

@@ -37,13 +37,7 @@ public class DeleteAction extends AbstractAction {
     super(persitenceController);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.persistence.AbstractAction#handleRegularEntityDefinition(java.lang.String,
-   * io.vertx.ext.web.RoutingContext, de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap,
-   * de.braintags.io.vertx.pojomapper.mapping.IMapper, io.vertx.core.Handler)
-   */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
       IMapper mapper, Handler<AsyncResult<Void>> handler) {
@@ -71,7 +65,33 @@ public class DeleteAction extends AbstractAction {
   @Override
   protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
       IMapper mapper, Handler<AsyncResult<Void>> handler) {
-    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
+    loadMainObject(captureMap, mapper, mor -> {
+      if (mor.failed()) {
+        handler.handle(Future.failedFuture(mor.cause()));
+      } else {
+        deleteSubObject(context, captureMap, mapper, mor.result(), handler);
+      }
+    });
+  }
+
+  /**
+   * @param context
+   * @param entityName
+   * @param captureMap
+   * @param mapper
+   * @param mainObject
+   *          this object will be saved after modification of the subobject
+   * @param handler
+   */
+  private void deleteSubObject(RoutingContext context, CaptureMap captureMap, IMapper mapper, Object mainObject,
+      Handler<AsyncResult<Void>> handler) {
+    DeleteParameter dp = RecordContractor.resolveDeleteParameter(mapper.getMapperFactory(), mainObject, captureMap);
+    if (dp.getParentCollection().remove(dp.getDeleteObject())) {
+      saveObjectInDatastore(mainObject, context, mapper, handler);
+    } else {
+      handler.handle(Future.failedFuture(
+          new IllegalArgumentException("Could not delete an object from a list: " + dp.getDeleteObject().toString())));
+    }
   }
 
 }
