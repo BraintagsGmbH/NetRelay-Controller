@@ -18,6 +18,7 @@ import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
+import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.unit.AbstractPersistenceControllerTest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.TestContext;
@@ -54,12 +55,13 @@ public class TPersistenceController_None extends AbstractPersistenceControllerTe
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
+    RouterDefinition persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/list.html",
         "/products/:entity/:action/detail.html", "/products/:entity/:action/list2.html", "/products/detail2.html" });
     persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    setPersistenceDef(persistenceDefinition);
   }
 
 }

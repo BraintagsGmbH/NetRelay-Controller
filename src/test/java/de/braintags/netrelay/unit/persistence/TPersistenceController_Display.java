@@ -69,7 +69,7 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
       record.child = false;
       record.name = "testmapper for display";
       DatastoreBaseTest.saveRecord(context, record);
-      String reference = createReferenceAsParameter(context, persistenceDefinition, Action.DISPLAY, record);
+      String reference = createReferenceAsParameter(context, getPersistenceDef(), Action.DISPLAY, record);
       String url = "/products/detail2.html?" + reference;
 
       testRequest(context, HttpMethod.POST, url, null, resp -> {
@@ -162,11 +162,12 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
+    RouterDefinition persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition
         .setRoutes(new String[] { "/products/:entity/:action/list.html", "/products/:entity/:action/detail.html",
             "/products/:entity/:action/list2.html", "/products/detail2.html", "/products/list.html" });
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    setPersistenceDef(persistenceDefinition);
     RouterDefinition rd = new RouterDefinition();
     rd.setController(CheckController.class);
     CheckController.checkMapperName = SimpleMapper.class.getSimpleName();
