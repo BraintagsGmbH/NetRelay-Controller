@@ -93,6 +93,48 @@ public class RecordContractor {
    *          the CaptureMap, which contains the entity definition
    * @return an instance of InsertParameter with resolved information
    */
+  public static final InsertParameter resolveUpdateParameter(IMapperFactory mapperFactory, Object mainObject,
+      CaptureMap map) {
+    String mapperName = getEntityDefiniton(map);
+    int index = mapperName.indexOf('.');
+    if (index < 0) {
+      throw new IllegalArgumentException("the entity definition does not reference a subobject");
+    }
+    InsertParameter ip = resolveUpdateParameter(mapperFactory, mainObject, mapperName.substring(index + 1));
+    ip.setFieldPath(extractEntityPath(map));
+    return ip;
+  }
+
+  private static final InsertParameter resolveUpdateParameter(IMapperFactory mapperFactory, Object parent,
+      String entityDef) {
+    int index = entityDef.indexOf('.');
+    if (index < 0) {
+      InsertParameter ip = new InsertParameter();
+      IMapper mapper = mapperFactory.getMapper(parent.getClass());
+      IField field = mapper.getField(extractEntityName(entityDef));
+      ip.setParentCollection(readCollection(parent, field));
+      ip.setSubObjectMapper(mapperFactory.getMapper(field.getSubClass()));
+      ip.setUpdateObject(resolveNewParent(mapperFactory, parent, entityDef));
+      return ip;
+    } else {
+      String objectReference = entityDef.substring(0, index);
+      Object newParent = resolveNewParent(mapperFactory, parent, objectReference);
+      return resolveInsertParameter(mapperFactory, newParent, entityDef.substring(index + 1));
+    }
+  }
+
+  /**
+   * If an insert of a subobject shall be executed by en entity definition like Person{4}.phoneNumbers, then this method
+   * extracts the needed objects and informations to execute the insert
+   * 
+   * @param datastore
+   *          a datastore to be able to get mapper informations
+   * @param mainObject
+   *          the main object, which shall contain the sub object or the sub-sub object
+   * @param map
+   *          the CaptureMap, which contains the entity definition
+   * @return an instance of InsertParameter with resolved information
+   */
   public static final InsertParameter resolveInsertParameter(IMapperFactory mapperFactory, Object mainObject,
       CaptureMap map) {
     String mapperName = getEntityDefiniton(map);
@@ -120,7 +162,6 @@ public class RecordContractor {
       Object newParent = resolveNewParent(mapperFactory, parent, objectReference);
       return resolveInsertParameter(mapperFactory, newParent, entityDef.substring(index + 1));
     }
-
   }
 
   private static Object resolveNewParent(IMapperFactory mapperFactory, Object parent, String objectReference) {

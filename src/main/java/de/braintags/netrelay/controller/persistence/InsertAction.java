@@ -55,12 +55,14 @@ public class InsertAction extends AbstractAction {
       if (mor.failed()) {
         handler.handle(Future.failedFuture(mor.cause()));
       } else {
-        createSubObject(context, entityName, captureMap, mapper, mor.result(), handler);
+        handleSubObject(context, entityName, captureMap, mapper, mor.result(), handler);
       }
     });
   }
 
   /**
+   * This method creates a new subobject, stores it into the parent Collection and saves the main record
+   * 
    * @param context
    * @param entityName
    * @param captureMap
@@ -69,10 +71,9 @@ public class InsertAction extends AbstractAction {
    *          this object will be saved after modification of the subobject
    * @param handler
    */
-  private void createSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper mapper,
+  protected void handleSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper mapper,
       Object mainObject, Handler<AsyncResult<Void>> handler) {
-    InsertParameter ip = RecordContractor.resolveInsertParameter(mapper.getMapperFactory(), mainObject,
-        captureMap);
+    InsertParameter ip = RecordContractor.resolveInsertParameter(mapper.getMapperFactory(), mainObject, captureMap);
     String subEntityName = ip.getFieldPath();
     Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
     handleFileUploads(subEntityName, context, params);
@@ -111,7 +112,7 @@ public class InsertAction extends AbstractAction {
     });
   }
 
-  private void handleFileUploads(String entityName, RoutingContext context, Map<String, String> params) {
+  protected void handleFileUploads(String entityName, RoutingContext context, Map<String, String> params) {
     String startKey = entityName.toLowerCase() + ".";
     Set<FileUpload> fileUploads = context.fileUploads();
     FileSystem fs = getPersistenceController().getVertx().fileSystem();

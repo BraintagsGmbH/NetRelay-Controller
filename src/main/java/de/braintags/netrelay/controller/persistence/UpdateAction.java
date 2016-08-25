@@ -18,6 +18,10 @@ import java.util.Map;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.util.exception.ParameterRequiredException;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
+import de.braintags.netrelay.mapping.NetRelayStoreObjectFactory;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -33,6 +37,35 @@ public class UpdateAction extends InsertAction {
    */
   public UpdateAction(PersistenceController persitenceController) {
     super(persitenceController);
+  }
+
+  /**
+   * This method fetches the required subobject, fills it with the transported properties and saves the parent instance
+   * 
+   * @param context
+   * @param entityName
+   * @param captureMap
+   * @param mapper
+   * @param mainObject
+   *          this object will be saved after modification of the subobject
+   * @param handler
+   */
+  @Override
+  protected void handleSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper mapper,
+      Object mainObject, Handler<AsyncResult<Void>> handler) {
+    InsertParameter ip = RecordContractor.resolveUpdateParameter(mapper.getMapperFactory(), mainObject, captureMap);
+    String subEntityName = ip.getFieldPath();
+    Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
+    handleFileUploads(subEntityName, context, params);
+    NetRelayStoreObjectFactory nsf = (NetRelayStoreObjectFactory) getPersistenceController().getMapperFactory()
+        .getStoreObjectFactory();
+    nsf.createStoreObject(params, ip.getUpdateObject(), ip.getSubObjectMapper(), result -> {
+      if (result.failed()) {
+        handler.handle(Future.failedFuture(result.cause()));
+      } else {
+        saveObjectInDatastore(mainObject, context, mapper, handler);
+      }
+    });
   }
 
   /*
