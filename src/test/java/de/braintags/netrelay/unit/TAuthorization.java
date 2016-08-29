@@ -14,15 +14,19 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
+import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
+import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
 import de.braintags.netrelay.model.Member;
+import de.braintags.netrelay.model.TestCustomer;
+import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
 import io.vertx.core.buffer.Buffer;
@@ -52,7 +56,31 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    */
   @Test
   public void testSubobject_Role_HasNoUpdatePermission(TestContext context) throws Exception {
-    context.fail("unimplemented yet");
+    Member member = createMember(context, true, "TestUser3", "users");
+    IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
+    IMapper phoneMapper = netRelay.getDatastore().getMapperFactory().getMapper(TestPhone.class);
+    String templatePermissions = "role: admin{U}";
+    Action action = Action.UPDATE;
+
+    resetRoutes(templatePermissions);
+    TestCustomer customer = initCustomer(context);
+    String entityDef = RecordContractor.generateEntityReference(mapper, customer);
+    entityDef += ".phoneNumbers" + RecordContractor.createIdReference(phoneMapper, customer.getPhoneNumbers().get(0));
+    String url = String.format(PROTECTED_PERSISTENCE_URL + "?action=UPDATE&entity=%s", entityDef);
+
+    String cookie = login(context, member);
+    if (cookie != null) {
+      testRequest(context, HttpMethod.POST, url, httpConn -> {
+        httpConn.headers().set("Cookie", cookie.toString());
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        String setCookie = resp.headers.get("Set-Cookie");
+        context.assertNull(setCookie, "Cookie should not be sent here");
+      }, 403, "Forbidden", null);
+    } else {
+      context.fail("Expected a cookie here");
+    }
   }
 
   /**
