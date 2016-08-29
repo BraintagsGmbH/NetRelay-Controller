@@ -7,13 +7,35 @@
  * 
  * To understand the configuration, you should read the section "Capture Collection" inside the NetRelay documentation
  * 
- * For more infos about how to secure data access, see {@link AuthenticationController}
+ * For more infos about how to secure data access, see
+ * {@link de.braintags.netrelay.controller.authentication.AuthenticationController}
  * 
- * Example configuration:<br/>
+ * *Referencing subobjects* +
+ * Imagine two mapper "Person" and "Phone". The Phone has the phone number and an ID.
+ * The mapper Person has an ID field and another field "List<Phone> phoneNumbers".
+ * 
+ * To add a new phone number to a Person, you will call the link: +
+ * `insertCustomer.html?action=INSERT&entity=Person{ID:5}.phoneNumbers` +
+ * If in the same request you want to send the new Phone number, you will create a form, where you will add a field with
+ * the name: +
+ * `Person.phoneNumbers.phoneNumber` +
+ * Of course this expects, that "insertCustomer.html" is added as valid route for the PersistenceController.
+ * 
+ * To update an existing phone number, you will call the url: +
+ * `insertCustomer.html?action=UPDATE&entity=Person{ID:5}.phoneNumbers{ID:1}` +
+ * and again to add an input field with the above name to the corresonding http form.
+ * 
+ * To delete an existing phone number from a person, you will call: +
+ * `insertCustomer.html?action=DELETE&entity=Person{ID:5}.phoneNumbers{ID:1}` +
+ * 
+ * 
+ * 
+ * 
+ * *Example configuration* +
  * This example configuration defines the Persistence-Controller to be active under the url /article/detail and will
- * let run the above described actions.
- * "http://localhost/article/detail?entity=article{ID:5}" will load the article for display,
- * "http://localhost/article/detail?entity=article{ID:5}&action=DELETE" will delete this article from the datastore<br/>
+ * let run the above described actions. +
+ * "http://localhost/article/detail?entity=article{ID:5}" will load the article for display, +
+ * "http://localhost/article/detail?entity=article{ID:5}&action=DELETE" will delete this article from the datastore +
  * 
  * 
  * [source, json]

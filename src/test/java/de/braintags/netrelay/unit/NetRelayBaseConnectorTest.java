@@ -25,7 +25,12 @@ import de.braintags.netrelay.controller.authentication.PasswordLostController;
 import de.braintags.netrelay.controller.authentication.RegisterController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.init.Settings;
+import de.braintags.netrelay.model.City;
+import de.braintags.netrelay.model.Country;
 import de.braintags.netrelay.model.Member;
+import de.braintags.netrelay.model.Street;
+import de.braintags.netrelay.model.TestCustomer;
+import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.unit.TestContext;
 
@@ -84,6 +89,40 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
       returnMember = member;
     }
     return returnMember;
+  }
+
+  /**
+   * @param context
+   * @return
+   */
+  protected Country initCountry(TestContext context) {
+    Country country = new Country();
+    country.name = "Germany";
+    City city = new City();
+    city.name = "Willich";
+    country.cities.add(city);
+    city.streets.add(new Street("testsrteet"));
+    ResultContainer rc = DatastoreBaseTest.saveRecord(context, country);
+    Object id = rc.writeResult.iterator().next().getId();
+    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, country.id);
+    context.assertTrue(savedCountry.cities.size() == 1);
+    context.assertTrue(savedCountry.cities.get(0).id != null);
+    context.assertTrue(savedCountry.cities.get(0).streets != null);
+    context.assertTrue(savedCountry.cities.get(0).streets.size() == 1);
+    return savedCountry;
+  }
+
+  protected TestCustomer initCustomer(TestContext context) {
+    TestCustomer customer = new TestCustomer();
+    customer.setLastName("testcustomer");
+    customer.getPhoneNumbers().add(new TestPhone("111111"));
+    ResultContainer rc = DatastoreBaseTest.saveRecord(context, customer);
+
+    TestCustomer savedCustomer = (TestCustomer) DatastoreBaseTest.findRecordByID(context, TestCustomer.class,
+        customer.getId());
+    context.assertTrue(savedCustomer.getPhoneNumbers().size() == 1);
+    context.assertTrue(savedCustomer.getPhoneNumbers().get(0).id != null);
+    return savedCustomer;
   }
 
 }

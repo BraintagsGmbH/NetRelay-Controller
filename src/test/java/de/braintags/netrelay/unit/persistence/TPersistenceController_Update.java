@@ -25,6 +25,9 @@ import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
+import de.braintags.netrelay.model.City;
+import de.braintags.netrelay.model.Country;
+import de.braintags.netrelay.model.Street;
 import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -96,13 +99,44 @@ public class TPersistenceController_Update extends AbstractPersistenceController
 
   @Test
   public void testUpdateSubSubRecord(TestContext context) {
-    context.fail("unimplemented test");
-  }
+    CheckController.checkMapperName = Country.class.getSimpleName();
+    IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(Country.class);
+    IMapper cityMapper = netRelay.getDatastore().getMapperFactory().getMapper(City.class);
+    IMapper streetMapper = netRelay.getDatastore().getMapperFactory().getMapper(Street.class);
+    Country tmpCountry = initCountry(context);
+    String street = "Karl-August-Strasse MODIFIED";
+    City city = tmpCountry.cities.get(0);
 
-  @Test
-  public void testUpdateNoIdField(TestContext context) {
-    // Test neu: Aufruf mit Feld als Update, das keine ID ist
-    context.fail("Test neu: Aufruf mit Feld als Update, das keine ID ist");
+    try {
+      String entityDef = RecordContractor.generateEntityReference(mapper, tmpCountry);
+      entityDef += ".cities" + RecordContractor.createIdReference(cityMapper, city);
+      entityDef += ".streets" + RecordContractor.createIdReference(streetMapper, city.streets.get(0));
+      String url = String.format(UPDATE_CITY_URL + "?action=UPDATE&entity=%s", entityDef);
+
+      MultipartUtil mu = new MultipartUtil();
+      mu.addFormField("Country.cities.streets.name", street);
+      testRequest(context, HttpMethod.POST, url, req -> {
+        mu.finish(req);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        context.assertTrue(resp.content.toString().contains("Germany"), "Expected name not found in response");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+
+    // after this request the customer must contain the phone-number
+    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
+    context.assertEquals(1, savedCountry.cities.size(), "Expected one city");
+    context.assertEquals(1, savedCountry.cities.get(0).streets.size(), "Expected one streets");
+
+    boolean found = false;
+    for (Street str : savedCountry.cities.get(0).streets) {
+      if (str.name.equals(street)) {
+        found = true;
+      }
+    }
+    context.assertTrue(found, "streetname was not modified");
   }
 
   @Test
