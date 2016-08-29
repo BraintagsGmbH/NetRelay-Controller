@@ -5,6 +5,11 @@
  * controller to fetch the article with the id 5 from the datastore and to store it inside the context, so that is can
  * be displayed by a template engine.
  * 
+ * The PersistenceController covers the most frequent use cases of datastore based actions by an http form, so that the
+ * number of particular Controllers can be reduced to specialized implementations. On the other hand the
+ * PersistenceController shall not give the ability to create uncontrollable datastore actions just by configuration, to
+ * force the creation of dedicated, well tested controllers and to avoid unrecognized performace bottlenecks
+ * 
  * To understand the configuration, you should read the section "Capture Collection" inside the NetRelay documentation
  * 
  * For more infos about how to secure data access, see
