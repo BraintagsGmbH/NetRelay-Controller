@@ -36,6 +36,14 @@ import de.braintags.netrelay.routing.CaptureCollection;
  */
 public class RecordContractor {
   /**
+   * The character, which splits the name of the ID field from the value, like "ID:3"
+   */
+  private static final String ID_SPLIT = ":";
+  /**
+   * The character, which splits several ID definitions, like "ID:3, local:DE"
+   */
+  private static final String ID_SEPARATOR = ",";
+  /**
    * The char, which opens the id specification inside the entity definition
    */
   public static final char OPEN_BRACKET = '(';
@@ -327,9 +335,9 @@ public class RecordContractor {
     int index = spec.indexOf(OPEN_BRACKET);
     if (index > 0) {
       String specDef = spec.trim().substring(index + 1, spec.length() - 1);
-      String[] defs = specDef.split(",");
+      String[] defs = specDef.split(ID_SEPARATOR);
       for (String def : defs) {
-        String[] keys = def.split(":");
+        String[] keys = def.split(ID_SPLIT);
         if (keys.length != 2) {
           throw new IllegalArgumentException(
               "Wrong id definition, expect one definition in the form of 'FieldName=fieldValue', not " + def);
@@ -404,6 +412,6 @@ public class RecordContractor {
     IField idField = mapper.getIdField();
     Object id = idField.getPropertyAccessor().readData(record);
     Assert.notNull("id", id);
-    return OPEN_BRACKET + idField.getName() + ":" + id + CLOSE_BRACKET;
+    return OPEN_BRACKET + idField.getName() + ID_SPLIT + id + CLOSE_BRACKET;
   }
 }

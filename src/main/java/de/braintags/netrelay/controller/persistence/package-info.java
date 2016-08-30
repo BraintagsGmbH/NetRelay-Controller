@@ -1,7 +1,7 @@
 /**
  * === {@link de.braintags.netrelay.controller.persistence.PersistenceController}
  * The PersistenceController is the instance, which translates the parameters and data of a request into a datastore
- * based action. A request like "http://localhost/article/detail?entity=article{ID:5}" will be interpreted by the
+ * based action. A request like "http://localhost/article/detail?entity=article(ID:5)" will be interpreted by the
  * controller to fetch the article with the id 5 from the datastore and to store it inside the context, so that is can
  * be displayed by a template engine.
  * 
@@ -20,18 +20,18 @@
  * The mapper Person has an ID field and another field "List<Phone> phoneNumbers".
  * 
  * To add a new phone number to a Person, you will call the link: +
- * `insertCustomer.html?action=INSERT&entity=Person{ID:5}.phoneNumbers` +
+ * `insertCustomer.html?action=INSERT&entity=Person(ID:5).phoneNumbers` +
  * If in the same request you want to send the new Phone number, you will create a form, where you will add a field with
  * the name: +
  * `Person.phoneNumbers.phoneNumber` +
  * Of course this expects, that "insertCustomer.html" is added as valid route for the PersistenceController.
  * 
  * To update an existing phone number, you will call the url: +
- * `insertCustomer.html?action=UPDATE&entity=Person{ID:5}.phoneNumbers{ID:1}` +
+ * `insertCustomer.html?action=UPDATE&entity=Person(ID:5).phoneNumbers(ID:1)` +
  * and again to add an input field with the above name to the corresonding http form.
  * 
  * To delete an existing phone number from a person, you will call: +
- * `insertCustomer.html?action=DELETE&entity=Person{ID:5}.phoneNumbers{ID:1}` +
+ * `insertCustomer.html?action=DELETE&entity=Person(ID:5).phoneNumbers(ID:1)` +
  * 
  * 
  * 
@@ -39,8 +39,8 @@
  * *Example configuration* +
  * This example configuration defines the Persistence-Controller to be active under the url /article/detail and will
  * let run the above described actions. +
- * "http://localhost/article/detail?entity=article{ID:5}" will load the article for display, +
- * "http://localhost/article/detail?entity=article{ID:5}&action=DELETE" will delete this article from the datastore +
+ * "http://localhost/article/detail?entity=article(ID:5)" will load the article for display, +
+ * "http://localhost/article/detail?entity=article(ID:5)&action=DELETE" will delete this article from the datastore +
  * 
  * 
  * [source, json]

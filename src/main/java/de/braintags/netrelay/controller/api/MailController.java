@@ -256,7 +256,7 @@ public class MailController extends AbstractController {
     LOGGER.info("Going to send message");
     mailClient.sendMail(email, result -> {
       if (result.failed()) {
-        LOGGER.error("Error in sending Mail occured", result.cause());
+        LOGGER.error("Error in sending Mail occured", new RuntimeException(result.cause()));
         MailSendResult msResult = new MailSendResult(result);
         handler.handle(Future.succeededFuture(msResult));
       } else {

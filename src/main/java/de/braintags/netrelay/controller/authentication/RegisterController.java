@@ -277,6 +277,7 @@ public class RegisterController extends AbstractAuthProviderController {
                       RequestUtil.sendRedirect(context.response(), successUrl);
                     } else {
                       context.put(MAIL_SEND_RESULT_PROP, msResult);
+                      context.put(REGISTER_ERROR_PARAM, "Error on sending confirmation mail: " + msResult.errorMessage);
                       context.reroute(failUrl);
                     }
                   });

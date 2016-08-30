@@ -275,6 +275,7 @@ public class PasswordLostController extends AbstractController {
                   RequestUtil.sendRedirect(context.response(), successUrl);
                 } else {
                   context.put(MAIL_SEND_RESULT_PROP, msResult);
+                  context.put(RESET_ERROR_PARAM, msResult.errorMessage);
                   context.reroute(failUrl);
                 }
               });
