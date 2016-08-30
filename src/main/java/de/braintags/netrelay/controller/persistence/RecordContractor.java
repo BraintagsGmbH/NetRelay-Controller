@@ -22,7 +22,6 @@ import de.braintags.io.vertx.pojomapper.mapping.IField;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
 import de.braintags.io.vertx.util.assertion.Assert;
-import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.exception.FieldNotFoundException;
@@ -30,12 +29,20 @@ import de.braintags.netrelay.exception.ObjectRequiredException;
 import de.braintags.netrelay.routing.CaptureCollection;
 
 /**
- * 
+ * Utility class which builds the contract between a request uri and a record
  * 
  * @author Michael Remme
  * 
  */
 public class RecordContractor {
+  /**
+   * The char, which opens the id specification inside the entity definition
+   */
+  public static final char OPEN_BRACKET = '(';
+  /**
+   * The char, which closes the id specification inside the entity definition
+   */
+  public static final char CLOSE_BRACKET = ')';
 
   /**
    * 
@@ -44,7 +51,7 @@ public class RecordContractor {
   }
 
   /**
-   * Method checks wether the entity definition references a subobject, like entity=Person{4}.phone
+   * Method checks wether the entity definition references a subobject, like entity=Person(ID:4).phone
    * 
    * @return true, if entity references a subobject
    */
@@ -82,7 +89,8 @@ public class RecordContractor {
   }
 
   /**
-   * If an insert of a subobject shall be executed by en entity definition like Person{4}.phoneNumbers, then this method
+   * If an insert of a subobject shall be executed by en entity definition like Person(ID:4).phoneNumbers, then this
+   * method
    * extracts the needed objects and informations to execute the insert
    * 
    * @param datastore
@@ -124,7 +132,8 @@ public class RecordContractor {
   }
 
   /**
-   * If an insert of a subobject shall be executed by en entity definition like Person{4}.phoneNumbers, then this method
+   * If an insert of a subobject shall be executed by en entity definition like Person(ID:4).phoneNumbers, then this
+   * method
    * extracts the needed objects and informations to execute the insert
    * 
    * @param datastore
@@ -244,7 +253,7 @@ public class RecordContractor {
    * @return the entity name
    */
   private static String extractEntityName(String def) {
-    int index = def.indexOf('{');
+    int index = def.indexOf(OPEN_BRACKET);
     if (index > 0) {
       def = def.substring(0, index);
     }
@@ -306,7 +315,7 @@ public class RecordContractor {
    * Extracts the id specification(s) as key-value pairs
    * 
    * @param spec
-   *          the specification as String in the form of {id:5}
+   *          the specification as String in the form of (ID:4)
    * @return
    */
   private static List<String[]> extractIds(String spec) {
@@ -315,7 +324,7 @@ public class RecordContractor {
     if (dotIndex > 0) {
       spec = spec.substring(0, dotIndex);
     }
-    int index = spec.indexOf('{');
+    int index = spec.indexOf(OPEN_BRACKET);
     if (index > 0) {
       String specDef = spec.trim().substring(index + 1, spec.length() - 1);
       String[] defs = specDef.split(",");
@@ -343,7 +352,7 @@ public class RecordContractor {
    * @param record
    *          the record to be referenced
    * @return the url parameter, which are referencing the record. This will be in the form
-   *         "action=DISPLAY&entity=Person{ID=8}"
+   *         "action=DISPLAY&entity=Person(ID:4)"
    */
   public static String generateReferenceParameter(CaptureCollection captureCollection, Action action, IMapper mapper,
       Object record) {
@@ -356,7 +365,7 @@ public class RecordContractor {
 
   /**
    * Generates the sequence, by which a record is referenced inside a URL.
-   * The reference will be like: entity=mapperName{ID=8}
+   * The reference will be like: entity=mapperName(ID:4)
    * 
    * @param mapper
    *          the instance of {@link IMapper} which contains information of ID fields
@@ -371,7 +380,7 @@ public class RecordContractor {
   }
 
   /**
-   * Generates the reference sequence for a record ( and the subrecords ), something like "mapperName{ID=8}".
+   * Generates the reference sequence for a record ( and the subrecords ), something like "mapperName(ID:4)".
    * 
    * 
    * @param mapper
@@ -385,7 +394,7 @@ public class RecordContractor {
   }
 
   /**
-   * Generates the pure ( encoded ) id sequence to reference a record, something like {ID:8}
+   * Generates the pure ( encoded ) id sequence to reference a record, something like (ID:4)
    * 
    * @param mapper
    * @param record
@@ -395,6 +404,6 @@ public class RecordContractor {
     IField idField = mapper.getIdField();
     Object id = idField.getPropertyAccessor().readData(record);
     Assert.notNull("id", id);
-    return RequestUtil.encodeText("{" + idField.getName() + ":" + id + "}");
+    return OPEN_BRACKET + idField.getName() + ":" + id + CLOSE_BRACKET;
   }
 }

@@ -17,9 +17,10 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
 import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.CookieController;
 import de.braintags.netrelay.controller.CurrentMemberController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
-import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.authentication.PasswordLostController;
 import de.braintags.netrelay.controller.authentication.RegisterController;
@@ -57,7 +58,8 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    settings.getRouterDefinitions().add(MailController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().add(CookieController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().add(SessionController.createDefaultRouterDefinition());
     settings.getRouterDefinitions().add(AuthenticationController.createDefaultRouterDefinition());
     settings.getRouterDefinitions().add(RegisterController.createDefaultRouterDefinition());
     settings.getRouterDefinitions().add(PasswordLostController.createDefaultRouterDefinition());
