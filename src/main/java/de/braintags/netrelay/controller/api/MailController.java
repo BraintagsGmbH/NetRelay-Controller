@@ -115,6 +115,11 @@ public class MailController extends AbstractController {
   public static final String TO_PARAMETER = "to";
 
   /**
+   * The name of the parameter inside the request or properties, by which the address to send the mail to is set
+   */
+  public static final String BCC_PARAMETER = "bcc";
+
+  /**
    * the parameter inside the request or properties, which is specifying the mail subject
    */
   public static final String SUBJECT_PARAMETER = "subject";
@@ -262,6 +267,12 @@ public class MailController extends AbstractController {
     String to = prefs.to == null || prefs.to.hashCode() == 0 ? readParameterOrContext(context, TO_PARAMETER, null, true)
         : prefs.to;
     email.setTo(to);
+
+    String bcc = prefs.bcc == null || prefs.bcc.hashCode() == 0
+        ? readParameterOrContext(context, BCC_PARAMETER, null, false) : prefs.bcc;
+    if (bcc != null)
+      email.setBcc(bcc);
+
     String subject = prefs.subject == null ? readParameterOrContext(context, SUBJECT_PARAMETER, null, false)
         : prefs.subject;
     email.setSubject(subject);
@@ -490,6 +501,7 @@ public class MailController extends AbstractController {
    */
   public static class MailPreferences {
     private String to;
+    private String bcc;
     private String from = null;
     private String subject = null;
     private String bounceAddress = null;
@@ -511,6 +523,7 @@ public class MailController extends AbstractController {
       from = readProperty(props, FROM_PARAM, null, false);
       bounceAddress = readProperty(props, BOUNCE_ADDRESS_PARAM, null, false);
       to = readProperty(props, TO_PARAMETER, null, false);
+      bcc = readProperty(props, BCC_PARAMETER, null, false);
       subject = readProperty(props, SUBJECT_PARAMETER, null, false);
       template = readProperty(props, TEMPLATE_PARAM, null, false);
       templateEngine = ThymeleafTemplateController.createTemplateEngine(props);
@@ -531,6 +544,15 @@ public class MailController extends AbstractController {
      */
     public final String getTo() {
       return to;
+    }
+
+    /**
+     * Get the defined bcc
+     * 
+     * @return the bcc
+     */
+    public final String getBcc() {
+      return bcc;
     }
 
     /**
