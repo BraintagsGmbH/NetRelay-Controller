@@ -35,6 +35,7 @@ public class TMailController extends NetRelayBaseConnectorTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TMailController.class);
   public static final String TEST_IMAGE_URI = "http://www.braintags.de/images/design/logo.png";
+  public static final String TESTS_MAIL_RECIPIENT_BCC = "home@braintags.de";
 
   @Test
   public void sendSimpleMail(TestContext context) {
@@ -59,6 +60,33 @@ public class TMailController extends NetRelayBaseConnectorTest {
     } catch (Exception e) {
       context.fail(e);
     }
+  }
+
+  @Test
+  public void sendSimpleMail_Bcc(TestContext context) {
+    try {
+      resetRoutes(false);
+      String url = "/api/sendMail";
+      Buffer responseBuffer = Buffer.buffer();
+      testRequest(context, HttpMethod.POST, url, req -> {
+        Buffer buffer = Buffer.buffer();
+        buffer.appendString("to=" + NetRelayBaseTest.TESTS_MAIL_RECIPIENT);
+        buffer.appendString("&bcc=" + TESTS_MAIL_RECIPIENT_BCC);
+        buffer.appendString("&subject=").appendString(RequestUtil.encodeText("Test sendSimpleMail BCC"));
+        buffer.appendString("&mailText=").appendString(RequestUtil.encodeText("super cleverer text als nachricht"));
+
+        req.headers().set("content-length", String.valueOf(buffer.length()));
+        req.headers().set("content-type", "application/x-www-form-urlencoded");
+        req.write(buffer);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        JsonObject json = new JsonObject(resp.content.toString());
+        context.assertTrue(json.getBoolean("success"), "success flag not set");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+    String test = "tesT";
   }
 
   @Test
