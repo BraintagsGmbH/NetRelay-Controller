@@ -16,7 +16,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import de.braintags.netrelay.unit.TAuthentication;
+import de.braintags.netrelay.unit.TAuthenticationDatastore;
+import de.braintags.netrelay.unit.TAuthenticationEncrypted;
+import de.braintags.netrelay.unit.TAuthenticationMongo;
 import de.braintags.netrelay.unit.TAuthorization;
 import de.braintags.netrelay.unit.TCaptureParameters;
 import de.braintags.netrelay.unit.TDataTablesController;
@@ -38,9 +40,9 @@ import de.braintags.netrelay.unit.persistence.TPersistenceSuite;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ TestAllNetRelay.class, TFailureController.class, TTemplateController.class, TCaptureParameters.class,
-    TMailProcessor.class, TPersistenceSuite.class, TAuthentication.class, TAuthorization.class, TRegistration.class,
-    TPasswordLost.class, TDataTablesController.class, TMailController.class, TVirtualHostController.class,
-    TProtocolController.class })
+    TMailProcessor.class, TPersistenceSuite.class, TAuthenticationMongo.class, TAuthenticationDatastore.class,
+    TAuthorization.class, TAuthenticationEncrypted.class, TRegistration.class, TPasswordLost.class,
+    TDataTablesController.class, TMailController.class, TVirtualHostController.class, TProtocolController.class })
 
 public class TestAllNetRelayController {
   // -DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=5

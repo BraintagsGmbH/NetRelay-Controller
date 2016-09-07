@@ -29,13 +29,13 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  * 
  */
-public class TAuthentication extends NetRelayBaseConnectorTest {
+public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
   /**
    * Comment for <code>PROTECTED_URL</code>
    */
   public static final String PROTECTED_URL = "/private/privatePage.html";
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
-      .getLogger(TAuthentication.class);
+      .getLogger(TAuthenticationDatastore.class);
 
   /**
    * Call protected page without login
@@ -242,6 +242,9 @@ public class TAuthentication extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put("passwordField", "password");
     def.getHandlerProperties().put("usernameField", "userName");
     def.getHandlerProperties().put("roleField", "roles");
+    def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
+        AuthenticationController.AUTH_PROVIDER_DATASTORE);
+
     if (directLoginPage != null) {
       def.getHandlerProperties().put(AuthenticationController.DIRECT_LOGGED_IN_OK_URL_PROP, directLoginPage);
     } else {

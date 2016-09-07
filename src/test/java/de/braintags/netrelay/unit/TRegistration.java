@@ -77,7 +77,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
   }
 
   private void callProtectedPage(TestContext context, Buffer cookie) throws Exception {
-    String url = TAuthentication.PROTECTED_URL;
+    String url = TAuthenticationMongo.PROTECTED_URL;
     testRequest(context, HttpMethod.POST, url, httpConn -> {
       httpConn.headers().set("Cookie", cookie.toString());
     }, resp -> {

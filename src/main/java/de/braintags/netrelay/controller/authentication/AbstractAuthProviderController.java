@@ -68,10 +68,16 @@ public abstract class AbstractAuthProviderController extends AbstractController 
       .getLogger(AbstractAuthProviderController.class);
 
   /**
-   * Used as possible value for property {@link #AUTH_PROVIDER_PROP} and references to an authentivation provider
+   * Used as possible value for property {@link #AUTH_PROVIDER_PROP} and references to an authentication provider
    * connected to a mongo db
    */
   public static final String AUTH_PROVIDER_MONGO = "MongoAuth";
+
+  /**
+   * Used as possible value for property {@link #AUTH_PROVIDER_PROP} and references to an authentication provider
+   * connected to the internal IDatastoreContainer
+   */
+  public static final String AUTH_PROVIDER_DATASTORE = "AuthProviderDatastore";
 
   /**
    * The name of the key, which is used, to store the name of the mapper in the {@link User#principal()}
