@@ -15,8 +15,8 @@ package de.braintags.netrelay.controller;
 import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
-import de.braintags.netrelay.model.IAuthenticatable;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

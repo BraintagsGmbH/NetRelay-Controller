@@ -16,6 +16,7 @@
 
 	<properties>
 		<netrelay.version>${NETRELAY_VERSION}</netrelay.version>
+		<vertx-auth-datastore-version>${DATASTORE_AUTH}</vertx-auth-datastore-version>
 		<thymeleaf.version>${THYMELEAF_VERSION}</thymeleaf.version>
 		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,6 +39,11 @@
 			<version>${netrelay.version}</version>
 			<classifier>tests</classifier>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-auth-datastore</artifactId>
+			<version>${vertx-auth-datastore-version}</version>
 		</dependency>
 		
 		<dependency>
@@ -68,6 +74,9 @@
 							<io.netty.leakDetectionLevel>PARANOID</io.netty.leakDetectionLevel>
 							<mailClientUserName>${mailClientUserName}</mailClientUserName>
                 			<mailClientPassword>${mailClientPassword}</mailClientPassword>
+							<IDatastoreContainer>de.braintags.io.vertx.pojomapper.mongo.vertxunit.MongoDataStoreContainer</IDatastoreContainer>
+							<startMongoLocal>true</startMongoLocal>
+							<db_name>NetRelayControllerDatabase</db_name>
 						</systemPropertyVariables>
 						<argLine>-server -Xmx1200M</argLine>
 						<forkCount>1</forkCount>

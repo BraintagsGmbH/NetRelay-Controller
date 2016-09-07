@@ -260,6 +260,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
   private Member createMember(TestContext context) {
     Member member = new Member();
     member.setUserName("testuser");
+    member.setEmail("testuser");
     member.setPassword("testpassword");
     member = createOrFindMember(context, netRelay.getDatastore(), member);
     context.assertNotNull(member, "Member must not be null");

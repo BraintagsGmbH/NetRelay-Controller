@@ -15,7 +15,8 @@ package de.braintags.netrelay;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.exception.NoSuchRecordException;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
-import de.braintags.netrelay.model.IAuthenticatable;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.auth.datastore.impl.DatastoreUser;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -118,33 +119,47 @@ public class MemberUtil {
       Handler<AsyncResult<IAuthenticatable>> resultHandler) {
     Class<? extends IAuthenticatable> mapperClass = getMapperClass(context, netRelay);
     if (user instanceof MongoUser) {
-      String id = user.principal().getString("_id");
-      IQuery<? extends IAuthenticatable> query = netRelay.getDatastore().createQuery(mapperClass);
-      query.field(query.getMapper().getIdField().getName()).is(id);
-      query.execute(qr -> {
-        if (qr.failed()) {
-          resultHandler.handle(Future.failedFuture(qr.cause()));
-        } else {
-          if (qr.result().size() <= 0) {
-            resultHandler.handle(Future.failedFuture(new NoSuchRecordException(
-                "no record found for principal with id " + id + " in mapper " + mapperClass.getName())));
-          }
-          qr.result().iterator().next(ir -> {
-            if (ir.failed()) {
-              resultHandler.handle(Future.failedFuture(ir.cause()));
-            } else {
-              IAuthenticatable auth = ir.result();
-              setCurrentUser(auth, context);
-              resultHandler.handle(Future.succeededFuture(auth));
-            }
-          });
-        }
-      });
+      readMongoUser(context, netRelay, (MongoUser) user, resultHandler, mapperClass);
+    } else if (user instanceof DatastoreUser) {
+      resultHandler.handle(Future.succeededFuture(((DatastoreUser) user).getAuthenticatable()));
     } else {
       Future<IAuthenticatable> future = Future
           .failedFuture(new UnsupportedOperationException("user type not supported: " + user.getClass().getName()));
       resultHandler.handle(future);
     }
+  }
+
+  /**
+   * @param context
+   * @param netRelay
+   * @param user
+   * @param resultHandler
+   * @param mapperClass
+   */
+  private static void readMongoUser(RoutingContext context, NetRelay netRelay, MongoUser user,
+      Handler<AsyncResult<IAuthenticatable>> resultHandler, Class<? extends IAuthenticatable> mapperClass) {
+    String id = user.principal().getString("_id");
+    IQuery<? extends IAuthenticatable> query = netRelay.getDatastore().createQuery(mapperClass);
+    query.field(query.getMapper().getIdField().getName()).is(id);
+    query.execute(qr -> {
+      if (qr.failed()) {
+        resultHandler.handle(Future.failedFuture(qr.cause()));
+      } else {
+        if (qr.result().size() <= 0) {
+          resultHandler.handle(Future.failedFuture(new NoSuchRecordException(
+              "no record found for principal with id " + id + " in mapper " + mapperClass.getName())));
+        }
+        qr.result().iterator().next(ir -> {
+          if (ir.failed()) {
+            resultHandler.handle(Future.failedFuture(ir.cause()));
+          } else {
+            IAuthenticatable auth = ir.result();
+            setCurrentUser(auth, context);
+            resultHandler.handle(Future.succeededFuture(auth));
+          }
+        });
+      }
+    });
   }
 
   @SuppressWarnings("unchecked")

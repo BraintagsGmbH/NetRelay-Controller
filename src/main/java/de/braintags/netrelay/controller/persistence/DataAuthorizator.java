@@ -19,7 +19,7 @@ import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.authentication.RedirectAuthHandlerBt;
-import de.braintags.netrelay.model.IAuthenticatable;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

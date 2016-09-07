@@ -15,6 +15,7 @@ package de.braintags.netrelay.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 
@@ -30,7 +31,6 @@ import io.vertx.core.http.HttpServerRequest;
 public class PasswordLostClaim extends AbstractRecord {
   private String email;
   private boolean active = true;
-  private IAuthenticatable user;
   private Map<String, String> requestParameter = new HashMap<>();
 
   /**

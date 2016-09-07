@@ -16,7 +16,9 @@ import java.util.Properties;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.io.vertx.pojomapper.mongo.MongoDataStore;
+import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.controller.AbstractController;
+import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -115,9 +117,21 @@ public abstract class AbstractAuthProviderController extends AbstractController 
     String mapper = readProperty(MongoAuth.PROPERTY_COLLECTION_NAME, null, true);
     if (tmpAuthProvider.equals(AUTH_PROVIDER_MONGO)) {
       return new AuthProviderProxy(initMongoAuthProvider(mapper), mapper);
+    } else if (tmpAuthProvider.equals(AUTH_PROVIDER_DATASTORE)) {
+      return new AuthProviderProxy(initDatastoreAuthProvider(mapper), mapper);
     } else {
       throw new UnsupportedOperationException("unsupported authprovider: " + tmpAuthProvider);
     }
+  }
+
+  private AuthProvider initDatastoreAuthProvider(String mapper) {
+    Class mapperClass = getNetRelay().getSettings().getMappingDefinitions().getMapperClass(mapper);
+    if (mapperClass == null) {
+      throw new InitException("Could not find defined mapper class for mapper '" + mapper + "'");
+    }
+    JsonObject config = new JsonObject();
+    config.put(IDatastoreAuth.PROPERTY_MAPPER_CLASS_NAME, mapperClass.getName());
+    return IDatastoreAuth.create(getNetRelay().getDatastore(), config);
   }
 
   /**

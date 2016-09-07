@@ -18,6 +18,7 @@ import java.util.List;
 import de.braintags.io.vertx.pojomapper.annotation.Entity;
 import de.braintags.io.vertx.pojomapper.annotation.field.Id;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 
 /**
  * Defines a member, which can be used inside a web application for authorization and authentication
@@ -36,6 +37,7 @@ public class Member implements IAuthenticatable {
   private String password;
   private String gender;
   private List<String> roles = new ArrayList<>();
+  private List<String> permissions = new ArrayList<>();
 
   /**
    * @return the userName
@@ -167,6 +169,23 @@ public class Member implements IAuthenticatable {
   @Override
   public void setRoles(List<String> roles) {
     this.roles = roles;
+  }
+
+  /**
+   * @return the permissions
+   */
+  @Override
+  public List<String> getPermissions() {
+    return permissions;
+  }
+
+  /**
+   * @param permissions
+   *          the permissions to set
+   */
+  @Override
+  public void setPermissions(List<String> permissions) {
+    this.permissions = permissions;
   }
 
 }
