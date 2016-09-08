@@ -21,9 +21,6 @@ import de.braintags.netrelay.controller.CookieController;
 import de.braintags.netrelay.controller.CurrentMemberController;
 import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
-import de.braintags.netrelay.controller.authentication.AuthenticationController;
-import de.braintags.netrelay.controller.authentication.PasswordLostController;
-import de.braintags.netrelay.controller.authentication.RegisterController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.City;
@@ -58,11 +55,8 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
-    settings.getRouterDefinitions().add(CookieController.createDefaultRouterDefinition());
-    settings.getRouterDefinitions().add(SessionController.createDefaultRouterDefinition());
-    settings.getRouterDefinitions().add(AuthenticationController.createDefaultRouterDefinition());
-    settings.getRouterDefinitions().add(RegisterController.createDefaultRouterDefinition());
-    settings.getRouterDefinitions().add(PasswordLostController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().addOrReplace(CookieController.createDefaultRouterDefinition());
+    settings.getRouterDefinitions().addOrReplace(SessionController.createDefaultRouterDefinition());
     settings.getRouterDefinitions().add(CurrentMemberController.createDefaultRouterDefinition());
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(),
         PersistenceController.createDefaultRouterDefinition());

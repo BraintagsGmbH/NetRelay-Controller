@@ -32,7 +32,13 @@
 			<artifactId>netrelay</artifactId>
 			<version>${netrelay.version}</version>
 		</dependency>
-
+		
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-auth-datastore</artifactId>
+			<version>${vertx-auth-datastore-version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>de.braintags</groupId>
 			<artifactId>netrelay</artifactId>
@@ -44,8 +50,9 @@
 			<groupId>de.braintags</groupId>
 			<artifactId>vertx-auth-datastore</artifactId>
 			<version>${vertx-auth-datastore-version}</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
 		</dependency>
-		
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-mail-client</artifactId>

@@ -19,6 +19,7 @@ import org.junit.Test;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
+import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.CurrentMemberController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
@@ -32,6 +33,7 @@ import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.unit.TestContext;
 
 /**
@@ -264,6 +266,14 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     super.modifySettings(context, settings);
     initMailClient(settings);
 
+    RouterDefinition def = AuthenticationController.createDefaultRouterDefinition();
+    def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "Member");
+    def.setRoutes(new String[] { "/private/*" });
+    def.getHandlerProperties().put("collectionName", "Member");
+    def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
+        AuthenticationController.AUTH_PROVIDER_DATASTORE);
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+
     RouterDefinition cmc = settings.getRouterDefinitions().remove(CurrentMemberController.class.getSimpleName());
     if (cmc == null) {
       cmc = new RouterDefinition();
@@ -273,15 +283,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     cmc.setRoutes(new String[] { "/*" });
     settings.getRouterDefinitions().addBefore(AuthenticationController.class.getSimpleName(), cmc);
 
-    RouterDefinition def = settings.getRouterDefinitions()
-        .getNamedDefinition(AuthenticationController.class.getSimpleName());
-    def.setRoutes(new String[] { "/private/*" });
-    def.getHandlerProperties().put("collectionName", "Member");
-    def.getHandlerProperties().put("passwordField", "password");
-    def.getHandlerProperties().put("usernameField", "email");
-    def.getHandlerProperties().put("roleField", "roles");
-
-    def = settings.getRouterDefinitions().getNamedDefinition(RegisterController.class.getSimpleName());
+    def = RegisterController.createDefaultRouterDefinition();
     def.setRoutes(new String[] { REGISTER_URL, CUSTOMER_DO_CONFIRMATION });
     def.getHandlerProperties().put(RegisterController.REG_START_FAIL_URL_PROP, "/customer/registerError.html");
     def.getHandlerProperties().put(MailController.FROM_PARAM, TESTS_MAIL_FROM);
@@ -292,6 +294,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put("passwordField", "password");
     def.getHandlerProperties().put("usernameField", "email");
     def.getHandlerProperties().put("roleField", "roles");
+    settings.getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(), def);
 
     settings.getMappingDefinitions().addMapperDefinition(Member.class);
 

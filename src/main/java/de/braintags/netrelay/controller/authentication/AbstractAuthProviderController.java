@@ -15,6 +15,8 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.Properties;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
+import de.braintags.io.vertx.pojomapper.mapping.IField;
+import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mongo.MongoDataStore;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.controller.AbstractController;
@@ -113,7 +115,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
   }
 
   protected AuthProviderProxy createAuthProvider(Properties properties) {
-    String tmpAuthProvider = readProperty(AUTH_PROVIDER_PROP, AUTH_PROVIDER_MONGO, false);
+    String tmpAuthProvider = readProperty(AUTH_PROVIDER_PROP, AUTH_PROVIDER_DATASTORE, false);
     String mapper = readProperty(MongoAuth.PROPERTY_COLLECTION_NAME, null, true);
     if (tmpAuthProvider.equals(AUTH_PROVIDER_MONGO)) {
       return new AuthProviderProxy(initMongoAuthProvider(mapper), mapper);
@@ -147,7 +149,17 @@ public abstract class AbstractAuthProviderController extends AbstractController 
     config.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.valueOf(saltStyle));
     MongoAuth auth = MongoAuth.create((MongoClient) ((MongoDataStore) store).getClient(), config);
 
-    auth.setPasswordField(readProperty(MongoAuth.PROPERTY_PASSWORD_FIELD, null, true));
+    String passwordFieldName = readProperty(MongoAuth.PROPERTY_PASSWORD_FIELD, null, true);
+    Class mapperClass = getNetRelay().getSettings().getMappingDefinitions().getMapperClass(mapper);
+    if (mapperClass == null) {
+      throw new InitException("Could not find mapper with name " + mapper);
+    }
+    IMapper mapperDef = getNetRelay().getDatastore().getMapperFactory().getMapper(mapperClass);
+    IField pwField = mapperDef.getField(passwordFieldName);
+    if (pwField.getEncoder() != null) {
+      throw new InitException("MongoAuth does not support the annotation Encoder, please use DatastoreAuth instead");
+    }
+    auth.setPasswordField(passwordFieldName);
     auth.setUsernameField(readProperty(MongoAuth.PROPERTY_USERNAME_FIELD, null, true));
     auth.setCollectionName(mapper);
 

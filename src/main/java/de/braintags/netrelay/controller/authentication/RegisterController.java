@@ -34,6 +34,7 @@ import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.model.RegisterClaim;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -488,6 +489,11 @@ public class RegisterController extends AbstractAuthProviderController {
       authInfo.put(((MongoAuthImpl) prov).getUsernameCredentialField(), user.getEmail())
           .put(((MongoAuthImpl) prov).getPasswordCredentialField(), user.getPassword());
       return authInfo;
+    } else if (prov instanceof IDatastoreAuth) {
+      JsonObject authInfo = new JsonObject();
+      authInfo.put(IDatastoreAuth.CREDENTIAL_USERNAME_FIELD, user.getEmail())
+          .put(IDatastoreAuth.CREDENTIAL_PASSWORD_FIELD, user.getPassword());
+      return authInfo;
     }
     throw new UnsupportedOperationException("Unsupported authprovider class: " + prov.getClass());
   }
@@ -579,7 +585,7 @@ public class RegisterController extends AbstractAuthProviderController {
    */
   public static Properties getDefaultProperties() {
     Properties json = new Properties();
-    json.put(AUTH_PROVIDER_PROP, AUTH_PROVIDER_MONGO);
+    json.put(AUTH_PROVIDER_PROP, AUTH_PROVIDER_DATASTORE);
     // coming from IAuthenticatable
     json.put(MongoAuth.PROPERTY_PASSWORD_FIELD, "password");
     json.put(MongoAuth.PROPERTY_USERNAME_FIELD, "email");

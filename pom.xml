@@ -47,6 +47,13 @@
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-auth-datastore</artifactId>
+			<version>${vertx-auth-datastore-version}</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
 		
 		<dependency>
 			<groupId>io.vertx</groupId>

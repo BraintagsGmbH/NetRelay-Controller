@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
+import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.authentication.PasswordLostCode;
@@ -177,8 +178,14 @@ public class TPasswordLost extends NetRelayBaseConnectorTest {
   }
 
   private void resetRoutes() throws Exception {
-    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
-        .getNamedDefinition(PasswordLostController.class.getSimpleName());
+
+    netRelay.resetRoutes();
+  }
+
+  @Override
+  public void modifySettings(TestContext context, Settings settings) {
+    super.modifySettings(context, settings);
+    RouterDefinition def = PasswordLostController.createDefaultRouterDefinition();
     def.setRoutes(new String[] { LOST_START, LOST_CONFIRM });
     def.getHandlerProperties().put(PasswordLostController.PW_LOST_FAIL_URL_PROP, "/customer/passwordLostError.html");
     def.getHandlerProperties().put(MailController.FROM_PARAM, TESTS_MAIL_FROM);
@@ -192,13 +199,7 @@ public class TPasswordLost extends NetRelayBaseConnectorTest {
         "/customer/passwordLostConfirmSuccess.html");
     def.getHandlerProperties().put(PasswordLostController.PW_RESET_FAIL_URL_PROP, "/customer/passwordLostError.html");
     def.getHandlerProperties().put(PasswordLostController.EMAIL_FIELD_NAME_PROP, EMAIL_PROPERTY);
-
-    netRelay.resetRoutes();
-  }
-
-  @Override
-  public void modifySettings(TestContext context, Settings settings) {
-    super.modifySettings(context, settings);
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
     initMailClient(settings);
   }
 

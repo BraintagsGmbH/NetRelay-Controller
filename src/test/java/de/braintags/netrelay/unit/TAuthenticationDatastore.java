@@ -14,13 +14,17 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
+import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.controller.authentication.PasswordLostController;
+import de.braintags.netrelay.controller.authentication.RegisterController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.unit.TestContext;
 
 /**
@@ -222,38 +226,6 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
   }
 
   /**
-   * "loginPage" : "/backend/login.html",
-   * "logoutAction" : "/member/logout",
-   * "logoutDestinationPage": "/backend/login.html",
-   * "roleField" : "roles",
-   * "collectionName" : "Member",
-   * "loginAction" : "/member/login",
-   * "passwordField" : "password",
-   * "usernameField" : "userName",
-   * "authProvider" : "MongoAuth"
-   * 
-   * @throws Exception
-   */
-  private void resetRoutes(String directLoginPage) throws Exception {
-    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
-        .getNamedDefinition(AuthenticationController.class.getSimpleName());
-    def.setRoutes(new String[] { "/private/*" });
-    def.getHandlerProperties().put("collectionName", "Member");
-    def.getHandlerProperties().put("passwordField", "password");
-    def.getHandlerProperties().put("usernameField", "userName");
-    def.getHandlerProperties().put("roleField", "roles");
-    def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
-        AuthenticationController.AUTH_PROVIDER_DATASTORE);
-
-    if (directLoginPage != null) {
-      def.getHandlerProperties().put(AuthenticationController.DIRECT_LOGGED_IN_OK_URL_PROP, directLoginPage);
-    } else {
-      def.getHandlerProperties().remove(AuthenticationController.DIRECT_LOGGED_IN_OK_URL_PROP);
-    }
-    netRelay.resetRoutes();
-  }
-
-  /**
    * @param context
    * @return
    */
@@ -281,7 +253,46 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
+
+    RouterDefinition def = AuthenticationController.createDefaultRouterDefinition();
+    def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "Member");
+    def.setRoutes(new String[] { "/private/*" });
+    def.getHandlerProperties().put("collectionName", "Member");
+    def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
+        AuthenticationController.AUTH_PROVIDER_DATASTORE);
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+
+    def = RegisterController.createDefaultRouterDefinition();
+    def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "Member");
+    settings.getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(), def);
+
+    settings.getRouterDefinitions().add(PasswordLostController.createDefaultRouterDefinition());
     settings.getMappingDefinitions().addMapperDefinition(Member.class);
+    settings.getRouterDefinitions().addAfter(PasswordLostController.class.getSimpleName(), def);
+
+    settings.getMappingDefinitions().addMapperDefinition(Member.class);
+  }
+
+  /**
+   * "loginPage" : "/backend/login.html",
+   * "logoutAction" : "/member/logout",
+   * "logoutDestinationPage": "/backend/login.html",
+   * "roleField" : "roles",
+   * "collectionName" : "Member",
+   * "loginAction" : "/member/login",
+   * "authProvider" : "MongoAuth"
+   * 
+   * @throws Exception
+   */
+  private void resetRoutes(String directLoginPage) throws Exception {
+    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
+        .getNamedDefinition(AuthenticationController.class.getSimpleName());
+    if (directLoginPage != null) {
+      def.getHandlerProperties().put(AuthenticationController.DIRECT_LOGGED_IN_OK_URL_PROP, directLoginPage);
+    } else {
+      def.getHandlerProperties().remove(AuthenticationController.DIRECT_LOGGED_IN_OK_URL_PROP);
+    }
+    netRelay.resetRoutes();
   }
 
 }

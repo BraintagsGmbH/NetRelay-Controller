@@ -14,10 +14,13 @@ package de.braintags.netrelay.controller.authentication;
 
 import java.util.Properties;
 
+import de.braintags.io.vertx.pojomapper.IDataStore;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.auth.datastore.impl.DataStoreAuth;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.web.RoutingContext;
@@ -97,7 +100,11 @@ import io.vertx.ext.web.handler.UserSessionHandler;
  * 
  * The configuration below protects the url /my-account/memberdata for users of any role. Users with the role "user" can
  * read and update records, users with the role "admin" can handle all actions on records and users with any other role
- * are only allowed to display records
+ * are only allowed to display records. +
+ * This configuration makes use of {@link DataStoreAuth}, which uses the {@link IDataStore}, which is defined by
+ * NetRelay. DatastoreAuth expects, that the instance to be handled ( and defined by the property "collectionName" ) is
+ * an instance of {@link IAuthenticatable}. Because of that there is no need to define the properties usernameField,
+ * passwordField and roleField. The login field is "email".
  * 
  * <pre>
     {
@@ -107,12 +114,9 @@ import io.vertx.ext.web.handler.UserSessionHandler;
       "handlerProperties" : {
         "loginPage" : "/backend/login.html",
         "logoutAction" : "/member/logout",
-        "roleField" : "roles",
         "collectionName" : "Member",
         "loginAction" : "/member/login",
-        "passwordField" : "password",
-        "usernameField" : "userName",
-        "authProvider" : "MongoAuth",
+        "authProvider" : "DatastoreAuth",
         "permissions" : "role: user{RU}, admin{CRUD}, *{R}"
       }
     }
@@ -122,7 +126,8 @@ import io.vertx.ext.web.handler.UserSessionHandler;
  * 
  * The configuration below protects all urls starting with /backend/system/ and /backend/dashboard/. Access is granted
  * for users with one of the roles marketing and admin, where marketing has the right to read and update records; admin
- * has the right to all actions
+ * has the right to all actions. +
+ * This configuration makes use of MongoAuth
  * 
  * <pre>
     {
@@ -331,11 +336,8 @@ public class AuthenticationController extends AbstractAuthProviderController {
   public static Properties getDefaultProperties() {
     Properties json = new Properties();
     json.put(LOGIN_PAGE_PROP, "/member/login");
-    json.put(AUTH_PROVIDER_PROP, AUTH_PROVIDER_MONGO);
-    json.put(MongoAuth.PROPERTY_PASSWORD_FIELD, "password");
-    json.put(MongoAuth.PROPERTY_USERNAME_FIELD, "username");
+    json.put(AUTH_PROVIDER_PROP, AUTH_PROVIDER_DATASTORE);
     json.put(MongoAuth.PROPERTY_COLLECTION_NAME, "usertable");
-    json.put(MongoAuth.PROPERTY_ROLE_FIELD, "roles");
     json.put(LOGIN_ACTION_URL_PROP, DEFAULT_LOGIN_ACTION_URL);
     json.put(LOGOUT_ACTION_URL_PROP, DEFAULT_LOGOUT_ACTION_URL);
     json.put(LOGOUT_DESTINATION_PAGE_PROP, DEFAULT_LOGOUT_DESTINATION);

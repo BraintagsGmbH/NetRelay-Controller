@@ -18,7 +18,10 @@ import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.io.vertx.pojomapper.testdatastore.ResultContainer;
 import de.braintags.netrelay.controller.Action;
+import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.controller.authentication.PasswordLostController;
+import de.braintags.netrelay.controller.authentication.RegisterController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
@@ -31,6 +34,7 @@ import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.unit.TestContext;
 
 /**
@@ -426,41 +430,6 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   }
 
   /**
-   * "loginPage" : "/backend/login.html",
-   * "logoutAction" : "/member/logout",
-   * "logoutDestinationPage": "/backend/login.html",
-   * "roleField" : "roles",
-   * "collectionName" : "Member",
-   * "loginAction" : "/member/login",
-   * "passwordField" : "password",
-   * "usernameField" : "userName",
-   * "authProvider" : "MongoAuth"
-   * 
-   * @throws Exception
-   */
-  private void resetRoutes(String permissions) throws Exception {
-    RouterDefinition def1 = netRelay.getSettings().getRouterDefinitions()
-        .getNamedDefinition(AuthenticationController.class.getSimpleName());
-    def1.setRoutes(new String[] { "/private/*" });
-    def1.getHandlerProperties().put("collectionName", "Member");
-    def1.getHandlerProperties().put("passwordField", "password");
-    def1.getHandlerProperties().put("usernameField", "userName");
-    def1.getHandlerProperties().put("roleField", "roles");
-    if (permissions != null) {
-      def1.getHandlerProperties().put(AuthenticationController.PERMISSIONS_PROP, permissions);
-    } else {
-      def1.getHandlerProperties().remove(AuthenticationController.PERMISSIONS_PROP);
-    }
-
-    persistenceDefinition = netRelay.getSettings().getRouterDefinitions()
-        .remove(PersistenceController.class.getSimpleName());
-    persistenceDefinition.setRoutes(new String[] { PROTECTED_PERSISTENCE_URL });
-    netRelay.getSettings().getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(),
-        persistenceDefinition);
-    netRelay.resetRoutes();
-  }
-
-  /**
    * @param context
    * @return
    */
@@ -470,6 +439,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
     }
     Member member = new Member();
     member.setUserName(username);
+    member.setEmail(username);
     member.setPassword("testpassword");
     if (roles != null) {
       for (String role : roles) {
@@ -495,7 +465,54 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   @Override
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
+
+    RouterDefinition def = AuthenticationController.createDefaultRouterDefinition();
+    def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "Member");
+    def.setRoutes(new String[] { "/private/*" });
+    def.getHandlerProperties().put("collectionName", "Member");
+    def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
+        AuthenticationController.AUTH_PROVIDER_DATASTORE);
+    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+
+    def = RegisterController.createDefaultRouterDefinition();
+    def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "Member");
+    settings.getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(), def);
+
+    settings.getRouterDefinitions().add(PasswordLostController.createDefaultRouterDefinition());
     settings.getMappingDefinitions().addMapperDefinition(Member.class);
+    settings.getRouterDefinitions().addAfter(PasswordLostController.class.getSimpleName(), def);
+
+    settings.getMappingDefinitions().addMapperDefinition(Member.class);
+  }
+
+  /**
+   * "loginPage" : "/backend/login.html",
+   * "logoutAction" : "/member/logout",
+   * "logoutDestinationPage": "/backend/login.html",
+   * "roleField" : "roles",
+   * "collectionName" : "Member",
+   * "loginAction" : "/member/login",
+   * "passwordField" : "password",
+   * "usernameField" : "userName",
+   * "authProvider" : "MongoAuth"
+   * 
+   * @throws Exception
+   */
+  private void resetRoutes(String permissions) throws Exception {
+    RouterDefinition def1 = netRelay.getSettings().getRouterDefinitions()
+        .getNamedDefinition(AuthenticationController.class.getSimpleName());
+    if (permissions != null) {
+      def1.getHandlerProperties().put(AuthenticationController.PERMISSIONS_PROP, permissions);
+    } else {
+      def1.getHandlerProperties().remove(AuthenticationController.PERMISSIONS_PROP);
+    }
+
+    persistenceDefinition = netRelay.getSettings().getRouterDefinitions()
+        .remove(PersistenceController.class.getSimpleName());
+    persistenceDefinition.setRoutes(new String[] { PROTECTED_PERSISTENCE_URL });
+    netRelay.getSettings().getRouterDefinitions().addAfter(AuthenticationController.class.getSimpleName(),
+        persistenceDefinition);
+    netRelay.resetRoutes();
   }
 
   private SimpleNetRelayMapper createInstance(TestContext context, boolean resetTable) {
