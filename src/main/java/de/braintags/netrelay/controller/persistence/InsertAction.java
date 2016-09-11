@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.io.vertx.pojomapper.mapping.IStoreObjectFactory;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.exception.FileNameException;
 import io.vertx.core.AsyncResult;
@@ -102,7 +103,8 @@ public class InsertAction extends AbstractAction {
       IMapper mapper, Handler<AsyncResult<Void>> handler) {
     Map<String, String> params = extractProperties(entityName, captureMap, context, mapper);
     handleFileUploads(entityName, context, params);
-    getPersistenceController().getMapperFactory().getStoreObjectFactory().createStoreObject(params, mapper, result -> {
+    IStoreObjectFactory sf = getPersistenceController().getMapperFactory().getStoreObjectFactory();
+    sf.createStoreObject(params, mapper, result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));
       } else {
