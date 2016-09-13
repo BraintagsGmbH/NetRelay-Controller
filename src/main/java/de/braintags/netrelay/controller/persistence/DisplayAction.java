@@ -13,6 +13,7 @@
 package de.braintags.netrelay.controller.persistence;
 
 import java.util.Arrays;
+import java.util.List;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQueryResult;
@@ -31,6 +32,9 @@ import io.vertx.ext.web.RoutingContext;
  * 
  */
 public class DisplayAction extends AbstractAction {
+  private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
+      .getLogger(DisplayAction.class);
+  private static final String MESSAGE = "Adding %s to context for entity %s / size: %s";
 
   /**
    * 
@@ -86,7 +90,11 @@ public class DisplayAction extends AbstractAction {
       if (arr.failed()) {
         handler.handle(Future.failedFuture(arr.cause()));
       } else {
-        addToContext(context, entityName, Arrays.asList(arr.result()));
+        List<Object> lr = Arrays.asList(arr.result());
+        String message = String.format(MESSAGE, lr.getClass().getName(), entityName,
+            String.valueOf(lr == null ? "null" : lr.size()));
+        LOGGER.debug(message);
+        addToContext(context, entityName, lr);
         handler.handle(Future.succeededFuture());
       }
     });
@@ -108,6 +116,7 @@ public class DisplayAction extends AbstractAction {
         if (ir.failed()) {
           handler.handle(Future.failedFuture(ir.cause()));
         } else {
+          LOGGER.debug("Storing single record in context with key '" + entityName + "' / value: " + ir.result());
           addToContext(context, entityName, ir.result());
           handler.handle(Future.succeededFuture());
         }

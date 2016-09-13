@@ -15,7 +15,6 @@ package de.braintags.netrelay.unit.persistence;
 import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
-import de.braintags.io.vertx.pojomapper.testdatastore.mapper.SimpleMapper;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -170,7 +169,7 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
     setPersistenceDef(persistenceDefinition);
     RouterDefinition rd = new RouterDefinition();
     rd.setController(CheckController.class);
-    CheckController.checkMapperName = SimpleMapper.class.getSimpleName();
+    CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
     settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }
 

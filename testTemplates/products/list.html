@@ -9,11 +9,31 @@
  success
 				<div class="col-md-6">
 					<h2>recordlist</h2>
-					<p th:each="mapper : ${ context.get( 'SimpleNetRelayMapper') }">
-						<h4 th:text="${mapper.name}"></h4>
-						<h4 th:text="${mapper.age}"></h4>
-					</p>
-				</div>
+					
+			<p th:text="${context.get( 'SimpleNetRelayMapper').getClass().getName() }">
+			</p>
+			Number of records:
+			<p th:text="${context.get( 'SimpleNetRelayMapper').size()}">
+			</p>
+			<p th:text="${context.get( 'SimpleNetRelayMapper').get(0).name}">
+			</p>
+			<p th:text="${context.get( 'SimpleNetRelayMapper').get(0).age}">
+			</p>
+			<p th:text="${context.get( 'SimpleNetRelayMapper').get(1).age}">
+			</p>
+			<p th:text="${context.get( 'SimpleNetRelayMapper').get(2).age}">
+			</p>
+			<p th:text="${context.get( 'SimpleNetRelayMapper').get(3).age}">
+			</p>
+			
+			<p th:each="snm : ${context.get('SimpleNetRelayMapper')}">
+				Alter
+				<span th:text="${snm.age}"/>
+			</p>
+			
+		
+			
+ 				</div>
 
 </body>
 </html>
