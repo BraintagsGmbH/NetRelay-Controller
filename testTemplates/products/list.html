@@ -15,16 +15,6 @@
 			Number of records:
 			<p th:text="${context.get( 'SimpleNetRelayMapper').size()}">
 			</p>
-			<p th:text="${context.get( 'SimpleNetRelayMapper').get(0).name}">
-			</p>
-			<p th:text="${context.get( 'SimpleNetRelayMapper').get(0).age}">
-			</p>
-			<p th:text="${context.get( 'SimpleNetRelayMapper').get(1).age}">
-			</p>
-			<p th:text="${context.get( 'SimpleNetRelayMapper').get(2).age}">
-			</p>
-			<p th:text="${context.get( 'SimpleNetRelayMapper').get(3).age}">
-			</p>
 			
 			<p th:each="snm : ${context.get('SimpleNetRelayMapper')}">
 				Alter
