@@ -49,8 +49,7 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
       "handlerProperties" : {
         "templateDirectory" : "templates",
         "mode" : "XHTML",
-        "contentType" : "text/html",
-        "cacheEnabled" : "false"
+        "contentType" : "text/html"
       }
     }
  * </pre>

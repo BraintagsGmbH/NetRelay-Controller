@@ -18,14 +18,13 @@
 		<netrelay.version>10.2.0-SNAPSHOT</netrelay.version>
 		<vertx-auth-datastore-version>1.0.0-SNAPSHOT</vertx-auth-datastore-version>
 		<thymeleaf.version>3.0.1.RELEASE</thymeleaf.version>
-		
-		
-		
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.skip>false</maven.test.skip>
 		<doc.skip>false</doc.skip>
 		<source.skip>false</source.skip>
 		<testjar.skip>false</testjar.skip>
+		<ignoreFailedTests>true</ignoreFailedTests>
 	</properties>
 
 	<dependencies>

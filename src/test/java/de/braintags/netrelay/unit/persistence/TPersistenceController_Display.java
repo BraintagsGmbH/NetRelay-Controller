@@ -33,6 +33,10 @@ import io.vertx.ext.unit.TestContext;
  * 
  */
 public class TPersistenceController_Display extends AbstractPersistenceControllerTest {
+  /**
+   * Comment for <code>PRODUCT_LIST_ALL_CAPTURE</code>
+   */
+  private static final String PRODUCT_LIST_ALL_CAPTURE = "/products/%s/DISPLAY/list.html";
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(TPersistenceController_Display.class);
 
@@ -88,7 +92,7 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
   @Test
   public void testDisplayListAll(TestContext context) {
     try {
-      String url = String.format("/products/%s/DISPLAY/list.html", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+      String url = String.format(PRODUCT_LIST_ALL_CAPTURE, NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
       testRequest(context, HttpMethod.POST, url, null, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
         context.assertTrue(resp.content.toString().contains("success"), "Expected name not found");
