@@ -63,6 +63,11 @@
 	      <artifactId>thymeleaf</artifactId>
 	      <version>${thymeleaf.version}</version>
 	    </dependency>
+		<dependency>
+		  <groupId>org.apache.tika</groupId>
+		  <artifactId>tika-core</artifactId>
+		  <version>1.9</version>
+		</dependency>
 	</dependencies>
 
 	<build>
