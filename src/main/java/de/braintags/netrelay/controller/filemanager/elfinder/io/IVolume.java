@@ -48,10 +48,6 @@ public interface IVolume {
 
   ITarget fromPath(String path);
 
-  void createFile(ITarget target);
-
-  void createFolder(ITarget target);
-
   void deleteFile(ITarget target);
 
   void deleteFolder(ITarget target);

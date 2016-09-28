@@ -86,29 +86,6 @@ public class VertxVolume implements IVolume {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#createFile(de.braintags.netrelay.controller.
-   * filemanager.elfinder.io.ITarget)
-   */
-  @Override
-  public void createFile(ITarget target) {
-    throw new UnsupportedOperationException();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#createFolder(de.braintags.netrelay.controller.
-   * filemanager.elfinder.io.ITarget)
-   */
-  @Override
-  public void createFolder(ITarget target) {
-    throw new UnsupportedOperationException();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#deleteFile(de.braintags.netrelay.controller.
    * filemanager.elfinder.io.ITarget)
    */

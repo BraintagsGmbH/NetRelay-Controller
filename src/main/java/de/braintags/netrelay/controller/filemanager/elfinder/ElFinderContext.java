@@ -79,6 +79,26 @@ public class ElFinderContext {
     return null;
   }
 
+  public String translateHash(String hash) {
+    for (IVolume v : rootVolumes) {
+      String prefix = v.getId() + "_";
+
+      if (hash.equals(prefix)) {
+        return "/";
+      }
+
+      if (hash.startsWith(prefix)) {
+        String localHash = hash.substring(prefix.length());
+
+        for (String[] pair : ESCAPES) {
+          localHash = localHash.replace(pair[1], pair[0]);
+        }
+        return new String(Base64.getDecoder().decode(localHash));
+      }
+    }
+    return null;
+  }
+
   /**
    * Creates a Hash like required by ElFinder from the given target
    * 
@@ -87,13 +107,32 @@ public class ElFinderContext {
    * @throws IOException
    */
   public static String getHash(ITarget target) {
-    String relativePath = target.getPath();
-    String base = new String(Base64.getEncoder().encode(relativePath.getBytes()));
+    return getHash(target.getVolume().getId(), target.getPath());
+  }
 
+  /**
+   * Creates a Hash like required by ElFinder from the given target
+   * 
+   * @param target
+   * @return
+   * @throws IOException
+   */
+  public static String getHash(String volumeId, String path) {
+    String base = new String(Base64.getEncoder().encode(path.getBytes()));
     for (String[] pair : ESCAPES) {
       base = base.replace(pair[0], pair[1]);
     }
-    return target.getVolume().getId() + "_" + base;
+    return volumeId + "_" + base;
+  }
+
+  /**
+   * Get the content for the given parameter of the current request
+   * 
+   * @param parameter
+   * @return
+   */
+  public String getParameter(String parameter) {
+    return routingContext.request().getParam(parameter);
   }
 
 }

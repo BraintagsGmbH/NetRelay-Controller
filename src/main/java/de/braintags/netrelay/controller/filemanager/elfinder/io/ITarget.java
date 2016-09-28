@@ -51,6 +51,22 @@ public interface ITarget {
    */
   String getPath();
 
+  /**
+   * Create a new file inside the given target
+   * 
+   * @param fileName
+   * @return
+   */
+  ITarget createFile(String fileName);
+
+  /**
+   * Create a new folder inside the given target
+   * 
+   * @param fileName
+   * @return
+   */
+  ITarget createFolder(String folderName);
+
   boolean isFolder();
 
   String getHash();

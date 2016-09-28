@@ -107,6 +107,7 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public boolean isFolder() {
+    loadDetails();
     return fileProps.isDirectory();
   }
 
@@ -220,6 +221,38 @@ public class VertxTarget implements ITarget {
     childList.forEach(sub -> targetList.add(getVolume().fromPath(sub)));
     targetList.forEach(target -> ((VertxTarget) target).loadDetails());
     return targetList;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#createFile(java.lang.String)
+   */
+  @Override
+  public ITarget createFile(String fileName) {
+    loadDetails();
+    if (!isFolder()) {
+      throw new IllegalArgumentException("not a directory: " + getPath());
+    }
+    String path = absolutePath + "/" + fileName;
+    volume.getFileSystem().createFileBlocking(path);
+    return volume.fromPath(path);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#createFolder(java.lang.String)
+   */
+  @Override
+  public ITarget createFolder(String folderName) {
+    loadDetails();
+    if (!isFolder()) {
+      throw new IllegalArgumentException("not a directory: " + getPath());
+    }
+    String path = absolutePath + "/" + folderName;
+    volume.getFileSystem().mkdirBlocking(path);
+    return volume.fromPath(path);
   }
 
   private void loadDetails() {

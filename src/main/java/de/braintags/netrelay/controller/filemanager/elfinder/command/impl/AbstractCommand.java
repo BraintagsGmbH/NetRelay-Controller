@@ -13,7 +13,9 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -39,13 +41,17 @@ public abstract class AbstractCommand implements ICommand {
   @Override
   public final void execute(ElFinderContext efContext, Handler<AsyncResult<JsonObject>> handler) {
     JsonObject json = new JsonObject();
-    execute(efContext, json, res -> {
-      if (res.failed()) {
-        handler.handle(Future.failedFuture(res.cause()));
-      } else {
-        handler.handle(Future.succeededFuture(json));
-      }
-    });
+    try {
+      execute(efContext, json, res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+        } else {
+          handler.handle(Future.succeededFuture(json));
+        }
+      });
+    } catch (Exception e) {
+      handler.handle(Future.failedFuture(e));
+    }
   }
 
   /**
@@ -77,6 +83,27 @@ public abstract class AbstractCommand implements ICommand {
     }
 
     return cwd;
+  }
+
+  /**
+   * Find all targets for the given hashes
+   * 
+   * @param efContext
+   * @param targetHashes
+   * @return
+   * @throws IOException
+   */
+  protected List<ITarget> findTargets(ElFinderContext efContext, List<String> targetHashes) {
+    if (targetHashes != null) {
+      List<ITarget> targets = new ArrayList<>(targetHashes.size());
+      for (String targetHash : targetHashes) {
+        ITarget target = findTarget(efContext, targetHash);
+        if (target != null)
+          targets.add(target);
+      }
+      return targets;
+    }
+    return Collections.emptyList();
   }
 
   /**
