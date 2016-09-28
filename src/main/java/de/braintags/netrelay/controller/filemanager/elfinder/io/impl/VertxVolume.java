@@ -86,51 +86,6 @@ public class VertxVolume implements IVolume {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#deleteFile(de.braintags.netrelay.controller.
-   * filemanager.elfinder.io.ITarget)
-   */
-  @Override
-  public void deleteFile(ITarget target) {
-    throw new UnsupportedOperationException();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#deleteFolder(de.braintags.netrelay.controller.
-   * filemanager.elfinder.io.ITarget)
-   */
-  @Override
-  public void deleteFolder(ITarget target) {
-    throw new UnsupportedOperationException();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#exists(de.braintags.netrelay.controller.
-   * filemanager.elfinder.io.ITarget)
-   */
-  @Override
-  public boolean exists(ITarget target) {
-    throw new UnsupportedOperationException();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#rename(de.braintags.netrelay.controller.
-   * filemanager.elfinder.io.ITarget, de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget)
-   */
-  @Override
-  public void rename(ITarget origin, ITarget destination) {
-    throw new UnsupportedOperationException();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#search(java.lang.String)
    */
   @Override

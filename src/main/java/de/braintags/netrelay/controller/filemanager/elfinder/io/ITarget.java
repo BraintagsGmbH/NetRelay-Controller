@@ -83,6 +83,8 @@ public interface ITarget {
 
   boolean hasChildFolder();
 
+  boolean hasChildren();
+
   InputStream openInputStream();
 
   OutputStream openOutputStream();
@@ -108,5 +110,11 @@ public interface ITarget {
    * @return
    */
   boolean isRoot();
+
+  void delete();
+
+  boolean exists();
+
+  void rename(String destination);
 
 }

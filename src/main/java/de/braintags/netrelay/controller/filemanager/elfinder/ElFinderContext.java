@@ -135,4 +135,16 @@ public class ElFinderContext {
     return routingContext.request().getParam(parameter);
   }
 
+  /**
+   * Get the content for the given parameter of the current request
+   * 
+   * @param parameter
+   *          the name of the parameter
+   * 
+   * @return the List of parameters
+   */
+  public List<String> getParameterValues(String parameter) {
+    return routingContext.request().params().getAll(parameter);
+  }
+
 }

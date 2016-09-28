@@ -48,14 +48,6 @@ public interface IVolume {
 
   ITarget fromPath(String path);
 
-  void deleteFile(ITarget target);
-
-  void deleteFolder(ITarget target);
-
-  boolean exists(ITarget target);
-
-  void rename(ITarget origin, ITarget destination);
-
   List<ITarget> search(String target);
 
   ITarget getParent(String path);

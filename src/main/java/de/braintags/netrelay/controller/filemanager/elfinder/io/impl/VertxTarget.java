@@ -67,7 +67,8 @@ public class VertxTarget implements ITarget {
   public VertxTarget(VertxVolume volume, String path, boolean isRoot) {
     this.volume = volume;
     if (!isRoot && !path.startsWith(volume.getRoot().getPath())) {
-      throw new IllegalArgumentException("path is not a subpath of volume root");
+      throw new IllegalArgumentException(
+          "path '" + path + "' is not a subpath of volume root " + volume.getRoot().getPath());
     }
     this.isRoot = isRoot;
     if (path == null || path.trim().hashCode() == 0) {
@@ -193,6 +194,17 @@ public class VertxTarget implements ITarget {
   /*
    * (non-Javadoc)
    * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#hasChildren()
+   */
+  @Override
+  public boolean hasChildren() {
+    List<ITarget> children = listChildren();
+    return !children.isEmpty();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#openInputStream()
    */
   @Override
@@ -309,6 +321,36 @@ public class VertxTarget implements ITarget {
   @Override
   public String toString() {
     return "VertxTarget [absolutePath=" + absolutePath + "]";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#delete()
+   */
+  @Override
+  public void delete() {
+    volume.getFileSystem().deleteBlocking(absolutePath);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#exists()
+   */
+  @Override
+  public boolean exists() {
+    return volume.getFileSystem().existsBlocking(absolutePath);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#rename(java.lang.String)
+   */
+  @Override
+  public void rename(String destination) {
+    volume.getFileSystem().moveBlocking(absolutePath, destination);
   }
 
 }
