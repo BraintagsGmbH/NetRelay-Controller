@@ -13,15 +13,16 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.io.impl;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tika.Tika;
 
+import de.braintags.io.vertx.util.file.BufferInputStream;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileProps;
 
 /**
@@ -40,6 +41,7 @@ public class VertxTarget implements ITarget {
   private boolean isRoot = false;
   private String name;
   private FileProps fileProps;
+  private String mimeType = null;
 
   /**
    * Create a new instance
@@ -139,11 +141,14 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public String getMimeType() {
-    if (isFolder()) {
-      return "directory";
-    } else {
-      return tika.detect(absolutePath);
+    if (mimeType == null) {
+      if (isFolder()) {
+        mimeType = "directory";
+      } else {
+        mimeType = tika.detect(absolutePath);
+      }
     }
+    return mimeType;
   }
 
   /*
@@ -200,26 +205,6 @@ public class VertxTarget implements ITarget {
   public boolean hasChildren() {
     List<ITarget> children = listChildren();
     return !children.isEmpty();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#openInputStream()
-   */
-  @Override
-  public InputStream openInputStream() {
-    throw new UnsupportedOperationException();
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#openOutputStream()
-   */
-  @Override
-  public OutputStream openOutputStream() {
-    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -351,6 +336,42 @@ public class VertxTarget implements ITarget {
   @Override
   public void rename(String destination) {
     volume.getFileSystem().moveBlocking(absolutePath, destination);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#readFile()
+   */
+  @Override
+  public Buffer readFile() {
+    if (isFolder()) {
+      throw new IllegalArgumentException("is a directory: " + getPath());
+    }
+    return volume.getFileSystem().readFileBlocking(getPath());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#writeFile(io.vertx.core.buffer.Buffer)
+   */
+  @Override
+  public void writeFile(Buffer buffer) {
+    if (isFolder()) {
+      throw new IllegalArgumentException("is a directory: " + getPath());
+    }
+    volume.getFileSystem().writeFileBlocking(getPath(), buffer);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#openInputStream()
+   */
+  @Override
+  public InputStream openInputStream() {
+    return new BufferInputStream(readFile());
   }
 
 }

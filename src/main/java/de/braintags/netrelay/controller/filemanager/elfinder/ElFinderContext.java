@@ -136,6 +136,16 @@ public class ElFinderContext {
   }
 
   /**
+   * Get the content for the given header of the current request
+   * 
+   * @param headerName
+   * @return
+   */
+  public String getHeader(String headerName) {
+    return routingContext.request().getHeader(headerName);
+  }
+
+  /**
    * Get the content for the given parameter of the current request
    * 
    * @param parameter

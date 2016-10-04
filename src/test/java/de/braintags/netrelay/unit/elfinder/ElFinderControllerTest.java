@@ -25,6 +25,7 @@ import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.unit.AbstractCaptureParameterTest;
 import de.braintags.netrelay.util.MultipartUtil;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
@@ -48,6 +49,102 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
   private static final String API_ELFINDER = "/fileManager/api";
 
   // ?cmd=size&targets%5B0%5D=ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290L2ltYWdlcw_E_E&_=1475072637217
+
+  @Test
+  public void archiveCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void dimCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void duplicateCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void extractCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void getCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void lsCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void parentsCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void pasteCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void putCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void renameCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void searchCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void tmbCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void treeCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void uploadCommand(TestContext context) {
+    context.fail("unsupported");
+  }
+
+  @Test
+  public void openFile(TestContext context) {
+    String fileContent = "content of a mgic file";
+    String fn = "file2Open.txt";
+    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+      vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
+    }
+
+    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String url = API_ELFINDER + "?cmd=" + "file&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
+        + "&_=1475075436203";
+    try {
+      MultipartUtil mu = new MultipartUtil();
+      testRequest(context, HttpMethod.POST, url, req -> {
+        mu.finish(req);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        context.assertFalse(resp.content.contains("error"), "Error occured: " + resp.content);
+        context.assertTrue(resp.content.contains(fileContent), "file content not found");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+  }
 
   @Test
   public void deleteFile(TestContext context) {

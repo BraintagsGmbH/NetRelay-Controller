@@ -32,8 +32,9 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.io;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
+
+import io.vertx.core.buffer.Buffer;
 
 public interface ITarget {
 
@@ -67,28 +68,74 @@ public interface ITarget {
    */
   ITarget createFolder(String folderName);
 
+  /**
+   * true, if this is a folder
+   * 
+   * @return
+   */
   boolean isFolder();
 
+  /**
+   * a hash, specifying the current instance
+   * 
+   * @return
+   */
   String getHash();
 
+  /**
+   * the last modification timestamp
+   * 
+   * @return
+   */
   long getLastModified();
 
+  /**
+   * Get the mime type of the underlaying file
+   * 
+   * @return
+   */
   String getMimeType();
 
+  /**
+   * Get the name of the underlaying file or directory
+   * 
+   * @return
+   */
   String getName();
 
+  /**
+   * Gt the parent instance
+   * 
+   * @return
+   */
   ITarget getParent();
 
+  /**
+   * Get the size of the underlaying file or directory
+   * 
+   * @return
+   */
   long getSize();
 
+  /**
+   * true, if it has sub folders
+   * 
+   * @return
+   */
   boolean hasChildFolder();
 
+  /**
+   * true, if it has children
+   * 
+   * @return
+   */
   boolean hasChildren();
 
-  InputStream openInputStream();
-
-  OutputStream openOutputStream();
-
+  /**
+   * Get the list of children
+   * 
+   * @return
+   */
   List<ITarget> listChildren();
 
   /**
@@ -111,10 +158,44 @@ public interface ITarget {
    */
   boolean isRoot();
 
+  /**
+   * Delete the existing file or directory. If directory is not empty, an exception is thrown
+   */
   void delete();
 
+  /**
+   * Checks wether file or directory exist
+   * 
+   * @return
+   */
   boolean exists();
 
+  /**
+   * Rename the target
+   * 
+   * @param destination
+   */
   void rename(String destination);
+
+  /**
+   * Get the content of the file as {@link Buffer}
+   * 
+   * @return
+   */
+  Buffer readFile();
+
+  /**
+   * Write the content of the file as {@link Buffer}
+   * 
+   * @param buffer
+   */
+  void writeFile(Buffer buffer);
+
+  /**
+   * Get an inputStream for the file
+   * 
+   * @return
+   */
+  InputStream openInputStream();
 
 }

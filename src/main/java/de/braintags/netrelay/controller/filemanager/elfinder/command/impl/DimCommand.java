@@ -12,7 +12,10 @@
  */
 package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 
-import java.util.List;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
@@ -20,32 +23,28 @@ import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 /**
- * 
+ * Returns dimensions of an image
  * 
  * @author Michael Remme
  * 
  */
-public class RmCommand extends AbstractCommand {
+public class DimCommand extends AbstractCommand {
+  public static final String SEPARATOR = "x";
 
   @Override
   public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
-    List<String> targets = efContext.getParameterValues(ElFinderConstants.ELFINDER_PARAMETER_TARGETS);
-    JsonArray removed = new JsonArray();
-    for (String ts : targets) {
-      ITarget target = findTarget(efContext, ts);
-      if (!target.isFolder() || checkEmptyDirectory(target)) {
-        target.delete();
-        removed.add(target.getHash());
-      } else {
-        json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ERROR, "Directory not empty: " + target.getPath());
-      }
-    }
-    json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_REMOVED, removed);
-    handler.handle(Future.succeededFuture());
-  }
+    final String targetString = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_TARGET);
 
+    BufferedImage image;
+    ITarget target = findTarget(efContext, targetString);
+    try {
+      image = ImageIO.read(target.openInputStream());
+      json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_DIM, image.getWidth() + SEPARATOR + image.getHeight());
+    } catch (IOException e) {
+      handler.handle(Future.failedFuture(e));
+    }
+  }
 }

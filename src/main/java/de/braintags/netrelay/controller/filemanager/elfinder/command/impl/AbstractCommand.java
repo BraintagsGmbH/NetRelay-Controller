@@ -155,6 +155,16 @@ public abstract class AbstractCommand implements ICommand {
     return returnArray;
   }
 
+  /**
+   * Checks wether target is a directory and not empty
+   * 
+   * @param target
+   * @return
+   */
+  protected boolean checkEmptyDirectory(ITarget target) {
+    return target.isFolder() && !target.hasChildren();
+  }
+
   protected JsonObject getTargetInfo(ElFinderContext efContext, ITarget target) {
     JsonObject info = new JsonObject();
 
