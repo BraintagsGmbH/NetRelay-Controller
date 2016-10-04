@@ -33,6 +33,8 @@ package de.braintags.netrelay.controller.filemanager.elfinder.io;
 
 import java.util.List;
 
+import io.vertx.core.file.FileSystem;
+
 public interface IVolume {
 
   /**
@@ -51,4 +53,11 @@ public interface IVolume {
   List<ITarget> search(String target);
 
   ITarget getParent(String path);
+
+  /**
+   * Get the filesystem of the volume
+   * 
+   * @return
+   */
+  FileSystem getFileSystem();
 }

@@ -98,7 +98,8 @@ public class VertxVolume implements IVolume {
    * 
    * @return
    */
-  FileSystem getFileSystem() {
+  @Override
+  public FileSystem getFileSystem() {
     return fs;
   }
 

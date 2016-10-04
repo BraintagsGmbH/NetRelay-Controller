@@ -37,7 +37,8 @@ public class MkfileCommand extends AbstractCommand {
     if (target == null) {
       throw new IllegalArgumentException("Folder does not exist: " + efContext.translateHash(targetHash));
     }
-    ITarget newFile = target.createFile(fileName);
+    ITarget newFile = target.createChildTarget(fileName);
+    newFile.createFile();
     JsonObject jo = getTargetInfo(efContext, newFile);
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, new JsonArray().add(jo));
     handler.handle(Future.succeededFuture());

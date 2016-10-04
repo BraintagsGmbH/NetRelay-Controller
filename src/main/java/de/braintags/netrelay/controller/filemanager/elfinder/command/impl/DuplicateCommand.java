@@ -12,9 +12,15 @@
  */
 package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
+
+import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
@@ -25,11 +31,38 @@ import io.vertx.core.json.JsonObject;
  * 
  */
 public class DuplicateCommand extends AbstractCommand {
-  public static final String STREAM = "1";
 
   @Override
   public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
-    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
+    List<String> targets = efContext.getParameterValues(ElFinderConstants.ELFINDER_PARAMETER_TARGETS);
+
+    List<ITarget> added = new ArrayList<>();
+
+    for (String targetString : targets) {
+      final ITarget source = findTarget(efContext, targetString);
+      final String name = source.getName();
+      String baseName = FilenameUtils.getBaseName(name);
+      final String extension = FilenameUtils.getExtension(name);
+
+      int i = 1;
+      ITarget destination;
+      baseName = baseName.replaceAll("\\(\\d+\\)$", "");
+
+      while (true) {
+        String newName = String.format("%s(%d)%s", baseName, i,
+            extension == null || extension.isEmpty() ? "" : "." + extension);
+        destination = source.getParent().createChildTarget(newName);
+
+        if (!destination.exists()) {
+          break;
+        }
+        i++;
+      }
+
+      createAndCopy(source, destination);
+      added.add(destination);
+    }
+    json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, buildJsonFilesArray(efContext, added));
   }
 
 }

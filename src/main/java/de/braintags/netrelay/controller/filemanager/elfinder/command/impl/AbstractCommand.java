@@ -26,6 +26,7 @@ import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -209,6 +210,18 @@ public abstract class AbstractCommand implements ICommand {
     options.put(ElFinderConstants.ELFINDER_PARAMETER_OVERWRITE_FILE, ElFinderConstants.ELFINDER_TRUE_RESPONSE);
     // options.put(ElFinderConstants.ELFINDER_PARAMETER_ARCHIVERS, ArchiverOption.JSON_INSTANCE);
     return options;
+  }
+
+  /**
+   * Copy the file or folder to the destination
+   * 
+   * @param src
+   * @param dst
+   * @throws IOException
+   */
+  protected void createAndCopy(ITarget src, ITarget dst) {
+    FileSystem fs = src.getVolume().getFileSystem();
+    fs.copyRecursiveBlocking(src.getPath(), dst.getPath(), true);
   }
 
 }

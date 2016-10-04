@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.AsyncFile;
 
 public interface ITarget {
 
@@ -53,20 +54,14 @@ public interface ITarget {
   String getPath();
 
   /**
-   * Create a new file inside the given target
-   * 
-   * @param fileName
-   * @return
+   * Create a new file in the filesystem. Use createChildTarget to gain the target
    */
-  ITarget createFile(String fileName);
+  void createFile();
 
   /**
-   * Create a new folder inside the given target
-   * 
-   * @param fileName
-   * @return
+   * Create a new file in the filesystem. Use createChildTarget to gain the target
    */
-  ITarget createFolder(String folderName);
+  void createFolder();
 
   /**
    * true, if this is a folder
@@ -171,6 +166,13 @@ public interface ITarget {
   boolean exists();
 
   /**
+   * Creates a new target as child
+   * 
+   * @return
+   */
+  ITarget createChildTarget(String childName);
+
+  /**
    * Rename the target
    * 
    * @param destination
@@ -197,5 +199,12 @@ public interface ITarget {
    * @return
    */
   InputStream openInputStream();
+
+  /**
+   * Get an instance of {@link AsyncFile} from the target
+   * 
+   * @return
+   */
+  AsyncFile getAsyncFile();
 
 }

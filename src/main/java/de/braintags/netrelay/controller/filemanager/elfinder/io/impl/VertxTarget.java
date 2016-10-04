@@ -23,6 +23,7 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.file.AsyncFile;
 import io.vertx.core.file.FileProps;
 
 /**
@@ -220,36 +221,29 @@ public class VertxTarget implements ITarget {
     return targetList;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#createFile(java.lang.String)
-   */
   @Override
-  public ITarget createFile(String fileName) {
-    loadDetails();
-    if (!isFolder()) {
-      throw new IllegalArgumentException("not a directory: " + getPath());
-    }
-    String path = absolutePath + "/" + fileName;
-    volume.getFileSystem().createFileBlocking(path);
-    return volume.fromPath(path);
+  public void createFile() {
+    volume.getFileSystem().createFileBlocking(getPath());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#createFolder(java.lang.String)
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#createChildTarget(java.lang.String)
    */
   @Override
-  public ITarget createFolder(String folderName) {
+  public ITarget createChildTarget(String childName) {
     loadDetails();
     if (!isFolder()) {
       throw new IllegalArgumentException("not a directory: " + getPath());
     }
-    String path = absolutePath + "/" + folderName;
-    volume.getFileSystem().mkdirBlocking(path);
+    String path = absolutePath + "/" + childName;
     return volume.fromPath(path);
+  }
+
+  @Override
+  public void createFolder() {
+    volume.getFileSystem().mkdirBlocking(getPath());
   }
 
   private void loadDetails() {
@@ -372,6 +366,16 @@ public class VertxTarget implements ITarget {
   @Override
   public InputStream openInputStream() {
     return new BufferInputStream(readFile());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#getAsyncFile()
+   */
+  @Override
+  public AsyncFile getAsyncFile() {
+    return volume.getFileSystem().openBlocking(getPath(), null);
   }
 
 }
