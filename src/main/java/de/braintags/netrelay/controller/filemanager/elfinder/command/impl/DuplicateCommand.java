@@ -21,6 +21,7 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
@@ -63,6 +64,7 @@ public class DuplicateCommand extends AbstractCommand {
       added.add(destination);
     }
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, buildJsonFilesArray(efContext, added));
+    handler.handle(Future.succeededFuture());
   }
 
 }

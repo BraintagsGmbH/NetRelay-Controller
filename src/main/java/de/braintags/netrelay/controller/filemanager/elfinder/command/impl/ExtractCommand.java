@@ -25,11 +25,10 @@ import io.vertx.core.json.JsonObject;
  * 
  */
 public class ExtractCommand extends AbstractCommand {
-  public static final String STREAM = "1";
 
   @Override
   public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
-    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
+    handler.handle(Future.failedFuture(new UnsupportedOperationException("Extract")));
   }
 
 }

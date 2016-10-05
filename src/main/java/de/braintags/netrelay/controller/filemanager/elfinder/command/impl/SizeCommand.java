@@ -40,9 +40,7 @@ public class SizeCommand extends AbstractCommand {
     for (ITarget target : targetList) {
       size += target.getSize();
     }
-
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_SIZE, size);
-
     handler.handle(Future.succeededFuture());
   }
 

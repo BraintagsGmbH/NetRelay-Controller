@@ -59,11 +59,9 @@ public class OpenCommand extends AbstractCommand {
     ITarget cwd = findCwd(efContext, target);
     files.put(cwd.getHash(), cwd);
     addChildren(efContext, files, cwd);
-
     json.put(ElFinderConstants.ELFINDER_PARAMETER_FILES, buildJsonFilesArray(efContext, files.values()));
     json.put(ElFinderConstants.ELFINDER_PARAMETER_CWD, getTargetInfo(efContext, cwd));
     json.put(ElFinderConstants.ELFINDER_PARAMETER_OPTIONS, getOptions(efContext, cwd));
-
     handler.handle(Future.succeededFuture());
   }
 

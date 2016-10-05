@@ -173,11 +173,11 @@ public interface ITarget {
   ITarget createChildTarget(String childName);
 
   /**
-   * Rename the target
+   * Rename the target into the new one
    * 
    * @param destination
    */
-  void rename(String destination);
+  void rename(ITarget destination);
 
   /**
    * Get the content of the file as {@link Buffer}

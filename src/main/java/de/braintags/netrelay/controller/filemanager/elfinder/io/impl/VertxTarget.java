@@ -328,8 +328,8 @@ public class VertxTarget implements ITarget {
    * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#rename(java.lang.String)
    */
   @Override
-  public void rename(String destination) {
-    volume.getFileSystem().moveBlocking(absolutePath, destination);
+  public void rename(ITarget destination) {
+    volume.getFileSystem().moveBlocking(absolutePath, destination.getPath());
   }
 
   /*

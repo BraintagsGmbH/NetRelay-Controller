@@ -12,7 +12,9 @@
  */
 package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 
+import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -25,11 +27,15 @@ import io.vertx.core.json.JsonObject;
  * 
  */
 public class GetCommand extends AbstractCommand {
-  public static final String STREAM = "1";
+  public static final String ENCODING = "utf-8";
 
   @Override
   public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
-    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
+    final String target = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_TARGET);
+    final ITarget vh = findTarget(efContext, target);
+    final String content = vh.readFile().toString(ENCODING);
+    json.put(ElFinderConstants.ELFINDER_PARAMETER_CONTENT, content);
+    handler.handle(Future.succeededFuture());
   }
 
 }
