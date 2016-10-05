@@ -32,16 +32,17 @@ import io.vertx.core.json.JsonObject;
  * 
  */
 public class DuplicateCommand extends AbstractCommand {
+  private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
+      .getLogger(DuplicateCommand.class);
 
   @Override
   public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
     List<String> targets = efContext.getParameterValues(ElFinderConstants.ELFINDER_PARAMETER_TARGETS);
-
     List<ITarget> added = new ArrayList<>();
-
     for (String targetString : targets) {
       final ITarget source = findTarget(efContext, targetString);
       final String name = source.getName();
+      LOGGER.info("going to duplicate file " + name);
       String baseName = FilenameUtils.getBaseName(name);
       final String extension = FilenameUtils.getExtension(name);
 
@@ -55,11 +56,11 @@ public class DuplicateCommand extends AbstractCommand {
         destination = source.getParent().createChildTarget(newName);
 
         if (!destination.exists()) {
+          LOGGER.info("duplicate name will be " + newName);
           break;
         }
         i++;
       }
-
       createAndCopy(source, destination);
       added.add(destination);
     }

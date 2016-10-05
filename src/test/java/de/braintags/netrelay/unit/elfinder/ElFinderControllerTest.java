@@ -42,6 +42,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       .getLogger(ElFinderControllerTest.class);
   private static final String VOLUME_ID = "ROOTVOLUME";
   private static final String ROOT_DIR = "/Users/mremme/workspace/vertx/NetRelay-Controller/tmp";
+  private static final String ROOT_WEBROOT = "/Users/mremme/workspace/vertx/NetRelay-Controller/webroot";
 
   /**
    * Comment for <code>API_ELFINDER</code>
@@ -62,7 +63,29 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void duplicateCommand(TestContext context) {
-    context.fail("unsupported");
+    String fn = "file2Duplicate.txt";
+    String fnDuplicated = "file2Duplicate(1).txt";
+    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+      vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
+    }
+    if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnDuplicated)) {
+      vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnDuplicated);
+    }
+
+    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String url = API_ELFINDER + "?cmd=" + "duplicate&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
+        + "&_=1475075436203";
+    try {
+      testRequest(context, HttpMethod.GET, url, req -> {
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        context.assertFalse(resp.content.contains("error"), "Error occured: " + resp.content);
+        context.assertTrue(vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnDuplicated), "file not duplicated");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
   }
 
   @Test
@@ -97,12 +120,29 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void renameCommand(TestContext context) {
-    context.fail("unsupported");
-  }
+    String fn = "file2Rename.txt";
+    String fnRenamed = "fileRenamed.txt";
+    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+      vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
+    }
+    if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnRenamed)) {
+      vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnRenamed);
+    }
 
-  @Test
-  public void searchCommand(TestContext context) {
-    context.fail("unsupported");
+    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String url = API_ELFINDER + "?cmd=" + "rename&name=" + fnRenamed + "&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET
+        + "=" + hash + "&_=1475075436203";
+    try {
+      testRequest(context, HttpMethod.GET, url, req -> {
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        context.assertFalse(resp.content.contains("error"), "Error occured: " + resp.content);
+        context.assertTrue(vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnRenamed), "file not renamed");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
   }
 
   @Test
@@ -118,6 +158,25 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
   @Test
   public void uploadCommand(TestContext context) {
     context.fail("unsupported");
+  }
+
+  @Test
+  public void searchCommand(TestContext context) {
+    // http://localhost:8080/fileManager/api?cmd=search&q=some&target=ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290&_=1475659740124
+    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_WEBROOT);
+    String url = API_ELFINDER + "?cmd=" + "search&q=some&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
+        + "&_=1475075436203";
+    try {
+      testRequest(context, HttpMethod.GET, url, req -> {
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        context.assertFalse(resp.content.contains("error"), "Error occured: " + resp.content);
+        context.assertTrue(resp.content.contains("files"), "expected parameter 'files'");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
   }
 
   @Test

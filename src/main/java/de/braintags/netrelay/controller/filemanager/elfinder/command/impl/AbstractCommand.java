@@ -221,7 +221,11 @@ public abstract class AbstractCommand implements ICommand {
    */
   protected void createAndCopy(ITarget src, ITarget dst) {
     FileSystem fs = src.getVolume().getFileSystem();
-    fs.copyRecursiveBlocking(src.getPath(), dst.getPath(), true);
+    if (src.isFolder()) {
+      fs.copyRecursiveBlocking(src.getPath(), dst.getPath(), true);
+    } else {
+      fs.copyBlocking(src.getPath(), dst.getPath());
+    }
   }
 
 }

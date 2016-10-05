@@ -134,6 +134,7 @@ public class VertxVolume implements IVolume {
    */
   public static List<Path> search(Path path, String target, FileTreeSearch.MatchMode mode, boolean ignoreCase)
       throws IOException {
+    LOGGER.info("searching in path " + path.toString());
     FileTreeSearch fileTreeSearch = new FileTreeSearch(target, mode, ignoreCase);
     Files.walkFileTree(path, fileTreeSearch);
 
