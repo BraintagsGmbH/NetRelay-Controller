@@ -100,6 +100,8 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void lsCommand(TestContext context) {
+    // ?cmd=ls&target=ROOTVOLUME_xxx&intersect%5B%5D=expert+-+use-case-workshop+-+Braintags+GmbH.pdf&_=1475683250174
+
     context.fail("unsupported");
   }
 
@@ -115,7 +117,40 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void putCommand(TestContext context) {
-    context.fail("unsupported");
+    // target: ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290L2luZGV4Lmh0bWw_E
+    // content: testcontent um auch zu ändern to change
+
+    String fileContent = "content of a magic file";
+    String fn = "file2Open.txt";
+    String filePath = ROOT_DIR + "/" + fn;
+    if (vertx.fileSystem().existsBlocking(filePath)) {
+      vertx.fileSystem().deleteBlocking(filePath);
+    }
+    vertx.fileSystem().writeFileBlocking(filePath, Buffer.buffer(fileContent));
+
+    String editedContent = fileContent + " edited";
+    String hash = ElFinderContext.getHash(VOLUME_ID, filePath);
+    String url = API_ELFINDER;
+    try {
+      MultipartUtil mu = new MultipartUtil();
+      mu.addFormField("cmd", "put");
+      mu.addFormField(ElFinderConstants.ELFINDER_PARAMETER_TARGET, hash);
+      mu.addFormField("content", editedContent);
+      mu.addFormField("_", "1475075436203");
+      testRequest(context, HttpMethod.POST, url, req -> {
+        mu.finish(req);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        context.assertFalse(resp.content.contains("error"), "Error occured: " + resp.content);
+        Buffer buffer = vertx.fileSystem().readFileBlocking(filePath);
+        context.assertTrue(buffer.toString().contains(editedContent), "file content not written: " + buffer.toString());
+
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+
   }
 
   @Test
@@ -157,7 +192,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void uploadCommand(TestContext context) {
-    context.fail("unsupported");
+    // not implemented
   }
 
   @Test

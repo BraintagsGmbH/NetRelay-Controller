@@ -36,7 +36,7 @@ public class PutCommand extends AbstractCommand {
     ITarget file = findTarget(efContext, target);
     String newContent = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_CONTENT);
     file.writeFile(Buffer.buffer(newContent, ENCODING));
-    json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_CHANGED, new Object[] { getTargetInfo(efContext, file) });
+    json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_CHANGED, this.buildJsonFilesArray(efContext, file));
     handler.handle(Future.succeededFuture());
   }
 

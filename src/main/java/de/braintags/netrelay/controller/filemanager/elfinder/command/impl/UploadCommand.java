@@ -12,11 +12,20 @@
  */
 package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import de.braintags.io.vertx.util.file.FileSystemUtil;
+import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.FileUpload;
 
 /**
  * 
@@ -25,11 +34,24 @@ import io.vertx.core.json.JsonObject;
  * 
  */
 public class UploadCommand extends AbstractCommand {
-  public static final String STREAM = "1";
 
   @Override
   public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
-    handler.handle(Future.failedFuture(new UnsupportedOperationException()));
+    String targetString = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_TARGET);
+    ITarget parentDir = findTarget(efContext, targetString);
+    Set<FileUpload> uploadedFiles = efContext.getRoutingContext().fileUploads();
+    List<ITarget> added = new ArrayList<>();
+
+    FileSystem fs = efContext.getRoutingContext().vertx().fileSystem();
+    for (FileUpload upload : uploadedFiles) {
+      String newFileName = FileSystemUtil.createUniqueName(fs, parentDir.getPath(), upload.fileName());
+      ITarget newFile = parentDir.createChildTarget(newFileName);
+      fs.moveBlocking(upload.uploadedFileName(), newFile.getPath());
+      added.add(newFile);
+    }
+
+    json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, buildJsonFilesArray(efContext, added));
+    handler.handle(Future.succeededFuture());
   }
 
 }

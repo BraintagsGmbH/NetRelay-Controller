@@ -103,17 +103,25 @@ public class ElFinderController extends AbstractController {
     if (command == null) {
       sendJson(context, ElFinderConstants.ELFINDER_ERROR_UNKNOWN_CONTROLLER);
     } else {
-      ElFinderContext efContext = createContext(context);
-      command.execute(efContext, res -> {
-        if (res.failed()) {
-          LOGGER.error("", res.cause());
-          String message = String.format(ElFinderConstants.ELFINDER_ERROR_EXCEPTION, res.cause().toString());
-          sendJson(context, message);
-        } else {
-          sendJson(context, res.result().encode());
-        }
-      });
+      try {
+        ElFinderContext efContext = createContext(context);
+        command.execute(efContext, res -> {
+          if (res.failed()) {
+            sendException(context, res.cause());
+          } else {
+            sendJson(context, res.result().encode());
+          }
+        });
+      } catch (Exception e) {
+        sendException(context, e);
+      }
     }
+  }
+
+  private void sendException(RoutingContext context, Throwable e) {
+    LOGGER.error("", e);
+    String message = String.format(ElFinderConstants.ELFINDER_ERROR_EXCEPTION, e.toString());
+    sendJson(context, message);
   }
 
   private ElFinderContext createContext(RoutingContext context) {

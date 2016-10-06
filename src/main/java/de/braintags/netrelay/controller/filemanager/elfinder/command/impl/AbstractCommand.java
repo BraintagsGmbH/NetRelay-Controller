@@ -150,6 +150,12 @@ public abstract class AbstractCommand implements ICommand {
     targetList.forEach(f -> map.put(f.getHash(), f));
   }
 
+  protected JsonArray buildJsonFilesArray(ElFinderContext efContext, ITarget target) {
+    JsonArray returnArray = new JsonArray();
+    returnArray.add(getTargetInfo(efContext, target));
+    return returnArray;
+  }
+
   protected JsonArray buildJsonFilesArray(ElFinderContext efContext, Collection<ITarget> targetList) {
     JsonArray returnArray = new JsonArray();
     targetList.forEach(target -> returnArray.add(getTargetInfo(efContext, target)));

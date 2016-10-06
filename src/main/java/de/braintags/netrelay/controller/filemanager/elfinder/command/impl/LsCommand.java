@@ -37,7 +37,7 @@ public class LsCommand extends AbstractCommand {
     Map<String, ITarget> files = new HashMap<>();
     ITarget source = findTarget(efContext, target);
     addChildren(efContext, files, source);
-    json.put(ElFinderConstants.ELFINDER_PARAMETER_LIST, files.values());
+    json.put(ElFinderConstants.ELFINDER_PARAMETER_LIST, this.buildJsonFilesArray(efContext, files.values()));
     handler.handle(Future.succeededFuture());
   }
 
