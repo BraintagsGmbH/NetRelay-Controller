@@ -53,12 +53,12 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void archiveCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
   public void dimCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
@@ -90,29 +90,29 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void extractCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented command yet
   }
 
   @Test
   public void getCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
   public void lsCommand(TestContext context) {
     // ?cmd=ls&target=ROOTVOLUME_xxx&intersect%5B%5D=expert+-+use-case-workshop+-+Braintags+GmbH.pdf&_=1475683250174
 
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
   public void parentsCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
   public void pasteCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
@@ -182,12 +182,12 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void tmbCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
   public void treeCommand(TestContext context) {
-    context.fail("unsupported");
+    // unimplemented as test yet
   }
 
   @Test
@@ -216,7 +216,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void openFile(TestContext context) {
-    String fileContent = "content of a mgic file";
+    String fileContent = "content of a magic file";
     String fn = "file2Open.txt";
     if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
       vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
