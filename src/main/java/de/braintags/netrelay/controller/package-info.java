@@ -108,7 +108,7 @@
  * 
  * {@link de.braintags.netrelay.controller.api}
  * 
- * 
+ * {@link de.braintags.netrelay.controller.filemanager.elfinder}
  * 
  * [source, json]
  * ----

@@ -18,7 +18,6 @@ import java.util.Properties;
 
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.controller.AbstractController;
-import de.braintags.netrelay.controller.IController;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.CommandFactory;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
@@ -27,49 +26,37 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * An abstract implementation of {@link IController}
+ * This controller builds the api to support the web base filemanager from
+ * https://github.com/Studio-42/elFinder
+ * 
  * 
  * <br/>
- * Documentation Template for Controllers:<br/>
  * Config-Parameter:<br/>
  * possible parameters, which are read from the configuration
  * <UL>
- * <LI>rootDirectories - define directories to be used in the form of VolumeId:rootDirectory
- * <LI>parameter2 - describe the sense of the parameter
+ * <LI>rootDirectories - defines directories to be used in the form of VolumeId:rootDirectory
  * </UL>
  * <br>
  * 
  * Request-Parameter:<br/>
- * possible parameters, which are read from a request
- * <UL>
- * <LI>parameter1 - describe the sense of the parameter
- * <LI>parameter2 - describe the sense of the parameter
- * </UL>
+ * the request parameters are defined by the required api like described at
+ * https://github.com/Studio-42/elFinder/wiki/Client-Server-API-2.1
  * <br/>
  * 
  * Result-Parameter:<br/>
- * possible paramters, which will be placed into the context
- * <UL>
- * <LI>parameter1 - describe the content, which is stored under the given parameter name
- * </UL>
- * <br/>
+ * results are sent like required by the ElFinder component for the suitable command
  * 
  * Example configuration:<br/>
  * 
  * <pre>
- * {
-      "name" : "ExampleController",
-      "routes" : null,
-      "blocking" : false,
-      "failureDefinition" : false,
-      "controller" : "de.braintags.netrelay.controller.ExampleController",
-      "httpMethod" : null,
-      "handlerProperties" : {
-        "prop1" : "127.0.0.1",
-        "prop2" : "http://localhost",
-        "prop3" : "true"
-       },
-      "captureCollection" : null
+ * 
+   {
+      "name" : "ElFinderController",
+      "controller" : "de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController",
+      "routes" : [ "/fileManager/api"  ],
+      "handlerProperties" : { 
+        "rootDirectories" : "ROOTVOLUME:/Users/myuser/workspace/vertx/NetRelay-Controller/webroot"
+      }
     }
  * </pre>
  * 
