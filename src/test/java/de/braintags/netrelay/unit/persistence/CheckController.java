@@ -15,7 +15,7 @@ public class CheckController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     Object o = context.get(checkMapperName);
     if (o == null) {
       error = new IllegalArgumentException("did not find an instance of " + checkMapperName + " in the context");

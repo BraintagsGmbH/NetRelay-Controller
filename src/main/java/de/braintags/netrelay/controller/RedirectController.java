@@ -89,7 +89,7 @@ public class RedirectController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     HttpServerResponse response = context.response();
     RequestUtil.sendRedirect(response, context.request(), destination, reusePathParameters);
   }

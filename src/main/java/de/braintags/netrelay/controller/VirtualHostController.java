@@ -88,7 +88,7 @@ public class VirtualHostController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     vHandler.handle(context);
   }
 

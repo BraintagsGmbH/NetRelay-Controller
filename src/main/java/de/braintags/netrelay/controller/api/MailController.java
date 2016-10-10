@@ -195,7 +195,7 @@ public class MailController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     sendMail(context, getNetRelay().getMailClient(), prefs, result -> sendReply(context, result.result()));
   }
 

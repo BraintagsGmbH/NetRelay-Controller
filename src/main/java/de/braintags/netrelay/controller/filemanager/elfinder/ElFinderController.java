@@ -82,7 +82,7 @@ public class ElFinderController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     LOGGER.debug("PARAMETERS: " + context.request().params());
     LOGGER.debug("HEADERS: " + context.request().headers());
     String commandName = context.request().getParam(ElFinderConstants.ELFINDER_PARAMETER_COMMAND);

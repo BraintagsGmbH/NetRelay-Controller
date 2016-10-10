@@ -41,7 +41,7 @@ public class RequestLoggingController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     LOGGER.info("LOGGING REQUEST FOR " + context.request().path());
 
     MultiMap headers = context.request().headers();

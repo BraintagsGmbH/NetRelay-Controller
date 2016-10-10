@@ -239,7 +239,7 @@ public class PasswordLostController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     if (hasParameter(context, emailFieldName)) {
       passwordLostStart(context);
     } else if (hasParameter(context, VALIDATION_ID_PARAM)) {

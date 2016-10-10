@@ -71,7 +71,7 @@ public class ProtocolController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     String path = context.request().absoluteURI();
     LOGGER.info(path);
     if (!path.startsWith(protocol) && path.contains("://")) {

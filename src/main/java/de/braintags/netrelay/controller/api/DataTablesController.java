@@ -87,7 +87,7 @@ public class DataTablesController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     String mapperName = context.request().getParam(MAPPER_KEY);
     if (mapperName == null) {
       context.fail(new ParameterRequiredException(MAPPER_KEY));

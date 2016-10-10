@@ -68,7 +68,7 @@ public class CurrentMemberController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public final void handle(RoutingContext context) {
+  public final void handleController(RoutingContext context) {
     LOGGER.debug("Session-ID: " + context.session().id() + " for request " + context.request().path());
     MemberUtil.getCurrentUser(context, getNetRelay(), res -> {
       if (res.failed()) {

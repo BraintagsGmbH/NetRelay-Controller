@@ -235,7 +235,7 @@ public class AuthenticationController extends AbstractAuthProviderController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     context.put(AUTH_HANDLER_PROP, authHandler);
     MemberUtil.recoverContextUser(context);
     authHandler.handle(context);

@@ -239,7 +239,7 @@ public class RegisterController extends AbstractAuthProviderController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext context) {
+  public void handleController(RoutingContext context) {
     if (hasParameter(context, PASSWORD_FIELD_NAME)) {
       registerStart(context);
     } else if (hasParameter(context, VALIDATION_ID_PARAM)) {

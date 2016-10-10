@@ -100,7 +100,7 @@ public class ThymeleafTemplateController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handle(RoutingContext event) {
+  public void handleController(RoutingContext event) {
     String path = event.request().path();
     LOGGER.info("handling template for url " + event.normalisedPath() + " | " + path);
     if (path.endsWith("/")) {
