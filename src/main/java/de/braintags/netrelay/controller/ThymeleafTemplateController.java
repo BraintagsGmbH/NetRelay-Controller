@@ -14,8 +14,10 @@ package de.braintags.netrelay.controller;
 
 import java.util.Properties;
 
+import org.thymeleaf.dialect.IDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 
+import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.TemplateHandler;
@@ -31,6 +33,7 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
  * <LI>{@value #TEMPLATE_DIRECTORY_PROPERTY}<br/>
  * <LI>{@value #CONTENT_TYPE_PROPERTY}<br/>
  * <LI>{@value #CACHE_ENABLED_PROPERTY}<br/>
+ * <LI>{@value #DIALECTS_PROPERTY}
  * </UL>
  * <br>
  * Request-Parameter:<br/>
@@ -92,6 +95,12 @@ public class ThymeleafTemplateController extends AbstractController {
    */
   public static final String CACHE_ENABLED_PROPERTY = "cacheEnabled";
 
+  /**
+   * By using this property, you are able to add dialects to extend thymeleaf. The value is a csv list, where each entry
+   * is like "dialectPrefix:dialectClass" or just "dialectClass", if the default prefix shall be used
+   */
+  public static final String DIALECTS_PROPERTY = "dialects";
+
   private TemplateHandler templateHandler;
 
   /*
@@ -131,7 +140,28 @@ public class ThymeleafTemplateController extends AbstractController {
     TemplateMode tm = TemplateMode.valueOf(tms);
     thEngine.setMode(tm);
     setCachable(thEngine, properties);
+    addDialects(thEngine, properties);
     return thEngine;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void addDialects(ThymeleafTemplateEngine thEngine, Properties properties) {
+    try {
+      String dP = (String) properties.getOrDefault(DIALECTS_PROPERTY, "");
+      String[] dialects = dP.split(",");
+      for (String dialect : dialects) {
+        if (dialect.contains(":")) {
+          String[] d = dialect.split(":");
+          Class<? extends IDialect> dc = (Class<? extends IDialect>) Class.forName(d[1]);
+          thEngine.getThymeleafTemplateEngine().addDialect(d[0], dc.newInstance());
+        } else {
+          Class<? extends IDialect> dc = (Class<? extends IDialect>) Class.forName(dialect);
+          thEngine.getThymeleafTemplateEngine().addDialect(dc.newInstance());
+        }
+      }
+    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+      throw new InitException(e);
+    }
   }
 
   /**
