@@ -18,7 +18,9 @@ import org.thymeleaf.dialect.IDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 
 import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.netrelay.NetRelay;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.netrelay.templateengine.thymeleaf.ThymeleafTemplateEngineImplBt;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.TemplateHandler;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
@@ -34,6 +36,7 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
  * <LI>{@value #CONTENT_TYPE_PROPERTY}<br/>
  * <LI>{@value #CACHE_ENABLED_PROPERTY}<br/>
  * <LI>{@value #DIALECTS_PROPERTY}
+ * <LI>{@value #MULTIPATH_PROPERTY}
  * </UL>
  * <br>
  * Request-Parameter:<br/>
@@ -101,6 +104,13 @@ public class ThymeleafTemplateController extends AbstractController {
    */
   public static final String DIALECTS_PROPERTY = "dialects";
 
+  /**
+   * If this property is set to true, then templates are searched first in the path WITHIN the defined template
+   * directory. If not found, templates are searched in the path WITHOUT the template directory.
+   * WARNING: to avoid confusions and potential file collisions, you should use this option only exceptional.
+   */
+  public static final String MULTIPATH_PROPERTY = "multiPath";
+
   private TemplateHandler templateHandler;
 
   /*
@@ -109,15 +119,16 @@ public class ThymeleafTemplateController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handleController(RoutingContext event) {
-    String path = event.request().path();
-    LOGGER.info("handling template for url " + event.normalisedPath() + " | " + path);
+  public void handleController(RoutingContext context) {
+    String path = context.request().path();
+    context.put(NetRelay.NETRELAY_PROPERTY, getNetRelay());
+    LOGGER.info("handling template for url " + context.normalisedPath() + " | " + path);
     if (path.endsWith("/")) {
       LOGGER.info("REROUTING TO: " + path);
       path += "index.html";
-      event.reroute(path);
+      context.reroute(path);
     } else {
-      templateHandler.handle(event);
+      templateHandler.handle(context);
     }
   }
 
@@ -135,7 +146,8 @@ public class ThymeleafTemplateController extends AbstractController {
    * @return
    */
   public static ThymeleafTemplateEngine createTemplateEngine(Properties properties) {
-    ThymeleafTemplateEngine thEngine = ThymeleafTemplateEngine.create();
+    boolean multiPath = Boolean.valueOf((String) properties.getOrDefault(MULTIPATH_PROPERTY, "false"));
+    ThymeleafTemplateEngine thEngine = new ThymeleafTemplateEngineImplBt(multiPath, getTemplateDirectory(properties));
     String tms = properties.getProperty(TEMPLATE_MODE_PROPERTY, ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE.name());
     TemplateMode tm = TemplateMode.valueOf(tms);
     thEngine.setMode(tm);
@@ -147,16 +159,18 @@ public class ThymeleafTemplateController extends AbstractController {
   @SuppressWarnings("unchecked")
   private static void addDialects(ThymeleafTemplateEngine thEngine, Properties properties) {
     try {
-      String dP = (String) properties.getOrDefault(DIALECTS_PROPERTY, "");
-      String[] dialects = dP.split(",");
-      for (String dialect : dialects) {
-        if (dialect.contains(":")) {
-          String[] d = dialect.split(":");
-          Class<? extends IDialect> dc = (Class<? extends IDialect>) Class.forName(d[1]);
-          thEngine.getThymeleafTemplateEngine().addDialect(d[0], dc.newInstance());
-        } else {
-          Class<? extends IDialect> dc = (Class<? extends IDialect>) Class.forName(dialect);
-          thEngine.getThymeleafTemplateEngine().addDialect(dc.newInstance());
+      String dP = (String) properties.getOrDefault(DIALECTS_PROPERTY, null);
+      if (dP != null && dP.hashCode() != 0) {
+        String[] dialects = dP.split(",");
+        for (String dialect : dialects) {
+          if (dialect.contains(":")) {
+            String[] d = dialect.split(":");
+            Class<? extends IDialect> dc = (Class<? extends IDialect>) Class.forName(d[1]);
+            thEngine.getThymeleafTemplateEngine().addDialect(d[0], dc.newInstance());
+          } else {
+            Class<? extends IDialect> dc = (Class<? extends IDialect>) Class.forName(dialect);
+            thEngine.getThymeleafTemplateEngine().addDialect(dc.newInstance());
+          }
         }
       }
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {

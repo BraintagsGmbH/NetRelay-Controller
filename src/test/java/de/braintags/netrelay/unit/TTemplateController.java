@@ -14,7 +14,9 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
+import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.init.Settings;
+import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.TestContext;
 
@@ -26,13 +28,52 @@ import io.vertx.ext.unit.TestContext;
  */
 public class TTemplateController extends NetRelayBaseConnectorTest {
 
+  /**
+   * Call a template with multipath, where the template exists not in template directory and as resource
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testIndexMultiPath_TemplateExistsInResource(TestContext context) throws Exception {
+    resetRoutes(true);
+    testRequest(context, HttpMethod.GET, "/de/braintags/resourceTemplate.html", 200, "OK");
+  }
+
+  /**
+   * Call a template with multipath, where the template exists not in template directory and as resource
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testIndexMultiPath_TemplateExistsNOTInResource(TestContext context) throws Exception {
+    resetRoutes(true);
+    testRequest(context, HttpMethod.GET, "/de/braintags/resourceTemplateDoesNotExist.html", 500,
+        "Internal Server Error");
+  }
+
+  /**
+   * Call a template with multipath, where the template exists in the template directory
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testIndexMultiPath_TemplateExistsInDirectory(TestContext context) throws Exception {
+    resetRoutes(true);
+    testRequest(context, HttpMethod.GET, "/index.html", 200, "OK");
+  }
+
   @Test
   public void testIndex(TestContext context) throws Exception {
+    resetRoutes(false);
     testRequest(context, HttpMethod.GET, "/index.html", 200, "OK");
   }
 
   @Test
   public void testRedirect(TestContext context) throws Exception {
+    resetRoutes(false);
     testRequest(context, HttpMethod.GET, "/", 200, "OK");
   }
 
@@ -44,6 +85,13 @@ public class TTemplateController extends NetRelayBaseConnectorTest {
   @Override
   public void initTest(TestContext context) {
     super.initTest(context);
+  }
+
+  private void resetRoutes(boolean multiPath) throws Exception {
+    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
+        .getNamedDefinition(ThymeleafTemplateController.class.getSimpleName());
+    def.getHandlerProperties().put(ThymeleafTemplateController.MULTIPATH_PROPERTY, String.valueOf(multiPath));
+    netRelay.resetRoutes();
   }
 
   /*
