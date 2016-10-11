@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.thymeleaf.IEngineConfiguration;
+import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
@@ -25,6 +26,10 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.impl.Utils;
 
 /**
+ * An implementation of {@link ITemplateResolver}
+ * The resolver will first search for an existing template
+ * inside the defined template directory. If none was found, the TemplateHandler will search for existing template in
+ * the pure path, without the defined template directory, to allow the use of stored resources inside the classpath.
  * 
  * 
  * @author Michael Remme

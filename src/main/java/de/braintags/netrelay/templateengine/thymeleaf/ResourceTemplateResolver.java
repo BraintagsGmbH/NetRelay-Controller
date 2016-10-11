@@ -22,6 +22,13 @@ import org.thymeleaf.templateresource.StringTemplateResource;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.impl.Utils;
 
+/**
+ * Regular template resolver, which is loading the given template from the vertx filesystem
+ * 
+ * 
+ * @author Michael Remme
+ *
+ */
 public class ResourceTemplateResolver extends StringTemplateResolver {
   private Vertx vertx;
 

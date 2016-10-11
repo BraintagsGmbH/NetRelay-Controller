@@ -32,7 +32,8 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 
 /**
- * A template engine for Thymeleaf, which allows different template resolver
+ * A template engine for Thymeleaf, which allows different template resolver. If the property multipath is set to true,
+ * then the {@link MultiPathResourceResolver} is used, otherwise the regular {@link ResourceTemplateResolver} is used
  * 
  * @author Michael Remme
  * 
