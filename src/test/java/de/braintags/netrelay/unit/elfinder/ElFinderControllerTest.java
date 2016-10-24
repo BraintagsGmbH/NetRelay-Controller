@@ -32,17 +32,17 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.ext.unit.TestContext;
 
 /**
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class ElFinderControllerTest extends AbstractCaptureParameterTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(ElFinderControllerTest.class);
   private static final String VOLUME_ID = "ROOTVOLUME";
-  private static final String ROOT_DIR = "/Users/mremme/workspace/vertx/NetRelay-Controller/tmp";
-  private static final String ROOT_WEBROOT = "/Users/mremme/workspace/vertx/NetRelay-Controller/webroot";
+  private static final String ROOT_DIR = "tmp";
+  private static final String ROOT_WEBROOT = "webroot";
 
   /**
    * Comment for <code>API_ELFINDER</code>
@@ -433,7 +433,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.netrelay.NetRelayBaseTest#modifySettings(de.braintags.netrelay.init.Settings)
    */
   @Override
