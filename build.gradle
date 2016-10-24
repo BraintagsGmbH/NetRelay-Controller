@@ -1,0 +1,20 @@
+apply from: 'gradle/vertx/vertxbase.gradle'
+
+dependencies {
+  compile group: 'de.braintags', name: 'netrelay', version:netrelayVersion
+  compile group: 'de.braintags', name: 'vertx-auth-datastore', version:vertxAuthDatastoreVersion
+  compile group: 'io.vertx', name: 'vertx-mail-client', version:vertxVersion
+  compile group: 'org.thymeleaf', name: 'thymeleaf', version:thymeleafVersion
+  compile group: 'org.apache.tika', name: 'tika-core', version:'1.9'
+
+  testCompile group: 'de.braintags', name: 'netrelay', version:netrelayVersion, classifier:'tests'
+  testCompile group: 'de.braintags', name: 'vertx-auth-datastore', version:vertxAuthDatastoreVersion, classifier:'tests'
+}
+
+test {
+  systemProperty 'IDatastoreContainer', 'de.braintags.io.vertx.pojomapper.mongo.vertxunit.MongoDataStoreContainer'
+  systemProperty 'startMongoLocal', 'true'
+  systemProperty 'db_name', 'NetRelayControllerDatabase'
+  systemProperty 'mailClientUserName', mailClientUserName
+  systemProperty 'mailClientPassword', mailClientPassword
+}
