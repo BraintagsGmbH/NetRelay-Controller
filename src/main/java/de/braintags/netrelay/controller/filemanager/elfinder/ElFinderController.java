@@ -132,6 +132,9 @@ public class ElFinderController extends AbstractController {
       if (!fs.existsBlocking(dirName)) {
         throw new InitException("Root directory with path '" + dirName + "' does not exist");
       }
+      if (dirName.endsWith("/")) {
+        dirName = dirName.substring(0, dirName.length() - 1);
+      }
       rootVolumes.add(new VertxVolume(fs, dirName, volumeId, null));
     }
   }
