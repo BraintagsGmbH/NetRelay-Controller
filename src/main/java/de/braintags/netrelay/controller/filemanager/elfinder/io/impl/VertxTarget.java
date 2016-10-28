@@ -13,6 +13,7 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.io.impl;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +39,8 @@ public class VertxTarget implements ITarget {
   private final Tika tika = new Tika();
 
   private VertxVolume volume;
-  private String absolutePath;
+  private Path path;
   private boolean isRoot = false;
-  private String name;
   private FileProps fileProps;
   private String mimeType = null;
 
@@ -52,7 +52,7 @@ public class VertxTarget implements ITarget {
    * @param path
    *          the relative path inside the volume
    */
-  public VertxTarget(VertxVolume volume, String path) {
+  public VertxTarget(VertxVolume volume, Path path) {
     this(volume, path, false);
   }
 
@@ -67,21 +67,21 @@ public class VertxTarget implements ITarget {
    *          defines wether the target is the root target of the volume
    * 
    */
-  public VertxTarget(VertxVolume volume, String path, boolean isRoot) {
+  public VertxTarget(VertxVolume volume, Path path, boolean isRoot) {
     this.volume = volume;
-    if (!isRoot && !path.startsWith(volume.getRoot().getPath())) {
-      throw new IllegalArgumentException(
-          "path '" + path + "' is not a subpath of volume root " + volume.getRoot().getPath());
+    if (!isRoot) {
+      String volumeRootPath = volume.getRoot().getAbsolutePath();
+      String pathPath = path.toAbsolutePath().toString();
+      if (!pathPath.startsWith(volumeRootPath)) {
+        throw new IllegalArgumentException(
+            "path '" + path + "' is not a subpath of volume root " + volume.getRoot().getPath());
+      }
     }
     this.isRoot = isRoot;
-    if (path == null || path.trim().hashCode() == 0) {
+    if (path == null) {
       throw new IllegalArgumentException("Path must not be null");
     }
-    this.absolutePath = path;
-    if (path.endsWith("/")) {
-      path = path.substring(0, path.length() - 1);
-    }
-    this.name = path.substring(path.lastIndexOf("/") + 1);
+    this.path = path;
   }
 
   /*
@@ -100,8 +100,8 @@ public class VertxTarget implements ITarget {
    * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#getPath()
    */
   @Override
-  public String getPath() {
-    return absolutePath;
+  public Path getPath() {
+    return path;
   }
 
   /*
@@ -146,7 +146,7 @@ public class VertxTarget implements ITarget {
       if (isFolder()) {
         mimeType = "directory";
       } else {
-        mimeType = tika.detect(absolutePath);
+        mimeType = tika.detect(getAbsolutePath());
       }
     }
     return mimeType;
@@ -159,7 +159,7 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public String getName() {
-    return name;
+    return path.getFileName().toString();
   }
 
   /*
@@ -169,7 +169,7 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public ITarget getParent() {
-    return getVolume().getParent(absolutePath);
+    return getVolume().getParent(path);
   }
 
   /*
@@ -210,20 +210,21 @@ public class VertxTarget implements ITarget {
 
   @Override
   public List<ITarget> listChildren() {
+    LOGGER.debug("Listing children for : " + toString());
     loadDetails();
     if (!isFolder()) {
       throw new IllegalArgumentException("not a directory: " + getPath());
     }
-    List<String> childList = volume.getFileSystem().readDirBlocking(absolutePath);
+    List<String> childList = volume.getFileSystem().readDirBlocking(getAbsolutePath());
     List<ITarget> targetList = new ArrayList<>();
-    childList.forEach(sub -> targetList.add(getVolume().fromPath(sub)));
+    childList.forEach(sub -> targetList.add(getVolume().fromPath(path.resolve(sub))));
     targetList.forEach(target -> ((VertxTarget) target).loadDetails());
     return targetList;
   }
 
   @Override
   public void createFile() {
-    volume.getFileSystem().createFileBlocking(getPath());
+    volume.getFileSystem().createFileBlocking(getAbsolutePath());
   }
 
   /*
@@ -237,18 +238,17 @@ public class VertxTarget implements ITarget {
     if (!isFolder()) {
       throw new IllegalArgumentException("not a directory: " + getPath());
     }
-    String path = absolutePath + "/" + childName;
-    return volume.fromPath(path);
+    return volume.fromPath(path.resolve(childName));
   }
 
   @Override
   public void createFolder() {
-    volume.getFileSystem().mkdirBlocking(getPath());
+    volume.getFileSystem().mkdirBlocking(getAbsolutePath());
   }
 
   private void loadDetails() {
     if (fileProps == null) {
-      fileProps = volume.getFileSystem().propsBlocking(absolutePath);
+      fileProps = volume.getFileSystem().propsBlocking(getAbsolutePath());
     }
   }
 
@@ -299,7 +299,7 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public String toString() {
-    return "VertxTarget [absolutePath=" + absolutePath + "]";
+    return "VertxTarget [absolutePath=" + path + "]";
   }
 
   /*
@@ -309,7 +309,7 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public void delete() {
-    volume.getFileSystem().deleteBlocking(absolutePath);
+    volume.getFileSystem().deleteBlocking(getAbsolutePath());
   }
 
   /*
@@ -319,7 +319,7 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public boolean exists() {
-    return volume.getFileSystem().existsBlocking(absolutePath);
+    return volume.getFileSystem().existsBlocking(getAbsolutePath());
   }
 
   /*
@@ -329,7 +329,7 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public void rename(ITarget destination) {
-    volume.getFileSystem().moveBlocking(absolutePath, destination.getPath());
+    volume.getFileSystem().moveBlocking(getAbsolutePath(), destination.getAbsolutePath());
   }
 
   /*
@@ -342,7 +342,7 @@ public class VertxTarget implements ITarget {
     if (isFolder()) {
       throw new IllegalArgumentException("is a directory: " + getPath());
     }
-    return volume.getFileSystem().readFileBlocking(getPath());
+    return volume.getFileSystem().readFileBlocking(getAbsolutePath());
   }
 
   /*
@@ -355,7 +355,7 @@ public class VertxTarget implements ITarget {
     if (isFolder()) {
       throw new IllegalArgumentException("is a directory: " + getPath());
     }
-    volume.getFileSystem().writeFileBlocking(getPath(), buffer);
+    volume.getFileSystem().writeFileBlocking(getAbsolutePath(), buffer);
   }
 
   /*
@@ -375,7 +375,28 @@ public class VertxTarget implements ITarget {
    */
   @Override
   public AsyncFile getAsyncFile() {
-    return volume.getFileSystem().openBlocking(getPath(), null);
+    return volume.getFileSystem().openBlocking(getAbsolutePath(), null);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#getAbsolutePath()
+   */
+  @Override
+  public String getAbsolutePath() {
+    return getPath().toAbsolutePath().toString();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#isChild(de.braintags.netrelay.controller.
+   * filemanager.elfinder.io.ITarget)
+   */
+  @Override
+  public boolean isChild(ITarget parent) {
+    return getAbsolutePath().startsWith(parent.getAbsolutePath());
   }
 
 }

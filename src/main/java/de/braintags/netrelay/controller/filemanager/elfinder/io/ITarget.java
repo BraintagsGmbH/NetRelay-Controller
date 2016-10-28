@@ -32,6 +32,7 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.io;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 import io.vertx.core.buffer.Buffer;
@@ -51,7 +52,14 @@ public interface ITarget {
    * 
    * @return
    */
-  String getPath();
+  Path getPath();
+
+  /**
+   * Return the absolute path of the target as String
+   * 
+   * @return
+   */
+  String getAbsolutePath();
 
   /**
    * Create a new file in the filesystem. Use createChildTarget to gain the target
@@ -206,5 +214,13 @@ public interface ITarget {
    * @return
    */
   AsyncFile getAsyncFile();
+
+  /**
+   * Returns true, if the current instance is a child of the given parent
+   * 
+   * @param parent
+   * @return
+   */
+  boolean isChild(ITarget parent);
 
 }

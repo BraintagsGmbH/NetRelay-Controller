@@ -20,6 +20,8 @@ import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -43,6 +45,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
   private static final String VOLUME_ID = "ROOTVOLUME";
   private static final String ROOT_DIR = "tmp";
   private static final String ROOT_WEBROOT = "webroot";
+  private IVolume vol;
 
   /**
    * Comment for <code>API_ELFINDER</code>
@@ -71,8 +74,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
     if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnDuplicated)) {
       vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnDuplicated);
     }
-
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
     String url = API_ELFINDER + "?cmd=" + "duplicate&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
         + "&_=1475075436203";
     try {
@@ -126,10 +128,10 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
     if (vertx.fileSystem().existsBlocking(filePath)) {
       vertx.fileSystem().deleteBlocking(filePath);
     }
-    vertx.fileSystem().writeFileBlocking(filePath, Buffer.buffer(fileContent));
 
+    vertx.fileSystem().writeFileBlocking(filePath, Buffer.buffer(fileContent));
     String editedContent = fileContent + " edited";
-    String hash = ElFinderContext.getHash(VOLUME_ID, filePath);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
     String url = API_ELFINDER;
     try {
       MultipartUtil mu = new MultipartUtil();
@@ -164,7 +166,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnRenamed);
     }
 
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
     String url = API_ELFINDER + "?cmd=" + "rename&name=" + fnRenamed + "&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET
         + "=" + hash + "&_=1475075436203";
     try {
@@ -198,7 +200,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
   @Test
   public void searchCommand(TestContext context) {
     // http://localhost:8080/fileManager/api?cmd=search&q=some&target=ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290&_=1475659740124
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_WEBROOT);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(ROOT_WEBROOT));
     String url = API_ELFINDER + "?cmd=" + "search&q=some&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
         + "&_=1475075436203";
     try {
@@ -222,7 +224,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
     }
 
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
     String url = API_ELFINDER + "?cmd=" + "file&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
         + "&_=1475075436203";
     try {
@@ -247,7 +249,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
     }
 
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
     String url = API_ELFINDER + "?cmd=" + "rm&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
         + "&_=1475075436203";
     try {
@@ -276,7 +278,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
     }
 
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + dir);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(dir));
     String url = API_ELFINDER + "?cmd=" + "rm&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
         + "&_=1475075436203";
     try {
@@ -302,7 +304,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vertx.fileSystem().mkdirBlocking(ROOT_DIR + "/" + fn);
     }
 
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR + "/" + fn);
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
     String url = API_ELFINDER + "?cmd=" + "rm&name=" + fn + "&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "="
         + hash + "&_=1475075436203";
     try {
@@ -327,7 +329,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fn);
     }
 
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR);
+    String hash = ElFinderContext.getHash(getVolume().getRoot());
     String url = API_ELFINDER + "?cmd=" + "mkdir&name=" + fn + "&target=" + hash + "&_=1475075436203";
     try {
       MultipartUtil mu = new MultipartUtil();
@@ -351,7 +353,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fn);
     }
 
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR);
+    String hash = ElFinderContext.getHash(getVolume().getRoot());
     String url = API_ELFINDER + "?cmd=" + "mkfile&name=" + fn + "&target=" + hash + "&_=1475075436203";
     try {
       MultipartUtil mu = new MultipartUtil();
@@ -391,7 +393,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void openSubDir(TestContext context) {
-    String hash = ElFinderContext.getHash(VOLUME_ID, ROOT_DIR);
+    String hash = ElFinderContext.getHash(getVolume().getRoot());
     String url = API_ELFINDER + "?cmd=open&target=" + hash + "&_=1475072637216";
 
     try {
@@ -429,6 +431,13 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
     } catch (Exception e) {
       context.fail(e);
     }
+  }
+
+  IVolume getVolume() {
+    if (vol == null) {
+      vol = new VertxVolume(vertx.fileSystem(), ROOT_DIR, VOLUME_ID, null);
+    }
+    return vol;
   }
 
   /*

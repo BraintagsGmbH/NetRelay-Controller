@@ -107,7 +107,7 @@ public class ElFinderContext {
    * @throws IOException
    */
   public static String getHash(ITarget target) {
-    return getHash(target.getVolume().getId(), target.getPath());
+    return getHash(target.getVolume().getId(), target.getAbsolutePath());
   }
 
   /**
@@ -117,7 +117,7 @@ public class ElFinderContext {
    * @return
    * @throws IOException
    */
-  public static String getHash(String volumeId, String path) {
+  private static String getHash(String volumeId, String path) {
     String base = new String(Base64.getEncoder().encode(path.getBytes()));
     for (String[] pair : ESCAPES) {
       base = base.replace(pair[0], pair[1]);

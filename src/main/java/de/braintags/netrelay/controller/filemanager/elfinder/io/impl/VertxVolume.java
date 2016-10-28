@@ -13,6 +13,7 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.io.impl;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,10 +41,14 @@ public class VertxVolume implements IVolume {
   private String volumeId;
   private String alias;
 
+  public VertxVolume(FileSystem fs, String rootDir, String volumeId, String alias) {
+    this(fs, FileSystems.getDefault().getPath(rootDir), volumeId, alias);
+  }
+
   /**
    * 
    */
-  public VertxVolume(FileSystem fs, String rootDir, String volumeId, String alias) {
+  public VertxVolume(FileSystem fs, Path rootDir, String volumeId, String alias) {
     this.fs = fs;
     this.rootDir = new VertxTarget(this, rootDir, true);
     this.volumeId = volumeId;
@@ -56,11 +61,19 @@ public class VertxVolume implements IVolume {
    * @see de.braintags.netrelay.controller.filemanager.elfinder.io.Volume#fromPath(java.lang.String)
    */
   @Override
-  public ITarget fromPath(String path) {
-    if (path.equals(rootDir.getPath())) {
+  public ITarget fromPath(Path path) {
+    if (path == null) {
+      throw new NullPointerException("Path must not be null");
+    }
+    if (path.toAbsolutePath().equals(rootDir.getPath().toAbsolutePath())) {
       return rootDir;
     }
     return new VertxTarget(this, path);
+  }
+
+  @Override
+  public ITarget fromPath(String path) {
+    return fromPath(getPath(path));
   }
 
   /*
@@ -100,12 +113,12 @@ public class VertxVolume implements IVolume {
    */
   @Override
   public List<ITarget> search(String target) {
-    Path path = getPath(getRoot().getPath());
+    Path path = getRoot().getPath();
     try {
       List<Path> sr = search(path, target, FileTreeSearch.MatchMode.ANYWHERE, false);
       List<ITarget> result = new ArrayList<>();
       for (Path p : sr) {
-        ITarget t = fromPath(p.toString());
+        ITarget t = fromPath(p);
         if (!t.exists()) {
           throw new IllegalArgumentException("wrong path: " + p.toString());
         }
@@ -143,12 +156,12 @@ public class VertxVolume implements IVolume {
   }
 
   private Path getPath(String relativePath) {
-    String rootDir = getRoot().getPath();
+    String rdir = getRoot().getAbsolutePath();
     Path path;
-    if (relativePath.startsWith(rootDir)) {
+    if (relativePath.startsWith(rdir)) {
       path = Paths.get(relativePath);
     } else {
-      path = Paths.get(rootDir, relativePath);
+      path = Paths.get(rdir, relativePath);
     }
     return path;
   }
@@ -179,16 +192,8 @@ public class VertxVolume implements IVolume {
    * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#getParent(java.lang.String)
    */
   @Override
-  public ITarget getParent(String path) {
-    if (path.endsWith("/")) {
-      path = path.substring(0, path.length() - 1);
-    }
-    if (path.equals(rootDir.getPath())) {
-      return rootDir;
-    }
-    int index = path.lastIndexOf("/");
-    String parentPath = path.substring(0, index);
-    return fromPath(parentPath);
+  public ITarget getParent(Path path) {
+    return fromPath(path.getParent());
   }
 
 }

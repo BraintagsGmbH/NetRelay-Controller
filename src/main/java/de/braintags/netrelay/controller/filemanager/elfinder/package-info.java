@@ -4,7 +4,7 @@
  * This controller builds the api to support the web base filemanager from
  * https://github.com/Studio-42/elFinder
  * 
- * An example configuraiton of the component would look like this:
+ * An example configuration of the component would look like this:
  * 
  * [source, json]
  * ----
@@ -13,11 +13,12 @@
  *   "controller" : "de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController",
  *   "routes" : [ "/fileManager/api" ],
  *   "handlerProperties" : {
- *     "rootDirectories" : "ROOTVOLUME:/Users/myuser/workspace/vertx/NetRelay-Controller/webroot"
+ *     "rootDirectories" : "ROOTVOLUME:webroot"
  *   }
  * }
  * ----
- * 
+ * Note: the path of the defined root directory in the example above defines the name of the volume before the colon,
+ * like it is displayed in the elfinder component.
  * 
  * A template for thymeleaf to implement the ElFinder component would look like this:
  * 

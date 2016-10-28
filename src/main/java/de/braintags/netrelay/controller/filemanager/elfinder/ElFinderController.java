@@ -12,6 +12,8 @@
  */
 package de.braintags.netrelay.controller.filemanager.elfinder;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -34,7 +36,10 @@ import io.vertx.ext.web.RoutingContext;
  * Config-Parameter:<br/>
  * possible parameters, which are read from the configuration
  * <UL>
- * <LI>rootDirectories - defines directories to be used in the form of VolumeId:rootDirectory
+ * <LI>rootDirectories - defines directories to be used in the form of VolumeId:rootDirectory.
+ * Note: the path of the defined root directory in the example above defines the name of the volume before the colon,
+ * like it is displayed in the elfinder component.
+ * 
  * </UL>
  * <br>
  * 
@@ -55,7 +60,7 @@ import io.vertx.ext.web.RoutingContext;
       "controller" : "de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController",
       "routes" : [ "/fileManager/api"  ],
       "handlerProperties" : { 
-        "rootDirectories" : "ROOTVOLUME:/Users/myuser/workspace/vertx/NetRelay-Controller/webroot"
+        "rootDirectories" : "ROOTVOLUME:webroot"
       }
     }
  * </pre>
@@ -132,10 +137,14 @@ public class ElFinderController extends AbstractController {
       if (!fs.existsBlocking(dirName)) {
         throw new InitException("Root directory with path '" + dirName + "' does not exist");
       }
+
+      Path path = FileSystems.getDefault().getPath(dirName);
+      LOGGER.debug("ElFinder-Path: " + path);
       if (dirName.endsWith("/")) {
         dirName = dirName.substring(0, dirName.length() - 1);
       }
-      rootVolumes.add(new VertxVolume(fs, dirName, volumeId, null));
+
+      rootVolumes.add(new VertxVolume(fs, path, volumeId, null));
     }
   }
 

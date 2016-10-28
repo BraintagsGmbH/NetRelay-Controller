@@ -12,6 +12,8 @@
  */
 package de.braintags.netrelay.unit.elfinder;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,24 +36,42 @@ public class ElFinderVolumeTest extends AbstractCaptureParameterTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(ElFinderVolumeTest.class);
 
-  public static final String ROOTDIR = "/Users/mremme/workspace/vertx/NetRelay-Controller/webroot";
+  public static final String ROOTDIR = "webroot";
 
   @Test
   public void testVolume(TestContext context) {
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), ROOTDIR, "ROOTDIR", null);
+    Path path = FileSystems.getDefault().getPath(ROOTDIR);
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null);
+    context.assertTrue(vv.getRoot().exists());
+    LOGGER.debug("DIRECTORY: " + vv.getRoot().toString());
     List<IVolume> rootVolumes = new ArrayList<>();
     rootVolumes.add(vv);
     ElFinderContext efContext = new ElFinderContext(null, rootVolumes);
-    ITarget sub = vv.fromPath(ROOTDIR + "/images");
-    context.assertTrue(sub.getPath().startsWith(ROOTDIR));
+    ITarget sub = vv.fromPath("images");
+    String subPath = sub.getAbsolutePath();
+    String rootPath = vv.getRoot().getAbsolutePath();
+
+    context.assertTrue(sub.isChild(vv.getRoot()));
     context.assertEquals("images", sub.getName());
-    context.assertEquals(ROOTDIR + "/images", sub.getPath());
+    context.assertEquals(vv.getRoot().getAbsolutePath() + "/images", sub.getPath().toString());
 
     String hashCode = sub.getHash();
     LOGGER.info("HASHCODE: " + hashCode);
     ITarget unHashed = efContext.fromHash(hashCode);
     context.assertEquals(sub.getPath(), unHashed.getPath());
     context.assertEquals(sub.getName(), unHashed.getName());
+
+    context.assertTrue(vv.fromPath(vv.getRoot().getAbsolutePath()).isRoot(), "root node not detected");
+    context.assertTrue(vv.fromPath(vv.getRoot().getPath()).isRoot(), "root node not detected");
+
+  }
+
+  @Test
+  public void listChildren(TestContext context) {
+    Path path = FileSystems.getDefault().getPath(ROOTDIR);
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null);
+    context.assertTrue(vv.getRoot().exists());
+    vv.getRoot().listChildren();
 
   }
 

@@ -44,9 +44,9 @@ public class UploadCommand extends AbstractCommand {
 
     FileSystem fs = efContext.getRoutingContext().vertx().fileSystem();
     for (FileUpload upload : uploadedFiles) {
-      String newFileName = FileSystemUtil.createUniqueName(fs, parentDir.getPath(), upload.fileName());
+      String newFileName = FileSystemUtil.createUniqueName(fs, parentDir.getAbsolutePath(), upload.fileName());
       ITarget newFile = parentDir.createChildTarget(newFileName);
-      fs.moveBlocking(upload.uploadedFileName(), newFile.getPath());
+      fs.moveBlocking(upload.uploadedFileName(), newFile.getAbsolutePath());
       added.add(newFile);
     }
 

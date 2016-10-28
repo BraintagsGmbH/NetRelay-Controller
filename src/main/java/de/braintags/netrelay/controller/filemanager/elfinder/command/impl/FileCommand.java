@@ -35,7 +35,7 @@ public class FileCommand extends AbstractCommand {
     ITarget fsi = super.findTarget(efContext, target);
     HttpServerResponse response = efContext.getRoutingContext().response();
     if (download) {
-      response.sendFile(fsi.getPath(), handler);
+      response.sendFile(fsi.getAbsolutePath(), handler);
     } else {
       String mime = fsi.getMimeType();
       response.putHeader("content-type", mime + "; charset=utf-8");
