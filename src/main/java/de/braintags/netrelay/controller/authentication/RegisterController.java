@@ -275,7 +275,7 @@ public class RegisterController extends AbstractAuthProviderController {
                   MailController.sendMail(context, getNetRelay().getMailClient(), mailPrefs, result -> {
                     MailController.MailSendResult msResult = result.result();
                     if (msResult.success) {
-                      RequestUtil.sendRedirect(context.response(), successUrl);
+                      RequestUtil.sendRedirect(context, successUrl);
                     } else {
                       context.put(MAIL_SEND_RESULT_PROP, msResult);
                       context.put(REGISTER_ERROR_PARAM, "Error on sending confirmation mail: " + msResult.errorMessage);
@@ -421,7 +421,7 @@ public class RegisterController extends AbstractAuthProviderController {
           context.put(REGISTER_ERROR_PARAM, acRes.cause().getMessage());
           context.reroute(failConfirmUrl);
         } else {
-          RequestUtil.sendRedirect(context.response(),
+          RequestUtil.sendRedirect(context,
               rc.getDestinationUrl() != null ? rc.getDestinationUrl() : successConfirmUrl);
         }
       });

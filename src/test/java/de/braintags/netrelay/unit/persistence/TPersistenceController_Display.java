@@ -93,6 +93,7 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
   public void testDisplayListAll(TestContext context) {
     try {
       String url = String.format(PRODUCT_LIST_ALL_CAPTURE, NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
+      LOGGER.info("calling url: " + url);
       testRequest(context, HttpMethod.POST, url, null, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
         context.assertTrue(resp.content.toString().contains("success"), "Expected name not found");

@@ -81,7 +81,7 @@ public class ProtocolController extends AbstractController {
       String uPath = sUri.getPath();
       String query = sUri.getQuery() != null ? "?" + sUri.getQuery() : "";
       String path2 = protocol + "://" + host + protDef + uPath + query;
-      RequestUtil.sendRedirect(context.response(), context.request(), path2, false);
+      RequestUtil.sendRedirect(context, path2, false);
     } else {
       context.next();
     }

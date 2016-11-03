@@ -17,7 +17,6 @@ import java.util.Properties;
 import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.exception.PropertyRequiredException;
 import de.braintags.netrelay.routing.RouterDefinition;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -90,8 +89,7 @@ public class RedirectController extends AbstractController {
    */
   @Override
   public void handleController(RoutingContext context) {
-    HttpServerResponse response = context.response();
-    RequestUtil.sendRedirect(response, context.request(), destination, reusePathParameters);
+    RequestUtil.sendRedirect(context, destination, reusePathParameters);
   }
 
   /**

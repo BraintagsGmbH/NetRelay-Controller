@@ -446,7 +446,7 @@ request parameter with the name
 This controller builds the api to support the web base filemanager from
 https://github.com/Studio-42/elFinder
 
-An example configuraiton of the component would look like this:
+An example configuration of the component would look like this:
 
 [source, json]
 ----
@@ -455,20 +455,19 @@ An example configuraiton of the component would look like this:
   "controller" : "de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController",
   "routes" : [ "/fileManager/api" ],
   "handlerProperties" : {
-    "rootDirectories" : "ROOTVOLUME:/Users/myuser/workspace/vertx/NetRelay-Controller/webroot"
+    "rootDirectories" : "ROOTVOLUME:webroot"
   }
 }
 ----
-
+Note: the path of the defined root directory in the example above defines the name of the volume before the colon,
+like it is displayed in the elfinder component.
 
 A template for thymeleaf to implement the ElFinder component would look like this:
 
 [source, html]
 ----
 
-<!
-
-DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
 xmlns:th="http://www.thymeleaf.org">
 <head>

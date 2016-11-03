@@ -272,7 +272,7 @@ public class PasswordLostController extends AbstractController {
               MailController.sendMail(context, getNetRelay().getMailClient(), mailPrefs, result -> {
                 MailController.MailSendResult msResult = result.result();
                 if (msResult.success) {
-                  RequestUtil.sendRedirect(context.response(), successUrl);
+                  RequestUtil.sendRedirect(context, successUrl);
                 } else {
                   context.put(MAIL_SEND_RESULT_PROP, msResult);
                   context.put(RESET_ERROR_PARAM, msResult.errorMessage);

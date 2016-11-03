@@ -187,19 +187,23 @@ public class PersistenceController extends AbstractCaptureController {
    */
   private void handlePersistence(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
       Handler<AsyncResult<Void>> handler) {
-    CounterObject<Void> co = new CounterObject<>(resolvedCaptureCollections.size(), handler);
-    for (CaptureMap map : resolvedCaptureCollections) {
-      handleAction(context, map, result -> {
-        if (result.failed()) {
-          co.setThrowable(result.cause());
-        } else {
-          if (co.reduce()) {
-            handler.handle(Future.succeededFuture());
+    if (resolvedCaptureCollections.isEmpty()) {
+      handler.handle(Future.succeededFuture());
+    } else {
+      CounterObject<Void> co = new CounterObject<>(resolvedCaptureCollections.size(), handler);
+      for (CaptureMap map : resolvedCaptureCollections) {
+        handleAction(context, map, result -> {
+          if (result.failed()) {
+            co.setThrowable(result.cause());
+          } else {
+            if (co.reduce()) {
+              handler.handle(Future.succeededFuture());
+            }
           }
+        });
+        if (co.isError()) {
+          break;
         }
-      });
-      if (co.isError()) {
-        break;
       }
     }
   }

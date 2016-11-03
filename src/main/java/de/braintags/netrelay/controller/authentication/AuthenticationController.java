@@ -290,7 +290,7 @@ public class AuthenticationController extends AbstractAuthProviderController {
     getNetRelay().getRouter().route(logoutUrl).handler(context -> {
       MemberUtil.logout(context);
       String path = logoutDestinationURL + "?" + LOGOUT_MESSAGE_PROP + "=success";
-      RequestUtil.sendRedirect(context.response(), path);
+      RequestUtil.sendRedirect(context, path);
     });
 
   }

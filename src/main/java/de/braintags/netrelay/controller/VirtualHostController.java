@@ -112,7 +112,7 @@ public class VirtualHostController extends AbstractController {
         newDestination += path;
       }
       LOGGER.info("redirecting to " + newDestination);
-      RequestUtil.sendRedirect(context.response(), context.request(), newDestination, true);
+      RequestUtil.sendRedirect(context, newDestination, true);
     });
   }
 

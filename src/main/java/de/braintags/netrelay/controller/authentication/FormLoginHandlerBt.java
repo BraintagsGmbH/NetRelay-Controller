@@ -165,7 +165,7 @@ public class FormLoginHandlerBt implements FormLoginHandler {
       String returnURL = context.session().remove(returnURLParam);
       if (returnURL != null) {
         // Now redirect back to the original url
-        RequestUtil.sendRedirect(context.response(), context.request(), returnURL);
+        RequestUtil.sendRedirect(context, returnURL);
         return true;
       }
     }
@@ -177,7 +177,7 @@ public class FormLoginHandlerBt implements FormLoginHandler {
       // Redirect to the default logged in OK page - this would occur
       // if the user logged in directly at this URL without being redirected here first from another
       // url
-      RequestUtil.sendRedirect(context.response(), context.request(), directLoggedInOKURL);
+      RequestUtil.sendRedirect(context, directLoggedInOKURL);
       return true;
     }
     return false;

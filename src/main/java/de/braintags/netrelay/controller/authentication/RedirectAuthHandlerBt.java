@@ -61,7 +61,7 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
         authorise(user, context);
       } else {
         // Now redirect to the login url - we'll get redirected back here after successful login
-        String url = RequestUtil.createRedirectUrl(context.request(), context.request().path());
+        String url = RequestUtil.createRedirectUrl(context, context.request().path());
         session.put(returnURLParam, url);
         context.response().putHeader("location", loginRedirectURL).setStatusCode(302).end();
       }
