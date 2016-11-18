@@ -110,7 +110,7 @@ public class TProtocolController extends NetRelayBaseConnectorTest {
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
     RouterDefinition def = new RouterDefinition();
-    def.setController(ProtocolController.class);
+    def.setControllerClass(ProtocolController.class);
     def.getHandlerProperties().put(ProtocolController.PROTOCOL_PROPNAME, "https");
     settings.getRouterDefinitions().add(0, def);
   }

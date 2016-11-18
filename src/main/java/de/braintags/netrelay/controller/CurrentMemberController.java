@@ -110,7 +110,7 @@ public class CurrentMemberController extends AbstractController {
     RouterDefinition def = new RouterDefinition();
     def.setName(CurrentMemberController.class.getSimpleName());
     def.setBlocking(false);
-    def.setController(CurrentMemberController.class);
+    def.setControllerClass(CurrentMemberController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(null);
     return def;

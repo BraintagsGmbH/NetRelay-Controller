@@ -12,6 +12,7 @@
  */
 package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
@@ -19,7 +20,6 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,11 +30,12 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class SearchCommand extends AbstractCommand {
+public class SearchCommand extends AbstractCommand<List<ITarget>> {
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<List<ITarget>>> handler) {
     final String query = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_SEARCH_QUERY);
+    List<ITarget> found = new ArrayList<>();
     try {
       JsonArray objects = new JsonArray();
       List<IVolume> volumes = efContext.getRootVolumes();
@@ -49,6 +50,7 @@ public class SearchCommand extends AbstractCommand {
             // adds targets info in the return list
             targets.forEach(target -> objects.add(getTargetInfo(efContext, target)));
           }
+          found.addAll(targets);
         }
       }
 
@@ -56,7 +58,7 @@ public class SearchCommand extends AbstractCommand {
     } catch (Exception e) {
       json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ERROR, "Unable to search! Error: " + e);
     }
-    handler.handle(Future.succeededFuture());
+    handler.handle(createFuture(found));
   }
 
 }

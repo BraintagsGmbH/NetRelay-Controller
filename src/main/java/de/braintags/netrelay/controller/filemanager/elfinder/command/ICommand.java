@@ -13,6 +13,7 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.command;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
+import de.braintags.netrelay.controller.filemanager.elfinder.ICommandListener;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -34,4 +35,11 @@ public interface ICommand {
    * @param handler
    */
   public void execute(ElFinderContext efContext, Handler<AsyncResult<JsonObject>> handler);
+
+  /**
+   * Register a listener for the current command
+   * 
+   * @param commandListener
+   */
+  public void addListener(ICommandListener commandListener);
 }

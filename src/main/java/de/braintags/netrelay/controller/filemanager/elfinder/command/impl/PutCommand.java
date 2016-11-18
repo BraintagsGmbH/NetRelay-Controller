@@ -16,7 +16,6 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -27,17 +26,17 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class PutCommand extends AbstractCommand {
+public class PutCommand extends AbstractCommand<ITarget> {
   public static final String ENCODING = "utf-8";
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<ITarget>> handler) {
     final String target = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_TARGET);
     ITarget file = findTarget(efContext, target);
     String newContent = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_CONTENT);
     file.writeFile(Buffer.buffer(newContent, ENCODING));
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_CHANGED, this.buildJsonFilesArray(efContext, file));
-    handler.handle(Future.succeededFuture());
+    handler.handle(createFuture(file));
   }
 
 }

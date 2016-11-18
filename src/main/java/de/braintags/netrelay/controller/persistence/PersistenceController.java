@@ -276,7 +276,7 @@ public class PersistenceController extends AbstractCaptureController {
     RouterDefinition def = new RouterDefinition();
     def.setName(PersistenceController.class.getSimpleName());
     def.setBlocking(true);
-    def.setController(PersistenceController.class);
+    def.setControllerClass(PersistenceController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(new String[] { "/persistenceController/:entity/:action/read.html" });
     def.setCaptureCollection(createDefaultCaptureCollection());

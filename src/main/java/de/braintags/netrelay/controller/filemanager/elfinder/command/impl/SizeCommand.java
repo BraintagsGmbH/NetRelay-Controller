@@ -18,7 +18,6 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
@@ -28,10 +27,10 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class SizeCommand extends AbstractCommand {
+public class SizeCommand extends AbstractCommand<List<ITarget>> {
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<List<ITarget>>> handler) {
     final List<String> targets = efContext.getRoutingContext().request().params()
         .getAll(ElFinderConstants.ELFINDER_PARAMETER_TARGETS);
 
@@ -41,7 +40,7 @@ public class SizeCommand extends AbstractCommand {
       size += target.getSize();
     }
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_SIZE, size);
-    handler.handle(Future.succeededFuture());
+    handler.handle(createFuture(targetList));
   }
 
 }

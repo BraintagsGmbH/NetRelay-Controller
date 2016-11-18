@@ -21,6 +21,7 @@ import java.util.Map;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
+import de.braintags.netrelay.controller.filemanager.elfinder.ICommandListener;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
@@ -34,10 +35,13 @@ import io.vertx.core.json.JsonObject;
  * abstract implementation of ICommand
  * 
  * @author Michael Remme
- * 
+ * @param <T>
+ *          defines the return type of the abstract method
+ *          {@link AbstractCommand#execute(ElFinderContext, JsonObject, Handler)}
  */
-public abstract class AbstractCommand implements ICommand {
+public abstract class AbstractCommand<T> implements ICommand {
   private static final String CMD_TMB_TARGET = "?cmd=tmb&target=%s";
+  private ICommandListener listener;
 
   @Override
   public final void execute(ElFinderContext efContext, Handler<AsyncResult<JsonObject>> handler) {
@@ -47,7 +51,17 @@ public abstract class AbstractCommand implements ICommand {
         if (res.failed()) {
           handler.handle(Future.failedFuture(res.cause()));
         } else {
-          handler.handle(Future.succeededFuture(json));
+          if (listener != null) {
+            listener.executed(this, efContext, res.result(), json, lr -> {
+              if (lr.failed()) {
+                handler.handle(Future.failedFuture(lr.cause()));
+              } else {
+                handler.handle(Future.succeededFuture(json));
+              }
+            });
+          } else {
+            handler.handle(Future.succeededFuture(json));
+          }
         }
       });
     } catch (Exception e) {
@@ -58,12 +72,13 @@ public abstract class AbstractCommand implements ICommand {
   /**
    * Execute and fill the given JsonObject
    * 
-   * @param context
    * @param efContext
    * @param json
    * @param handler
+   *          the handler is getting the elements, which were used for the action, like an {@link ITarget} or a
+   *          {@link List} of targets for instance
    */
-  protected abstract void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler);
+  protected abstract void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<T>> handler);
 
   /**
    * Find the current working directory - the directory for the current request
@@ -163,6 +178,36 @@ public abstract class AbstractCommand implements ICommand {
   }
 
   /**
+   * Create a suceeded future with the given target
+   * 
+   * @param target
+   * @return
+   */
+  protected Future<ITarget> createFuture(ITarget target) {
+    return Future.succeededFuture(target);
+  }
+
+  /**
+   * Create a suceeded future with the given targets
+   * 
+   * @param targets
+   * @return
+   */
+  protected Future<List<ITarget>> createFuture(List<ITarget> targets) {
+    return Future.succeededFuture(targets);
+  }
+
+  /**
+   * Create a suceeded future with the given targets
+   * 
+   * @param targets
+   * @return
+   */
+  protected Future<Map<String, ITarget>> createFuture(Map<String, ITarget> targets) {
+    return Future.succeededFuture(targets);
+  }
+
+  /**
    * Checks wether target is a directory and not empty
    * 
    * @param target
@@ -232,6 +277,18 @@ public abstract class AbstractCommand implements ICommand {
     } else {
       fs.copyBlocking(src.getAbsolutePath(), dst.getAbsolutePath());
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand#addListener(de.braintags.netrelay.controller
+   * .filemanager.elfinder.ICommandListener)
+   */
+  @Override
+  public void addListener(ICommandListener commandListener) {
+    this.listener = commandListener;
   }
 
 }

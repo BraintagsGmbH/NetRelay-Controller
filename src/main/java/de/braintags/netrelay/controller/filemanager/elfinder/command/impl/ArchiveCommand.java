@@ -28,10 +28,10 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class ArchiveCommand extends AbstractCommand {
+public class ArchiveCommand extends AbstractCommand<List<ITarget>> {
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<List<ITarget>>> handler) {
     List<String> targets = efContext.getParameterValues(ElFinderConstants.ELFINDER_PARAMETER_TARGETS);
     String type = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_TYPE);
     List<ITarget> targetList = findTargets(efContext, targets);

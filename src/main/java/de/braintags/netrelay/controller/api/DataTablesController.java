@@ -214,7 +214,7 @@ public class DataTablesController extends AbstractController {
     def.setActive(false);
     def.setName(DataTablesController.class.getSimpleName());
     def.setBlocking(false);
-    def.setController(DataTablesController.class);
+    def.setControllerClass(DataTablesController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(new String[] {});
     return def;

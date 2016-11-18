@@ -16,7 +16,6 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -27,10 +26,10 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class MkfileCommand extends AbstractCommand {
+public class MkfileCommand extends AbstractCommand<ITarget> {
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<ITarget>> handler) {
     final String targetHash = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_TARGET);
     final String fileName = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_NAME);
     ITarget target = findTarget(efContext, targetHash);
@@ -41,7 +40,7 @@ public class MkfileCommand extends AbstractCommand {
     newFile.createFile();
     JsonObject jo = getTargetInfo(efContext, newFile);
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, new JsonArray().add(jo));
-    handler.handle(Future.succeededFuture());
+    handler.handle(createFuture(newFile));
   }
 
 }

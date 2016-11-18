@@ -15,6 +15,7 @@ package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -25,21 +26,28 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class FileCommand extends AbstractCommand {
+public class FileCommand extends AbstractCommand<ITarget> {
   public static final String STREAM = "1";
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<ITarget>> handler) {
     String target = efContext.getParameter("target");
     boolean download = STREAM.equals(efContext.getParameter("download"));
     ITarget fsi = super.findTarget(efContext, target);
     HttpServerResponse response = efContext.getRoutingContext().response();
     if (download) {
-      response.sendFile(fsi.getAbsolutePath(), handler);
+      response.sendFile(fsi.getAbsolutePath(), res -> {
+        if (res.failed()) {
+          handler.handle(Future.failedFuture(res.cause()));
+        } else {
+          handler.handle(createFuture(fsi));
+        }
+      });
     } else {
       String mime = fsi.getMimeType();
       response.putHeader("content-type", mime + "; charset=utf-8");
       response.end(fsi.readFile());
+      handler.handle(createFuture(fsi));
     }
   }
 

@@ -31,11 +31,11 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class DimCommand extends AbstractCommand {
+public class DimCommand extends AbstractCommand<ITarget> {
   public static final String SEPARATOR = "x";
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<ITarget>> handler) {
     final String targetString = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_TARGET);
 
     BufferedImage image;
@@ -43,8 +43,10 @@ public class DimCommand extends AbstractCommand {
     try {
       image = ImageIO.read(target.openInputStream());
       json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_DIM, image.getWidth() + SEPARATOR + image.getHeight());
+      handler.handle(createFuture(target));
     } catch (IOException e) {
       handler.handle(Future.failedFuture(e));
     }
   }
+
 }

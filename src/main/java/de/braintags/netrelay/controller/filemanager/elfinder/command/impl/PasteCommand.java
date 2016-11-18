@@ -19,7 +19,6 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
@@ -29,11 +28,11 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class PasteCommand extends AbstractCommand {
+public class PasteCommand extends AbstractCommand<List<ITarget>> {
   public static final String INT_CUT = "1";
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<List<ITarget>>> handler) {
     List<String> targets = efContext.getParameterValues(ElFinderConstants.ELFINDER_PARAMETER_TARGETS);
     final String destination = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_FILE_DESTINATION);
     final boolean cut = INT_CUT.equals(efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_CUT));
@@ -58,7 +57,7 @@ public class PasteCommand extends AbstractCommand {
 
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, buildJsonFilesArray(efContext, added));
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_REMOVED, removed.toArray());
-    handler.handle(Future.succeededFuture());
+    handler.handle(createFuture(added));
   }
 
 }

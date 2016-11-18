@@ -23,7 +23,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * 
  */
 @RunWith(Suite.class)
-@SuiteClasses({ ElFinderVolumeTest.class, ElFinderControllerTest.class })
+@SuiteClasses({ ElFinderVolumeTest.class, ElFinderControllerTest.class, ElFinderListenerTest.class })
 public class ElFinderTestSuite {
 
 }

@@ -20,7 +20,6 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -32,10 +31,10 @@ import io.vertx.ext.web.RoutingContext;
  * @author Michael Remme
  * 
  */
-public class OpenCommand extends AbstractCommand {
+public class OpenCommand extends AbstractCommand<Map<String, ITarget>> {
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Map<String, ITarget>>> handler) {
     RoutingContext context = efContext.getRoutingContext();
     boolean init = context.request().getParam(ElFinderConstants.ELFINDER_PARAMETER_INIT) != null;
     boolean tree = context.request().getParam(ElFinderConstants.ELFINDER_PARAMETER_TREE) != null;
@@ -62,7 +61,7 @@ public class OpenCommand extends AbstractCommand {
     json.put(ElFinderConstants.ELFINDER_PARAMETER_FILES, buildJsonFilesArray(efContext, files.values()));
     json.put(ElFinderConstants.ELFINDER_PARAMETER_CWD, getTargetInfo(efContext, cwd));
     json.put(ElFinderConstants.ELFINDER_PARAMETER_OPTIONS, getOptions(efContext, cwd));
-    handler.handle(Future.succeededFuture());
+    handler.handle(createFuture(files));
   }
 
 }

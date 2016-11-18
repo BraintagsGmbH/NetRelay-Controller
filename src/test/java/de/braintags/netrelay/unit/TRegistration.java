@@ -278,7 +278,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     if (cmc == null) {
       cmc = new RouterDefinition();
       cmc.setActive(true);
-      cmc.setController(CurrentMemberController.class);
+      cmc.setControllerClass(CurrentMemberController.class);
     }
     cmc.setRoutes(new String[] { "/*" });
     settings.getRouterDefinitions().addBefore(AuthenticationController.class.getSimpleName(), cmc);

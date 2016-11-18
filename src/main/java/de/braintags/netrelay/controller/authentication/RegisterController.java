@@ -572,7 +572,7 @@ public class RegisterController extends AbstractAuthProviderController {
     RouterDefinition def = new RouterDefinition();
     def.setName(RegisterController.class.getSimpleName());
     def.setBlocking(false);
-    def.setController(RegisterController.class);
+    def.setControllerClass(RegisterController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(new String[] { "/customer/doRegister", "/customer/verifyRegistration" });
     return def;

@@ -98,6 +98,30 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
   @Test
   public void getCommand(TestContext context) {
     // unimplemented as test yet
+    String fileContent = "content of a magic file";
+    String fn = "file2Open.txt";
+    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+      vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
+    }
+
+    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+    String url = API_ELFINDER + "?cmd=" + "get&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
+        + "&_=1475075436203";
+    try {
+      MultipartUtil mu = new MultipartUtil();
+      testRequest(context, HttpMethod.POST, url, req -> {
+        mu.finish(req);
+      }, resp -> {
+        LOGGER.info("RESPONSE: " + resp.content);
+        LOGGER.info("HEADERS: " + resp.headers);
+        context.assertFalse(resp.content.contains("error"), "Error occured: " + resp.content);
+        context.assertTrue(resp.content.contains("content"), "content element not found");
+        context.assertTrue(resp.content.contains(fileContent), "file content not found");
+      }, 200, "OK", null);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+
   }
 
   @Test

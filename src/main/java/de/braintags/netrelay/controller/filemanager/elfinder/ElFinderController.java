@@ -101,7 +101,9 @@ public class ElFinderController extends AbstractController {
           if (res.failed()) {
             sendException(context, res.cause());
           } else {
-            sendJson(context, res.result().encode());
+            if (!context.response().ended()) { // some commands, like File, may send already another result
+              sendJson(context, res.result().encode());
+            }
           }
         });
       } catch (Exception e) {

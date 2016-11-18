@@ -101,7 +101,7 @@ public class RedirectController extends AbstractController {
     RouterDefinition def = new RouterDefinition();
     def.setName(RedirectController.class.getSimpleName());
     def.setBlocking(false);
-    def.setController(RedirectController.class);
+    def.setControllerClass(RedirectController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(new String[] { "/" });
     return def;

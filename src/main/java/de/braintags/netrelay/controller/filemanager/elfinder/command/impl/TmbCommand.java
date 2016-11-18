@@ -13,6 +13,7 @@
 package de.braintags.netrelay.controller.filemanager.elfinder.command.impl;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -24,11 +25,11 @@ import io.vertx.core.json.JsonObject;
  * @author Michael Remme
  * 
  */
-public class TmbCommand extends AbstractCommand {
+public class TmbCommand extends AbstractCommand<ITarget> {
   public static final String STREAM = "1";
 
   @Override
-  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<Void>> handler) {
+  public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<ITarget>> handler) {
     handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 
