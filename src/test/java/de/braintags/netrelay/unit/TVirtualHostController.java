@@ -89,7 +89,7 @@ public class TVirtualHostController extends NetRelayBaseConnectorTest {
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
     RouterDefinition def = new RouterDefinition();
-    def.setControllerClass(VirtualHostController.class);
+    def.setController(VirtualHostController.class);
     def.getHandlerProperties().put(VirtualHostController.HOSTNAME_PROP, "127.0.0.1");
     def.getHandlerProperties().put(VirtualHostController.DESTINATION_PROP, "localhost");
     settings.getRouterDefinitions().add(0, def);

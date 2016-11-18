@@ -112,6 +112,16 @@ public class ElFinderController extends AbstractController {
     }
   }
 
+  /**
+   * Add an {@link ICommandListener}
+   * 
+   * @param command
+   * @param listener
+   */
+  public void addCommandListener(String command, ICommandListener listener) {
+    commandFactory.addCommandListener(command, listener);
+  }
+
   private void sendException(RoutingContext context, Throwable e) {
     LOGGER.error("", e);
     String message = String.format(ElFinderConstants.ELFINDER_ERROR_EXCEPTION, e.toString());

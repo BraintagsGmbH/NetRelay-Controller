@@ -490,7 +490,7 @@ public class MailController extends AbstractController {
     RouterDefinition def = new RouterDefinition();
     def.setName(MailController.class.getSimpleName());
     def.setBlocking(false);
-    def.setControllerClass(MailController.class);
+    def.setController(MailController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(new String[] { "/api/sendmail" });
     return def;

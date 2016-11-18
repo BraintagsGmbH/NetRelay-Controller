@@ -18,6 +18,8 @@ import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController;
+import de.braintags.netrelay.controller.filemanager.elfinder.ICommandListener;
+import de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
 import de.braintags.netrelay.init.Settings;
@@ -25,8 +27,12 @@ import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.unit.AbstractCaptureParameterTest;
 import de.braintags.netrelay.util.MultipartUtil;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 
 /**
@@ -47,9 +53,13 @@ public class ElFinderListenerTest extends AbstractCaptureParameterTest {
    * Comment for <code>API_ELFINDER</code>
    */
   private static final String API_ELFINDER = "/fileManager/api";
+  private static boolean LISTENED = false;
 
   @Test
   public void openFile(TestContext context) {
+    LISTENED = false;
+    addListener();
+
     String fileContent = "content of a magic file";
     String fn = "file2Open.txt";
     if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
@@ -72,10 +82,27 @@ public class ElFinderListenerTest extends AbstractCaptureParameterTest {
     } catch (Exception e) {
       context.fail(e);
     }
+
+    context.assertTrue(LISTENED, "listener not called?");
   }
 
   private void addListener() {
-    //
+    ICommandListener listener = new ICommandListener() {
+
+      @Override
+      public void executed(ICommand command, ElFinderContext context, Object target, JsonObject resultObject,
+          Handler<AsyncResult<Void>> handler) {
+        LISTENED = true;
+        LOGGER.info("LISTENER CALLED: " + resultObject);
+        Future f = Future.succeededFuture();
+        handler.handle(f);
+      }
+    };
+
+    RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
+        .getNamedDefinition(ElFinderController.class.getSimpleName());
+    ElFinderController contr = (ElFinderController) def.getControllerInstance();
+    contr.addCommandListener("file", listener);
   }
 
   IVolume getVolume() {

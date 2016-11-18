@@ -206,7 +206,7 @@ public class ThymeleafTemplateController extends AbstractController {
     RouterDefinition def = new RouterDefinition();
     def.setName(ThymeleafTemplateController.class.getSimpleName());
     def.setBlocking(false);
-    def.setControllerClass(ThymeleafTemplateController.class);
+    def.setController(ThymeleafTemplateController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(new String[] { "/*" });
     return def;

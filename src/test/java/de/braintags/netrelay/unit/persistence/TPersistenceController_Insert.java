@@ -235,7 +235,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     setPersistenceDef(persistenceDefinition);
 
     RouterDefinition rd = new RouterDefinition();
-    rd.setControllerClass(CheckController.class);
+    rd.setController(CheckController.class);
     CheckController.checkMapperName = SimpleMapper.class.getSimpleName();
     settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }

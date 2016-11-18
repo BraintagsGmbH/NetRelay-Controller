@@ -322,7 +322,7 @@ public class AuthenticationController extends AbstractAuthProviderController {
     RouterDefinition def = new RouterDefinition();
     def.setName(AuthenticationController.class.getSimpleName());
     def.setBlocking(false);
-    def.setControllerClass(AuthenticationController.class);
+    def.setController(AuthenticationController.class);
     def.setHandlerProperties(getDefaultProperties());
     def.setRoutes(new String[] { "/member/*" });
     return def;

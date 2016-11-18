@@ -173,7 +173,7 @@ public class TPersistenceController_Display extends AbstractPersistenceControlle
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
     setPersistenceDef(persistenceDefinition);
     RouterDefinition rd = new RouterDefinition();
-    rd.setControllerClass(CheckController.class);
+    rd.setController(CheckController.class);
     CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
     settings.getRouterDefinitions().addAfter(PersistenceController.class.getSimpleName(), rd);
   }
