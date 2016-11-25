@@ -53,11 +53,13 @@ public class ElFinderListenerTest extends AbstractCaptureParameterTest {
    * Comment for <code>API_ELFINDER</code>
    */
   private static final String API_ELFINDER = "/fileManager/api";
-  private static boolean LISTENED = false;
+  private static boolean LISTENED_BEFORE = false;
+  private static boolean LISTENED_AFTER;
 
   @Test
   public void openFile(TestContext context) {
-    LISTENED = false;
+    LISTENED_BEFORE = false;
+    LISTENED_AFTER = false;
     addListener();
 
     String fileContent = "content of a magic file";
@@ -83,20 +85,29 @@ public class ElFinderListenerTest extends AbstractCaptureParameterTest {
       context.fail(e);
     }
 
-    context.assertTrue(LISTENED, "listener not called?");
+    context.assertTrue(LISTENED_BEFORE, "listener not called?");
+    context.assertTrue(LISTENED_AFTER, "listener not called?");
   }
 
   private void addListener() {
     ICommandListener listener = new ICommandListener() {
 
       @Override
-      public void executed(ICommand command, ElFinderContext context, Object target, JsonObject resultObject,
+      public void before(ICommand command, ElFinderContext context, Handler<AsyncResult<Boolean>> handler) {
+        LISTENED_BEFORE = true;
+        Future f = Future.succeededFuture();
+        handler.handle(f);
+      }
+
+      @Override
+      public void after(ICommand command, ElFinderContext context, Object target, JsonObject resultObject,
           Handler<AsyncResult<Void>> handler) {
-        LISTENED = true;
+        LISTENED_AFTER = true;
         LOGGER.info("LISTENER CALLED: " + resultObject);
         Future f = Future.succeededFuture();
         handler.handle(f);
       }
+
     };
 
     RouterDefinition def = netRelay.getSettings().getRouterDefinitions()

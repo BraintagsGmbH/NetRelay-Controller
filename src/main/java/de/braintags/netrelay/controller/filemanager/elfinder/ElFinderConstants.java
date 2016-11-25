@@ -73,6 +73,7 @@ public final class ElFinderConstants {
   public static final String ELFINDER_PARAMETER_ARCHIVERS = "archivers";
   public static final String ELFINDER_PARAMETER_COMMAND = "cmd";
   public static final String ELFINDER_PARAMETER_TARGETS = "targets[]";
+  public static final String ELFINDER_PARAMETER_RENAMES = "renames[]";
   public static final String ELFINDER_PARAMETER_SEARCH_QUERY = "q";
   public static final String ELFINDER_PARAMETER_CONTENT = "content";
   public static final String ELFINDER_PARAMETER_LIST = "list";
@@ -80,6 +81,7 @@ public final class ElFinderConstants {
   public static final String ELFINDER_PARAMETER_FILE_DESTINATION = "dst";
   public static final String ELFINDER_PARAMETER_CUT = "cut";
   public static final String ELFINDER_PARAMETER_TYPE = "type";
+  public static final String ELFINDER_PARAMETER_SRC = "src";
 
   // api commands json header
   public static final String ELFINDER_JSON_RESPONSE_ADDED = "added";

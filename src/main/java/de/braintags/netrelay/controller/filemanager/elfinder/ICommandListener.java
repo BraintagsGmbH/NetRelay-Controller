@@ -26,6 +26,18 @@ import io.vertx.core.json.JsonObject;
 public interface ICommandListener {
 
   /**
+   * This method is called, before a command shall be processed
+   * 
+   * @param command
+   *          the command, which was executed
+   * @param context
+   *          the context for the request
+   * @param handler
+   *          a handler to be informed, wether the command shall be executed or not
+   */
+  public void before(ICommand command, ElFinderContext context, Handler<AsyncResult<Boolean>> handler);
+
+  /**
    * This method is called, when the command was executed
    * 
    * @param command
@@ -39,7 +51,7 @@ public interface ICommandListener {
    * @param handler
    *          a handler to be informed
    */
-  public void executed(ICommand command, ElFinderContext context, Object target, JsonObject resultObject,
+  public void after(ICommand command, ElFinderContext context, Object target, JsonObject resultObject,
       Handler<AsyncResult<Void>> handler);
 
 }

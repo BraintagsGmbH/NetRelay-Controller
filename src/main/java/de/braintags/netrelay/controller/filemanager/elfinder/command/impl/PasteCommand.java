@@ -20,10 +20,19 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 /**
+ * Arguments are defined as:
  * 
+ * cmd : paste
+ * src : hash of the directory from which the files will be copied / moved (the source)
+ * dst : hash of the directory to which the files will be copied / moved (the destination)
+ * targets[] : An array of hashes for the files to be copied / moved
+ * cut : 1 if the files are moved, missing if the files are copied
+ * renames[] : Filename list of rename request
+ * suffix : Suffixes during rename (default is "~")
  * 
  * @author Michael Remme
  * 
@@ -34,7 +43,9 @@ public class PasteCommand extends AbstractCommand<List<ITarget>> {
   @Override
   public void execute(ElFinderContext efContext, JsonObject json, Handler<AsyncResult<List<ITarget>>> handler) {
     List<String> targets = efContext.getParameterValues(ElFinderConstants.ELFINDER_PARAMETER_TARGETS);
+    List<String> renames = efContext.getParameterValues(ElFinderConstants.ELFINDER_PARAMETER_RENAMES);
     final String destination = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_FILE_DESTINATION);
+    final String src = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_SRC);
     final boolean cut = INT_CUT.equals(efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_CUT));
 
     List<ITarget> added = new ArrayList<>();
@@ -56,7 +67,10 @@ public class PasteCommand extends AbstractCommand<List<ITarget>> {
     }
 
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, buildJsonFilesArray(efContext, added));
-    json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_REMOVED, removed.toArray());
+
+    JsonArray returnArray = new JsonArray();
+    removed.forEach(target -> returnArray.add(target));
+    json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_REMOVED, returnArray);
     handler.handle(createFuture(added));
   }
 

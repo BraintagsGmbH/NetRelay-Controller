@@ -45,27 +45,54 @@ public abstract class AbstractCommand<T> implements ICommand {
 
   @Override
   public final void execute(ElFinderContext efContext, Handler<AsyncResult<JsonObject>> handler) {
+    listenerBefore(efContext, lb -> {
+      if (lb.failed()) {
+        handler.handle(Future.failedFuture(lb.cause()));
+      } else if (lb.result()) {
+        doExecute(efContext, handler);
+      } else {
+        // command denied
+        handler.handle(Future.failedFuture("action denied by server"));
+      }
+    });
+
+  }
+
+  private void doExecute(ElFinderContext efContext, Handler<AsyncResult<JsonObject>> handler) {
     JsonObject json = new JsonObject();
     try {
       execute(efContext, json, res -> {
         if (res.failed()) {
           handler.handle(Future.failedFuture(res.cause()));
         } else {
-          if (listener != null) {
-            listener.executed(this, efContext, res.result(), json, lr -> {
-              if (lr.failed()) {
-                handler.handle(Future.failedFuture(lr.cause()));
-              } else {
-                handler.handle(Future.succeededFuture(json));
-              }
-            });
-          } else {
-            handler.handle(Future.succeededFuture(json));
-          }
+          listenerAfter(efContext, json, res.result(), handler);
         }
       });
     } catch (Exception e) {
       handler.handle(Future.failedFuture(e));
+    }
+  }
+
+  private void listenerBefore(ElFinderContext efContext, Handler<AsyncResult<Boolean>> handler) {
+    if (listener != null) {
+      listener.before(this, efContext, handler);
+    } else {
+      handler.handle(Future.succeededFuture(true));
+    }
+  }
+
+  private void listenerAfter(ElFinderContext efContext, JsonObject json, T result,
+      Handler<AsyncResult<JsonObject>> handler) {
+    if (listener != null) {
+      listener.after(this, efContext, result, json, lr -> {
+        if (lr.failed()) {
+          handler.handle(Future.failedFuture(lr.cause()));
+        } else {
+          handler.handle(Future.succeededFuture(json));
+        }
+      });
+    } else {
+      handler.handle(Future.succeededFuture(json));
     }
   }
 

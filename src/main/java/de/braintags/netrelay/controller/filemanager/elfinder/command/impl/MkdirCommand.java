@@ -34,7 +34,7 @@ public class MkdirCommand extends AbstractCommand<ITarget> {
     final String fileName = efContext.getParameter(ElFinderConstants.ELFINDER_PARAMETER_NAME);
     ITarget target = findTarget(efContext, targetHash);
     ITarget newFile = target.createChildTarget(fileName);
-    newFile.createFile();
+    newFile.createFolder();
     JsonObject jo = getTargetInfo(efContext, newFile);
     json.put(ElFinderConstants.ELFINDER_JSON_RESPONSE_ADDED, new JsonArray().add(jo));
     handler.handle(createFuture(newFile));
