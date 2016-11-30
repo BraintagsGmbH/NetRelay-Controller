@@ -223,4 +223,11 @@ public interface ITarget {
    */
   boolean isChild(ITarget parent);
 
+  /**
+   * Get the file extension. For a file demo.txt this will be "txt"
+   * 
+   * @return
+   */
+  String getExtension();
+
 }

@@ -399,4 +399,14 @@ public class VertxTarget implements ITarget {
     return getAbsolutePath().startsWith(parent.getAbsolutePath());
   }
 
+  @Override
+  public String getExtension() {
+    String name = getName();
+    if (name.lastIndexOf('.') > 0) {
+      return name.substring(name.lastIndexOf('.') + 1);
+    } else {
+      return null;
+    }
+  }
+
 }
