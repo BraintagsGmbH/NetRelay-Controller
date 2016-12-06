@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.braintags.io.vertx.util.CounterObject;
+import de.braintags.io.vertx.util.HttpContentType;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.NetRelay;
 import de.braintags.netrelay.controller.AbstractController;
@@ -203,7 +204,7 @@ public class MailController extends AbstractController {
     String varname = readProperty(STORE_RESULT_VARIABLE_PARAMETER, null, false);
     if (varname == null) {
       HttpServerResponse response = context.response();
-      response.putHeader("content-type", "application/json; charset=utf-8").end(Json.encodePrettily(result));
+      response.putHeader("content-type", HttpContentType.JSON_UTF8.toString()).end(Json.encodePrettily(result));
     } else {
       context.put(varname, Json.encodePrettily(result));
       context.next();

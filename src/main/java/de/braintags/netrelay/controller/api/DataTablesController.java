@@ -22,6 +22,7 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.mapping.IField;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mapping.IStoreObject;
+import de.braintags.io.vertx.util.HttpContentType;
 import de.braintags.io.vertx.util.exception.ParameterRequiredException;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.api.DataTableLinkDescriptor.ColDef;
@@ -121,7 +122,7 @@ public class DataTablesController extends AbstractController {
                 context.fail(result.cause());
               } else {
                 HttpServerResponse response = context.response();
-                response.putHeader("content-type", "application/json; charset=utf-8")
+                response.putHeader("content-type", HttpContentType.JSON_UTF8.toString())
                     .end(result.result().encodePrettily());
               }
             });

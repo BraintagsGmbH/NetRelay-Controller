@@ -18,7 +18,6 @@ import org.thymeleaf.dialect.IDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 
 import de.braintags.io.vertx.util.exception.InitException;
-import de.braintags.netrelay.NetRelay;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.templateengine.thymeleaf.ThymeleafTemplateEngineImplBt;
 import io.vertx.ext.web.RoutingContext;
@@ -121,7 +120,7 @@ public class ThymeleafTemplateController extends AbstractController {
   @Override
   public void handleController(RoutingContext context) {
     String path = context.request().path();
-    context.put(NetRelay.NETRELAY_PROPERTY, getNetRelay());
+    addNetRelayToContext(context);
     LOGGER.info("handling template for url " + context.normalisedPath() + " | " + path);
     if (path.endsWith("/")) {
       LOGGER.info("REROUTING TO: " + path);
