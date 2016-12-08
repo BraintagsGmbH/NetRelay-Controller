@@ -22,6 +22,7 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.mapping.IField;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mapping.IStoreObject;
+import de.braintags.io.vertx.pojomapper.mapping.IStoreObjectFactory;
 import de.braintags.io.vertx.util.HttpContentType;
 import de.braintags.io.vertx.util.exception.ParameterRequiredException;
 import de.braintags.netrelay.controller.AbstractController;
@@ -148,17 +149,18 @@ public class DataTablesController extends AbstractController {
             LOGGER.info("SELECTION SIZE: " + selection.length);
             if (selection.length == 0) {
               handler.handle(Future.succeededFuture(createJsonObject(query.getMapper(),
-                  new ArrayList<IStoreObject<?>>(), descr, totalResult, tableCount)));
+                  new ArrayList<IStoreObject<?, ?>>(), descr, totalResult, tableCount)));
             } else {
-              mapperFactory.getStoreObjectFactory().createStoreObjects(query.getMapper(), Arrays.asList(selection),
-                  str -> {
-                    if (str.failed()) {
-                      handler.handle(Future.failedFuture(result.cause()));
-                    } else {
-                      handler.handle(Future.succeededFuture(
-                          createJsonObject(query.getMapper(), str.result(), descr, totalResult, tableCount)));
-                    }
-                  });
+              IStoreObjectFactory<?> sf = mapperFactory.getStoreObjectFactory();
+              sf.createStoreObjects(query.getMapper(), Arrays.asList(selection), str -> {
+                if (str.failed()) {
+                  handler.handle(Future.failedFuture(result.cause()));
+                } else {
+                  List tmpSel = str.result();
+                  JsonObject jo = createJsonObject(query.getMapper(), tmpSel, descr, totalResult, tableCount);
+                  handler.handle(Future.succeededFuture(jo));
+                }
+              });
             }
           }
         });
@@ -166,7 +168,7 @@ public class DataTablesController extends AbstractController {
     });
   }
 
-  private JsonObject createJsonObject(IMapper mapper, List<IStoreObject<?>> selection, DataTableLinkDescriptor descr,
+  private JsonObject createJsonObject(IMapper mapper, List<IStoreObject<?, ?>> selection, DataTableLinkDescriptor descr,
       long completeCount, long tableCount) {
     LOGGER.info("tableCount: " + tableCount + ", completeCount: " + completeCount);
     JsonObject json = new JsonObject();
@@ -174,13 +176,13 @@ public class DataTablesController extends AbstractController {
     json.put("recordsFiltered", completeCount);
     JsonArray resArray = new JsonArray();
     json.put("data", resArray);
-    for (IStoreObject<?> ob : selection) {
+    for (IStoreObject<?, ?> ob : selection) {
       resArray.add(handleObject(mapper, ob, descr));
     }
     return json;
   }
 
-  private JsonArray handleObject(IMapper mapper, IStoreObject<?> sto, DataTableLinkDescriptor descr) {
+  private JsonArray handleObject(IMapper mapper, IStoreObject<?, ?> sto, DataTableLinkDescriptor descr) {
     JsonArray json = new JsonArray();
     for (ColDef colDef : descr.getColumns()) {
       if (colDef != null && colDef.name != null && colDef.name.hashCode() != 0) {

@@ -40,7 +40,7 @@ public class DeleteAction extends AbstractAction {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     IDataStore datastore = getPersistenceController().getNetRelay().getDatastore();
     IDelete<?> delete = datastore.createDelete(mapper.getMapperClass());
     IQuery query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
@@ -64,7 +64,7 @@ public class DeleteAction extends AbstractAction {
    */
   @Override
   protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     loadMainObject(captureMap, mapper, mor -> {
       if (mor.failed()) {
         handler.handle(Future.failedFuture(mor.cause()));

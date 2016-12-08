@@ -59,7 +59,7 @@ public abstract class AbstractAction {
    * @return a mapper from the internal {@link IMapperFactory}
    */
   @SuppressWarnings("rawtypes")
-  protected IMapper getMapper(String mapperName) {
+  protected IMapper<?> getMapper(String mapperName) {
     MappingDefinitions defs = persitenceController.getNetRelay().getSettings().getMappingDefinitions();
     Class mapperClass = defs.getMapperClass(mapperName);
     if (mapperClass == null) {
@@ -114,7 +114,7 @@ public abstract class AbstractAction {
    */
   final void handle(String entityName, RoutingContext context, CaptureMap captureMap,
       Handler<AsyncResult<Void>> handler) {
-    IMapper mapper = getMapper(entityName);
+    IMapper<?> mapper = getMapper(entityName);
     if (RecordContractor.isSubobjectDefinition(captureMap)) {
       handleSubobjectEntityDefinition(context, entityName, captureMap, mapper, handler);
     } else {
@@ -129,8 +129,8 @@ public abstract class AbstractAction {
    * @param mainMapper
    * @param handler
    */
-  protected void loadMainObject(CaptureMap map, IMapper mainMapper, Handler<AsyncResult<?>> handler) {
-    IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mainMapper.getMapperClass());
+  protected <T> void loadMainObject(CaptureMap map, IMapper<T> mainMapper, Handler<AsyncResult<T>> handler) {
+    IQuery<T> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mainMapper.getMapperClass());
     RecordContractor.extractId(mainMapper, map, query);
     QueryHelper.executeToFirstRecord(query, true, handler);
   }
@@ -150,7 +150,7 @@ public abstract class AbstractAction {
    *          the handler to be informed about the result
    */
   protected abstract void handleRegularEntityDefinition(String entityName, RoutingContext context,
-      CaptureMap captureMap, IMapper mapper, Handler<AsyncResult<Void>> handler);
+      CaptureMap captureMap, IMapper<?> mapper, Handler<AsyncResult<Void>> handler);
 
   /**
    * The entity definition contains a reference onto a subobject inside the main object, which shall be handled
@@ -167,5 +167,5 @@ public abstract class AbstractAction {
    *          the handler to be informed about the result
    */
   protected abstract void handleSubobjectEntityDefinition(RoutingContext context, String entityName,
-      CaptureMap captureMap, IMapper mapper, Handler<AsyncResult<Void>> handler);
+      CaptureMap captureMap, IMapper<?> mapper, Handler<AsyncResult<Void>> handler);
 }

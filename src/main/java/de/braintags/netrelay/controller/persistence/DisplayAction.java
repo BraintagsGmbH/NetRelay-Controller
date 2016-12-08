@@ -45,7 +45,7 @@ public class DisplayAction extends AbstractAction {
 
   @Override
   protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     IQuery<?> query = getPersistenceController().getNetRelay().getDatastore().createQuery(mapper.getMapperClass());
     RecordContractor.extractId(mapper, captureMap, query);
     addQueryCritera(query, captureMap);
@@ -54,7 +54,7 @@ public class DisplayAction extends AbstractAction {
 
   @Override
   protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 
