@@ -6,7 +6,7 @@
 
 
 This project is an extension of the project NetRelay and contains several implementations of
-`IController`, which are ready to be used, configurable and cover lot of use
+`link:../../apidocs/de/braintags/netrelay/controller/IController.html[IController]`, which are ready to be used, configurable and cover lot of use
 cases.
 
 To understand and to use those implementations you should be familar with the use of NetRelay.
@@ -47,10 +47,10 @@ Description of the function of existing controllers.
 More detailed information about the configuration parameters,
 return values etc. can be found inside the javadoc of the corresponding implementation.
 
-=== `CurrentMemberController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/CurrentMemberController.html[CurrentMemberController]`
 If a user is logged in, the corresponding record is fetched from the datastore and placed into the context with the
 property . From there the instance can be
-accessed by other controllers like the `ThymeleafTemplateController`.
+accessed by other controllers like the `link:../../apidocs/de/braintags/netrelay/controller/ThymeleafTemplateController.html[ThymeleafTemplateController]`.
 
 [source, json]
 ----
@@ -66,7 +66,7 @@ accessed by other controllers like the `ThymeleafTemplateController`.
 }
 ----
 
-=== `ProtocolController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/ProtocolController.html[ProtocolController]`
 The ProtocolController forces the use of a certain protocol, like https for instance, for the defined routes. If for
 a fitting route the required protocol is not used, a redirect will be sent
 
@@ -85,7 +85,7 @@ a fitting route the required protocol is not used, a redirect will be sent
 }
 ----
 
-=== `RedirectController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/RedirectController.html[RedirectController]`
 The RedirectController redirects fitting routes to the page specified by property
 
 
@@ -102,7 +102,7 @@ The RedirectController redirects fitting routes to the page specified by propert
 }
 ----
 
-=== `ThymeleafTemplateController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/ThymeleafTemplateController.html[ThymeleafTemplateController]`
 This controller is used to process templates based on the template engine Thymeleaf
 
 [source, json]
@@ -120,7 +120,7 @@ This controller is used to process templates based on the template engine Thymel
 }
 ----
 
-=== `VirtualHostController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/VirtualHostController.html[VirtualHostController]`
 The VirtualHostController integrates the VirtualHostHandler from vertx. Like that it will verify, wether the hostname
 of a request matches the defined hostName parameter. If so, it will send a redirect to the defined destination with
 the defined http code.
@@ -147,7 +147,7 @@ the defined http code.
 This package contains several controllers, which can be used to configure and use the complete process of
 authentication, authorization ( permissions ), registration etc.
 
-==== `AuthenticationController`
+==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/AuthenticationController.html[AuthenticationController]`
 This controller performs authentication ( login / logout ) and authorization ( permission handling, role access,
 action access etc. ).
 
@@ -207,7 +207,7 @@ are only allowed to display records
 
 
 
-==== `RegisterController`
+==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/RegisterController.html[RegisterController]`
 This controller performs a user registration with an integrated automatic double opt in process.
 To use this controller, you will have to create some templates:
 
@@ -262,7 +262,7 @@ When the above process failed, this template will be called
 ----
 
 
-==== `PasswordLostController`
+==== `link:../../apidocs/de/braintags/netrelay/controller/authentication/PasswordLostController.html[PasswordLostController]`
 The PasswordLostController is used to manage the process for a user, who doesn't remember his password. The process
 integrates automatically double opt in.
 To use this controller, you will have to create some templates:
@@ -317,7 +317,7 @@ When the above process failed, this template will be called
 
 ----
 
-=== `PersistenceController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/persistence/PersistenceController.html[PersistenceController]`
 The PersistenceController is the instance, which translates the parameters and data of a request into a datastore
 based action.
 
@@ -333,7 +333,7 @@ force the creation of dedicated, well tested controllers and to avoid unrecogniz
 To understand the configuration, you should read the section "Capture Collection" inside the NetRelay documentation
 
 For more infos about how to secure data access, see
-`AuthenticationController`
+`link:../../apidocs/de/braintags/netrelay/controller/authentication/AuthenticationController.html[AuthenticationController]`
 
 *Referencing subobjects* +
 Imagine two mapper "Person" and "Phone". The Phone has the phone number and an ID.
@@ -390,7 +390,7 @@ let run the above described actions. +
 
 ----
 
-=== `RequestLoggingController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/logging/RequestLoggingController.html[RequestLoggingController]`
 This controller logs the request data into the logger and can be used for debugging purpose
 
 [source, json]
@@ -402,7 +402,7 @@ This controller logs the request data into the logger and can be used for debugg
 }
 ----
 
-=== `MailController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/api/MailController.html[MailController]`
 A controller which is sending mails by using the mail client, which is defined by NetRelay.
 
 The
@@ -426,7 +426,7 @@ controller can compose the content of the mail by using a static text, which wil
 ----
 
 
-=== `DataTablesController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/api/DataTablesController.html[DataTablesController]`
 A controller, which generates the input for a jquery datatable. The mapper, which shall be used, is specified by a
 request parameter with the name 
 
@@ -442,7 +442,7 @@ request parameter with the name
 }
 ----
 
-=== `ElFinderController`
+=== `link:../../apidocs/de/braintags/netrelay/controller/filemanager/elfinder/ElFinderController.html[ElFinderController]`
 This controller builds the api to support the web base filemanager from
 https://github.com/Studio-42/elFinder
 
