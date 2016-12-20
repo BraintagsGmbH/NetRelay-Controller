@@ -1,0 +1,24 @@
+{
+  "description": "This is a test query",
+  "mapper": "Person",
+  "operation": "select",
+  "dynamic": {
+    "orderBy": "${request.params.order}",
+    "query": [ 
+		    {
+				"condition": {
+		        	"field": "firstname",
+		            "logic": "=",
+		            "value": "max"
+				}
+			}, 
+		    {
+		    	"condition": {
+		        	"field": "score",
+		            "logic": "=",
+		            "value": 2.5
+				}
+			}
+		]          
+    }
+}

@@ -1,0 +1,8 @@
+{
+  "description": "This is a test query",
+  "mapper": "Person",
+  "operation": "select",
+  "dynamic": {
+    "orderBy": "${request.params.order}"
+  }
+}

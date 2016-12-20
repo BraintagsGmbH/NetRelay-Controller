@@ -1,0 +1,16 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head>
+</head>
+
+<body>
+<!-- Expect only one result with age 20 -->
+<p th:text="'Firstname: ' + ${context.get('Person').firstname}"></p>
+<p th:text="'Lastname: ' + ${context.get('Person').lastname}"></p>
+<p th:text="'Age: ' + ${context.get('Person').age}"></p>
+
+</body>
+</html>

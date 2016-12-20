@@ -1,0 +1,20 @@
+{
+  "description": "This is a test query",
+  "mapper": "Person",
+  "operation": "select",
+  "native": [
+    {
+      "query": {
+        "firstname": "Max",
+        "lastname": "Mustermann",
+        "age": {
+        	"$lt":30
+        } 
+      }
+    },
+    {
+      "datastore": "de.braintags.io.vertx.pojomapper.mysql.MySqlDataStore",
+      "query": "SELECT * FROM Person WHERE firstname = 'MAX' AND lastname = 'Mustermann'"
+    }
+  ]
+}

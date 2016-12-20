@@ -1,0 +1,44 @@
+{
+  "description": "This is a test query",
+  "mapper": "Person",
+  "operation": "select",
+  "dynamic": {
+    "orderBy": "${request.params.order}",
+    "query": {
+      "and": [
+        {
+          "condition": {
+            "field": "firstname",
+            "logic": "=",
+            "value": "max"
+          }
+        },
+        {
+          "condition": {
+            "field": "score",
+            "logic": "=",
+            "value": 2.5
+          }
+        },
+        {
+          "or": [
+            {
+              "condition": {
+                "field": "city",
+                "logic": "=",
+                "value": "willich"
+              }
+            },
+            {
+              "condition": {
+                "field": "zip",
+                "logic": "=",
+                "value": 47877
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
