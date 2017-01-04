@@ -51,7 +51,7 @@ public class UpdateAction extends InsertAction {
    * @param handler
    */
   @Override
-  protected void handleSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper mapper,
+  protected void handleSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper<?> mapper,
       Object mainObject, Handler<AsyncResult<Void>> handler) {
     InsertParameter ip = RecordContractor.resolveUpdateParameter(mapper.getMapperFactory(), mainObject, captureMap);
     String subEntityName = ip.getFieldPath();

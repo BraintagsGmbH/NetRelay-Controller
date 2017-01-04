@@ -51,7 +51,7 @@ public class InsertAction extends AbstractAction {
 
   @Override
   protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     loadMainObject(captureMap, mapper, mor -> {
       if (mor.failed()) {
         handler.handle(Future.failedFuture(mor.cause()));
@@ -72,21 +72,22 @@ public class InsertAction extends AbstractAction {
    *          this object will be saved after modification of the subobject
    * @param handler
    */
-  protected void handleSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper mapper,
+  protected void handleSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper<?> mapper,
       Object mainObject, Handler<AsyncResult<Void>> handler) {
     InsertParameter ip = RecordContractor.resolveInsertParameter(mapper.getMapperFactory(), mainObject, captureMap);
     String subEntityName = ip.getFieldPath();
     Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
     handleFileUploads(subEntityName, context, params);
-    getPersistenceController().getMapperFactory().getStoreObjectFactory().createStoreObject(params,
-        ip.getSubObjectMapper(), result -> {
-          if (result.failed()) {
-            handler.handle(Future.failedFuture(result.cause()));
-          } else {
-            ip.getParentCollection().add(result.result().getEntity());
-            saveObjectInDatastore(mainObject, context, mapper, handler);
-          }
-        });
+    IStoreObjectFactory<Map<String, String>> sf = (IStoreObjectFactory<Map<String, String>>) getPersistenceController()
+        .getMapperFactory().getStoreObjectFactory();
+    sf.createStoreObject(params, ip.getSubObjectMapper(), result -> {
+      if (result.failed()) {
+        handler.handle(Future.failedFuture(result.cause()));
+      } else {
+        ip.getParentCollection().add(result.result().getEntity());
+        saveObjectInDatastore(mainObject, context, mapper, handler);
+      }
+    });
   }
 
   /**
@@ -100,10 +101,11 @@ public class InsertAction extends AbstractAction {
    */
   @Override
   protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     Map<String, String> params = extractProperties(entityName, captureMap, context, mapper);
     handleFileUploads(entityName, context, params);
-    IStoreObjectFactory sf = getPersistenceController().getMapperFactory().getStoreObjectFactory();
+    IStoreObjectFactory<Map<String, String>> sf = (IStoreObjectFactory<Map<String, String>>) getPersistenceController()
+        .getMapperFactory().getStoreObjectFactory();
     sf.createStoreObject(params, mapper, result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));

@@ -22,6 +22,7 @@ import java.util.Properties;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.dataaccess.write.IWrite;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.io.vertx.pojomapper.mapping.IStoreObjectFactory;
 import de.braintags.io.vertx.pojomapper.util.QueryHelper;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.MemberUtil;
@@ -433,7 +434,8 @@ public class RegisterController extends AbstractAuthProviderController {
     NetRelayMapperFactory mapperFactory = (NetRelayMapperFactory) getNetRelay().getNetRelayMapperFactory();
     Map<String, String> props = extractPropertiesFromMap(mapper.getMapperClass().getSimpleName(),
         rc.getRequestParameter());
-    mapperFactory.getStoreObjectFactory().createStoreObject(props, mapper, result -> {
+    IStoreObjectFactory<Map<String, String>> sf = mapperFactory.getStoreObjectFactory();
+    sf.createStoreObject(props, mapper, result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));
       } else {

@@ -37,13 +37,13 @@ public class NoneAction extends AbstractAction {
 
   @Override
   protected void handleRegularEntityDefinition(String entityName, RoutingContext context, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     handler.handle(Future.succeededFuture());
   }
 
   @Override
   protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,
-      IMapper mapper, Handler<AsyncResult<Void>> handler) {
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     handler.handle(Future.succeededFuture());
   }
 

@@ -95,7 +95,7 @@ public class ElFinderListenerTest extends AbstractCaptureParameterTest {
       @Override
       public void before(ICommand command, ElFinderContext context, Handler<AsyncResult<Boolean>> handler) {
         LISTENED_BEFORE = true;
-        Future f = Future.succeededFuture();
+        Future f = Future.succeededFuture(true);
         handler.handle(f);
       }
 
