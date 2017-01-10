@@ -117,9 +117,9 @@ public class DataTableLinkDescriptor {
           Object value = thResult.result().getResult();
           if (value != null && value.hashCode() != 0) {
             if (allowContains(value)) {
-              query.field(def.name).contains(value);
+              query.setRootQueryPart(query.contains(def.name, value));
             } else {
-              query.field(def.name).is(value);
+              query.setRootQueryPart(query.isEqual(def.name, value));
             }
           }
           if (def.sortable) {

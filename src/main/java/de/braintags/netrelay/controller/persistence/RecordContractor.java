@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
+import de.braintags.io.vertx.pojomapper.dataaccess.query.IQueryContainer;
 import de.braintags.io.vertx.pojomapper.mapping.IField;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
@@ -293,9 +294,11 @@ public class RecordContractor {
    */
   public static void extractId(IMapper mapper, CaptureMap map, IQuery<?> query) {
     List<String[]> ids = extractIds(mapper, map);
+    IQueryContainer and = query.and();
     for (String[] id : ids) {
-      query.field(id[0]).is(id[1]);
+      and.getContent().add(query.isEqual(id[0], id[1]));
     }
+    query.setRootQueryPart(and);
   }
 
   /**

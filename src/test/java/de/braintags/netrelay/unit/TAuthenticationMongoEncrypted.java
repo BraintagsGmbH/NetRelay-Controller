@@ -121,7 +121,7 @@ public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
     IQuery<TestMemberEncrypted> query = datastore.createQuery(TestMemberEncrypted.class);
     String password = member.getPassword();
     context.assertNotNull(password, "password must not be null");
-    query.field("email").is(member.getEmail());
+    query.setRootQueryPart(query.isEqual("email", member.getEmail()));
     TestMemberEncrypted returnMember = (TestMemberEncrypted) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       ResultContainer cont = DatastoreBaseTest.saveRecord(context, member);

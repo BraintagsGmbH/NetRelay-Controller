@@ -145,7 +145,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.field(query.getMapper().getIdField().getName()).is(id);
+    query.setRootQueryPart(query.isEqual(query.getMapper().getIdField().getName(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 
@@ -187,7 +187,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.field(query.getMapper().getIdField().getName()).is(id);
+    query.setRootQueryPart(query.isEqual(query.getMapper().getIdField().getName(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 
