@@ -1,8 +1,8 @@
 /*
  * #%L
- * netrelay
+ * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,10 +37,10 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
 /**
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class TPersistenceController_Delete extends AbstractPersistenceControllerTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
@@ -145,7 +145,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.field(query.getMapper().getIdField().getName()).is(id);
+    query.setSearchCondition(query.isEqual(query.getMapper().getIdField().getName(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 
@@ -187,13 +187,13 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.field(query.getMapper().getIdField().getName()).is(id);
+    query.setSearchCondition(query.isEqual(query.getMapper().getIdField().getName(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.netrelay.NetRelayBaseTest#modifySettings(de.braintags.netrelay.init.Settings)
    */
   @Override

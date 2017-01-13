@@ -2,7 +2,7 @@
  * #%L
  * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,15 +33,15 @@ import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.ext.unit.TestContext;
 
 /**
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
 
   /**
-   * 
+   *
    */
   public NetRelayBaseConnectorTest() {
   }
@@ -49,7 +49,7 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
   /**
    * This method is modifying the {@link Settings} which are used to init NetRelay. Here it defines the
    * template directory as "testTemplates"
-   * 
+   *
    * @param settings
    */
   @Override
@@ -70,7 +70,7 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
   /**
    * Searches in the database, wether a member with the given username / password exists.
    * If not, it is created. After the found or created member is returned
-   * 
+   *
    * @param context
    * @param datastore
    * @param member
@@ -78,7 +78,8 @@ public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
    */
   public static final Member createOrFindMember(TestContext context, IDataStore datastore, Member member) {
     IQuery<Member> query = datastore.createQuery(Member.class);
-    query.field("userName").is(member.getUserName()).field("password").is(member.getPassword());
+    query.setSearchCondition(
+        query.and(query.isEqual("userName", member.getUserName()), query.isEqual("password", member.getPassword())));
     Member returnMember = (Member) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       ResultContainer cont = DatastoreBaseTest.saveRecord(context, member);
