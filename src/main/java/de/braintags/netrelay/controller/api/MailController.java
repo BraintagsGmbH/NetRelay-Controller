@@ -19,7 +19,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.braintags.io.vertx.util.CounterObject;
 import de.braintags.io.vertx.util.HttpContentType;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.NetRelay;
@@ -27,6 +26,7 @@ import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
@@ -363,7 +363,7 @@ public class MailController extends AbstractController {
         String cid = getContentId();
         URI imgUrl = makeAbsoluteURI(imageSource);
         if (imgUrl != null) {
-          MailAttachment attachment = createAttachment(context, imgUrl, cid);
+          MailAttachment attachment = createAttachment(imgUrl, cid);
           matcher.appendReplacement(result, "$1cid:" + cid + "$3");
           attachments.add(attachment);
         } else {
@@ -376,21 +376,47 @@ public class MailController extends AbstractController {
     if (attachments.isEmpty()) {
       handler.handle(Future.succeededFuture(msg));
     } else {
-      CounterObject co = new CounterObject<>(attachments.size(), handler);
-      for (MailAttachment attachment : attachments) {
-        readData(prefs, (UriMailAttachment) attachment, rr -> {
-          if (rr.failed()) {
-            co.setThrowable(rr.cause());
-          } else if (co.reduce()) {
-            msg.setInlineAttachment(attachments);
-            handler.handle(Future.succeededFuture(msg));
-          }
-        });
-        if (co.isError()) {
-          break;
-        }
-      }
+      readAttachmentData(prefs, msg, attachments, handler);
     }
+  }
+
+  @SuppressWarnings({ "rawtypes" })
+  private static void readAttachmentData(MailPreferences prefs, MailMessage msg, List<MailAttachment> attachments,
+      Handler<AsyncResult<MailMessage>> handler) {
+    List<Future> fl = new ArrayList<>(attachments.size());
+    for (MailAttachment attachment : attachments) {
+      fl.add(readData(prefs, (UriMailAttachment) attachment));
+    }
+    CompositeFuture cf = CompositeFuture.all(fl);
+    cf.setHandler(cfr -> {
+      if (cfr.failed()) {
+        handler.handle(Future.failedFuture(cfr.cause()));
+      } else {
+        msg.setInlineAttachment(attachments);
+        handler.handle(Future.succeededFuture(msg));
+      }
+    });
+  }
+
+  @SuppressWarnings("rawtypes")
+  private static Future readData(MailPreferences prefs, UriMailAttachment attachment) {
+    Future f = Future.future();
+    URI uri = attachment.getUri();
+    HttpClient client = prefs.httpClient;
+    int port = uri.getPort() > 0 ? uri.getPort() : 80;
+    HttpClientRequest req = client.request(HttpMethod.GET, port, uri.getHost(), uri.getPath(),
+        resp -> resp.bodyHandler(buff -> {
+          try {
+            attachment.setData(buff);
+            f.complete();
+          } catch (Exception e) {
+            LOGGER.error("", e);
+            f.fail(e);
+          }
+        }));
+    // this calls the resp.bodyHandler
+    req.end();
+    return f;
   }
 
   /**
@@ -414,7 +440,7 @@ public class MailController extends AbstractController {
     return c + "." + System.currentTimeMillis() + "@" + hostname;
   }
 
-  private static MailAttachment createAttachment(RoutingContext context, URI uri, String cidName) {
+  private static MailAttachment createAttachment(URI uri, String cidName) {
     UriMailAttachment attachment = new UriMailAttachment(uri);
     attachment.setName(cidName);
     attachment.setContentType(getContentType(uri));
@@ -423,25 +449,6 @@ public class MailController extends AbstractController {
     headers.add("Content-ID", "<" + cidName + ">");
     attachment.setHeaders(headers);
     return attachment;
-  }
-
-  private static void readData(MailPreferences prefs, UriMailAttachment attachment,
-      Handler<AsyncResult<Void>> handler) {
-    URI uri = attachment.getUri();
-    HttpClient client = prefs.httpClient;
-    int port = uri.getPort() > 0 ? uri.getPort() : 80;
-    HttpClientRequest req = client.request(HttpMethod.GET, port, uri.getHost(), uri.getPath(), resp -> {
-      resp.bodyHandler(buff -> {
-        try {
-          attachment.setData(buff);
-          handler.handle(Future.succeededFuture());
-        } catch (Exception e) {
-          LOGGER.error("", e);
-          handler.handle(Future.failedFuture(e));
-        }
-      });
-    });
-    req.end();
   }
 
   private static String getContentType(URI uri) {
