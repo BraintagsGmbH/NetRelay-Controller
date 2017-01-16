@@ -1,8 +1,8 @@
 /*
  * #%L
- * vertx-pojongo
+ * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,12 +35,12 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * The PasswordLostController is used to manage the process for a user who lost his password.<br/>
- * 
+ *
  * The entry point for the usage of this controller is an http-form, which you will create and which contains a field to
  * enter an email address. The name of this field must be the same, like you defined in the controller properties with
  * the property {@value #EMAIL_FIELD_NAME_PROP}, which by default is "email". The destination of the form must be a
  * route, which is covered by the current controller ( for instance /customer/passwordLost ). <br/>
- * 
+ *
  * The controller knows two actions:<br/>
  * - the start of the password lost process<br/>
  * where a user filled out a the email address and sent the form. The start of the
@@ -70,12 +70,12 @@ import io.vertx.ext.web.RoutingContext;
  * The confirmation page can be any virtual page and must be defined as route for the PasswordLostController, so that it
  * is reacting to it. The ID is the ID, which was stored before in the context.<br/>
  * </p>
- * 
+ *
  * After successfully processing the MailController, the success page, defined by {@value #REG_START_SUCCESS_URL_PROP},
  * is called. If anything failed, then the information about the error are stored under the parameter
  * {@value #RESET_ERROR_PARAM} inside the context and the error page defined by
  * {@value #PW_LOST_FAIL_URL_PROP} is called.<br/>
- * 
+ *
  * When a user clicks the link in the mail, the PasswordLostController will perform the confirmation. It will fetch the
  * instance of PasswordLostClaim, which was previously created, will fetch the IAuthenticatable from the datastore and
  * will store it under the property {@link #AUTHENTICATABLE_PROP} . After that it will call the success page, defined by
@@ -84,7 +84,7 @@ import io.vertx.ext.web.RoutingContext;
  * {@value #PW_RESET_FAIL_URL_PROP} is called. The success page will typically display a form, where the new password
  * and a confirmation password can be entered and saved. The form then will refer to a page, where the
  * {@link PersistenceController} is executed.
- * 
+ *
  * <br/>
  * <br/>
  * Config-Parameter:<br/>
@@ -94,17 +94,17 @@ import io.vertx.ext.web.RoutingContext;
  * <LI>{@value #PW_LOST_FAIL_URL_PROP}
  * <LI>{@value #PW_RESET_SUCCESS_URL_PROP}
  * <LI>{@value #PW_RESET_FAIL_URL_PROP}
- * 
+ *
  * <LI>{@value #AUTHENTICATABLE_CLASS_PROP }
  * <LI>{@value #EMAIL_FIELD_NAME_PROP }
- * 
+ *
  * <LI>{@value #EMAIL_FIELD_NAME_PROP} - defines the name of the field, which transports the email address to be used
  * for the reset process
- * 
+ *
  * <LI>Additionally the config-parameters of {@link MailController} must be set
  * </UL>
  * <br>
- * 
+ *
  * Request-Parameter:<br/>
  * possible parameters, which are read from a request
  * <UL>
@@ -114,7 +114,7 @@ import io.vertx.ext.web.RoutingContext;
  * the first step
  * </UL>
  * <br/>
- * 
+ *
  * Result-Parameter:<br/>
  * possible paramters, which will be placed into the context
  * <UL>
@@ -128,12 +128,12 @@ import io.vertx.ext.web.RoutingContext;
  * here and the request is redirected to the success page, where the confirmation mail is created and sent. This
  * parameter is keeping the confirmation id, which must be integrated into the link
  * <LI>PasswordLostClaim - Step 1 - on a successfull create action, the {@link PasswordLostClaim} is stored here
- * 
+ *
  * </UL>
  * <br/>
- * 
+ *
  * Example configuration<br/>
- * 
+ *
  * <pre>
     {
       "name" : "PasswordLostController",
@@ -148,14 +148,14 @@ import io.vertx.ext.web.RoutingContext;
           "mode" : "XHTML",
           "cacheEnabled" : "false",
           "from" : "service@xxx.com",
-          "bcc" : "service@xxx.com",          
+          "bcc" : "service@xxx.com",
           "subject": "password lost"
       }
     }
  * </pre>
- * 
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class PasswordLostController extends AbstractController {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
@@ -228,14 +228,14 @@ public class PasswordLostController extends AbstractController {
   private String emailFieldName;
 
   /**
-   * 
+   *
    */
   public PasswordLostController() {
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
@@ -296,7 +296,7 @@ public class PasswordLostController extends AbstractController {
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
     IQuery<PasswordLostClaim> query = getNetRelay().getDatastore().createQuery(PasswordLostClaim.class);
-    query.setRootQueryPart(query.and(query.isEqual("email", email), query.isEqual("active", true)));
+    query.setSearchCondition(query.and(query.isEqual("email", email), query.isEqual("active", true)));
     QueryHelper.executeToList(query, qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
@@ -349,7 +349,7 @@ public class PasswordLostController extends AbstractController {
       handler.handle(Future.failedFuture(PasswordLostCode.EMAIL_REQUIRED.toString()));
     } else {
       IQuery<? extends IAuthenticatable> query = getNetRelay().getDatastore().createQuery(this.authenticatableCLass);
-      query.setRootQueryPart(query.isEqual("email", email));
+      query.setSearchCondition(query.isEqual("email", email));
       QueryHelper.executeToList(query, qr -> {
         if (qr.failed()) {
           LOGGER.error("", qr.cause());
@@ -400,7 +400,7 @@ public class PasswordLostController extends AbstractController {
 
   /**
    * We don't wait for it
-   * 
+   *
    * @param claim
    * @param handler
    */
@@ -417,7 +417,7 @@ public class PasswordLostController extends AbstractController {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @SuppressWarnings("unchecked")
@@ -439,7 +439,7 @@ public class PasswordLostController extends AbstractController {
 
   /**
    * Creates a default definition for the current instance
-   * 
+   *
    * @return
    */
   public static RouterDefinition createDefaultRouterDefinition() {
@@ -454,7 +454,7 @@ public class PasswordLostController extends AbstractController {
 
   /**
    * Get the default properties for an implementation of StaticController
-   * 
+   *
    * @return
    */
   public static Properties getDefaultProperties() {

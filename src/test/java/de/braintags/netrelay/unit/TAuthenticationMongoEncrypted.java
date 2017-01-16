@@ -1,8 +1,8 @@
 /*
  * #%L
- * netrelay
+ * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,10 +26,10 @@ import de.braintags.vertx.auth.datastore.test.model.TestMemberEncrypted;
 import io.vertx.ext.unit.TestContext;
 
 /**
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
   /**
@@ -47,7 +47,7 @@ public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.netrelay.unit.NetRelayBaseTest#initNetRelay(io.vertx.ext.unit.TestContext)
    */
   @Override
@@ -62,7 +62,7 @@ public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
 
   /**
    * Improves that for a call to a protected page a redirect is sent
-   * 
+   *
    * @param context
    */
   @Test
@@ -78,7 +78,7 @@ public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
    * "collectionName" : "Member",
    * "loginAction" : "/member/login",
    * "authProvider" : "MongoAuth"
-   * 
+   *
    * @throws Exception
    */
   private void resetRoutes(String directLoginPage) throws Exception {
@@ -110,7 +110,7 @@ public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
   /**
    * Searches in the database, wether a member with the given username / password exists.
    * If not, it is created. After the found or created member is returned
-   * 
+   *
    * @param context
    * @param datastore
    * @param member
@@ -121,7 +121,7 @@ public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
     IQuery<TestMemberEncrypted> query = datastore.createQuery(TestMemberEncrypted.class);
     String password = member.getPassword();
     context.assertNotNull(password, "password must not be null");
-    query.setRootQueryPart(query.isEqual("email", member.getEmail()));
+    query.setSearchCondition(query.isEqual("email", member.getEmail()));
     TestMemberEncrypted returnMember = (TestMemberEncrypted) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       ResultContainer cont = DatastoreBaseTest.saveRecord(context, member);
@@ -138,7 +138,7 @@ public class TAuthenticationMongoEncrypted extends NetRelayBaseConnectorTest {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.netrelay.unit.NetRelayBaseConnectorTest#modifySettings(io.vertx.ext.unit.TestContext,
    * de.braintags.netrelay.init.Settings)
    */

@@ -12,11 +12,11 @@
  */
 package de.braintags.netrelay.controller.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
-import de.braintags.io.vertx.util.CounterObject;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController;
@@ -26,6 +26,7 @@ import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.netrelay.routing.CaptureDefinition;
 import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.file.FileSystem;
@@ -185,36 +186,37 @@ public class PersistenceController extends AbstractCaptureController {
    * @param resolvedCaptureCollections
    * @param handler
    */
+  @SuppressWarnings("rawtypes")
   private void handlePersistence(RoutingContext context, List<CaptureMap> resolvedCaptureCollections,
       Handler<AsyncResult<Void>> handler) {
     if (resolvedCaptureCollections.isEmpty()) {
       handler.handle(Future.succeededFuture());
     } else {
-      CounterObject<Void> co = new CounterObject<>(resolvedCaptureCollections.size(), handler);
+      List<Future> fl = new ArrayList<>();
       for (CaptureMap map : resolvedCaptureCollections) {
-        handleAction(context, map, result -> {
-          if (result.failed()) {
-            co.setThrowable(result.cause());
-          } else {
-            if (co.reduce()) {
-              handler.handle(Future.succeededFuture());
-            }
-          }
-        });
-        if (co.isError()) {
-          break;
-        }
+        fl.add(handleAction(context, map));
       }
+      CompositeFuture cf = CompositeFuture.all(fl);
+      cf.setHandler(cfr -> {
+        if (cfr.failed()) {
+          handler.handle(Future.failedFuture(cfr.cause()));
+        } else {
+          handler.handle(Future.succeededFuture());
+        }
+      });
     }
   }
 
-  private void handleAction(RoutingContext context, CaptureMap map, Handler<AsyncResult<Void>> handler) {
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  private Future handleAction(RoutingContext context, CaptureMap map) {
     AbstractAction action = resolveAction(map);
     String mapperName = RecordContractor.extractEntityName(map);
     LOGGER.info(String.format("handling action %s on mapper %s", action, mapperName));
     LOGGER.info("REQUEST-PARAMS: " + context.request().params().toString());
     LOGGER.info("FORM_PARAMS: " + context.request().formAttributes().toString());
-    action.handle(mapperName, context, map, handler);
+    Future f = Future.future();
+    action.handle(mapperName, context, map, f.completer());
+    return f;
   }
 
   private AbstractAction resolveAction(CaptureMap map) {
@@ -224,19 +226,14 @@ public class PersistenceController extends AbstractCaptureController {
     switch (action) {
     case DISPLAY:
       return displayAction;
-
     case INSERT:
       return insertAction;
-
     case UPDATE:
       return updateAction;
-
     case DELETE:
       return deleteAction;
-
     case NONE:
       return noneAction;
-
     default:
       throw new UnsupportedOperationException("unknown action: " + action);
     }
@@ -293,8 +290,7 @@ public class PersistenceController extends AbstractCaptureController {
 
     CaptureCollection collection = new CaptureCollection();
     collection.setCaptureDefinitions(defs);
-    CaptureCollection[] cc = new CaptureCollection[] { collection };
-    return cc;
+    return new CaptureCollection[] { collection };
   }
 
   /**

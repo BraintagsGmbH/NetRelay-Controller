@@ -1,8 +1,8 @@
 /*
  * #%L
- * netrelay
+ * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -32,9 +32,9 @@ import io.vertx.ext.web.RoutingContext;
 /**
  * Contains all relevant parameters from a request which was sent to {@link DataTablesController}.
  * From those data the reply is processed
- * 
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class DataTableLinkDescriptor {
   private static final String ICOLUMNS = "iColumns";
@@ -48,7 +48,7 @@ public class DataTableLinkDescriptor {
   private int displayLength;
 
   /**
-   * 
+   *
    */
   public DataTableLinkDescriptor(Class<?> mapperClass, RoutingContext context) {
     Objects.requireNonNull(mapperClass, "Mapper cass must not be null");
@@ -60,7 +60,7 @@ public class DataTableLinkDescriptor {
 
   /**
    * Generate an instance of IQuery from the information in here
-   * 
+   *
    * @param dataStore
    * @return
    */
@@ -71,7 +71,7 @@ public class DataTableLinkDescriptor {
 
   /**
    * Generate an instance of IQuery from the information in here
-   * 
+   *
    * @param dataStore
    *          the datastore to be used
    * @param mf
@@ -117,9 +117,9 @@ public class DataTableLinkDescriptor {
           Object value = thResult.result().getResult();
           if (value != null && value.hashCode() != 0) {
             if (allowContains(value)) {
-              query.setRootQueryPart(query.contains(def.name, value));
+              query.setSearchCondition(query.contains(def.name, value));
             } else {
-              query.setRootQueryPart(query.isEqual(def.name, value));
+              query.setSearchCondition(query.isEqual(def.name, value));
             }
           }
           if (def.sortable) {

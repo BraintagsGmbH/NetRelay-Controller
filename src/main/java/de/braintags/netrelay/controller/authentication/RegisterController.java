@@ -1,8 +1,8 @@
 /*
  * #%L
- * netrelay
+ * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -79,14 +79,14 @@ import io.vertx.ext.web.RoutingContext;
  * The confirmation page can be any virtual page and must be defined as route for the RegisterController, so that it is
  * reacting to it. The ID is the ID, which was stored before in the context.<br/>
  * </p>
- * 
+ *
  * After successfully processing the MailController, the success page, defined by {@value #REG_START_SUCCESS_URL_PROP},
  * is called. <br/>
- * 
+ *
  * When a user clicks the link in the mail, the RegistrationController will perform the confirmation. It will fetch the
  * instance of RegisterClaim, which was previously created and generate a member, customer etc. from it and save it in
  * the datastore. After that it will call the success page, defined by {@value #REG_CONFIRM_SUCCESS_URL_PROP}
- * 
+ *
  * <br/>
  * <br/>
  * Config-Parameter:<br/>
@@ -106,7 +106,7 @@ import io.vertx.ext.web.RoutingContext;
  * registration confirmation
  * </UL>
  * <br>
- * 
+ *
  * Request-Parameter:<br/>
  * <UL>
  * <LI>for the start of a registration, a new instance of {@link RegisterClaim} is created by two fields first:
@@ -119,10 +119,10 @@ import io.vertx.ext.web.RoutingContext;
  * additional fields can be set by fields with the structure mapper.fieldName
  * <LI>confirmation of a registration: the parameter {@value #VALIDATION_ID_PARAM} must contain the id transported
  * before
- * 
+ *
  * </UL>
  * <br/>
- * 
+ *
  * Result-Parameter:<br/>
  * <UL>
  * <LI>{@value #REGISTER_ERROR_PARAM} the parameter, where an error String of a failed registration is stored in
@@ -132,10 +132,10 @@ import io.vertx.ext.web.RoutingContext;
  * confirmatino id, which must be integrated into the link
  * </UL>
  * <br/>
- * 
- * 
+ *
+ *
  * Example configuration<br/>
- * 
+ *
  * <pre>
 
     {
@@ -155,10 +155,10 @@ import io.vertx.ext.web.RoutingContext;
           "subject": "Please verify your subscription",
       }
     }
- * 
+ *
  * </pre>
- * 
- * 
+ *
+ *
  * @author Michael Remme
  *
  */
@@ -236,7 +236,7 @@ public class RegisterController extends AbstractAuthProviderController {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
@@ -326,7 +326,7 @@ public class RegisterController extends AbstractAuthProviderController {
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
     IQuery<RegisterClaim> query = getNetRelay().getDatastore().createQuery(RegisterClaim.class);
-    query.setRootQueryPart(query.and(query.isEqual("email", email), query.isEqual("active", true)));
+    query.setSearchCondition(query.and(query.isEqual("email", email), query.isEqual("active", true)));
     QueryHelper.executeToList(query, qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
@@ -363,7 +363,7 @@ public class RegisterController extends AbstractAuthProviderController {
       handler.handle(Future.failedFuture(RegistrationCode.EMAIL_REQUIRED.toString()));
     } else if (!allowDuplicateEmail) {
       IQuery<? extends IAuthenticatable> query = getNetRelay().getDatastore().createQuery(this.authenticatableCLass);
-      query.setRootQueryPart(query.isEqual("email", email));
+      query.setSearchCondition(query.isEqual("email", email));
       query.executeCount(qr -> {
         if (qr.failed()) {
           LOGGER.error("", qr.cause());
@@ -532,7 +532,7 @@ public class RegisterController extends AbstractAuthProviderController {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @SuppressWarnings("unchecked")
@@ -567,7 +567,7 @@ public class RegisterController extends AbstractAuthProviderController {
 
   /**
    * Creates a default definition for the current instance
-   * 
+   *
    * @return
    */
   public static RouterDefinition createDefaultRouterDefinition() {
@@ -582,7 +582,7 @@ public class RegisterController extends AbstractAuthProviderController {
 
   /**
    * Get the default properties for an implementation of StaticController
-   * 
+   *
    * @return
    */
   public static Properties getDefaultProperties() {

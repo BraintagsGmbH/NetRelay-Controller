@@ -1,8 +1,8 @@
 /*
  * #%L
- * netrelay
+ * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,10 +37,10 @@ import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.unit.TestContext;
 
 /**
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class TRegistration extends NetRelayBaseConnectorTest {
   /**
@@ -154,7 +154,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     }, 200, "OK", null);
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
-    query.setRootQueryPart(query.isEqual("email", USER_BRAINTAGS_DE));
+    query.setSearchCondition(query.isEqual("email", USER_BRAINTAGS_DE));
     ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
     context.assertNotNull(qres, "No result returned");
     Member member = (Member) DatastoreBaseTest.findFirst(context, query);
@@ -187,7 +187,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     }, 302, "Found", null);
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
-    query.setRootQueryPart(query.isEqual("email", USER_BRAINTAGS_DE));
+    query.setSearchCondition(query.isEqual("email", USER_BRAINTAGS_DE));
     ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
     context.assertNotNull(qres, "No result returned");
     Member member = (Member) DatastoreBaseTest.findFirst(context, query);
@@ -244,14 +244,14 @@ public class TRegistration extends NetRelayBaseConnectorTest {
 
   /**
    * validate, that there is only one active record with the email
-   * 
+   *
    * @param context
    * @param email
    * @return
    */
   private RegisterClaim validateNoMultipleRequests(TestContext context, String email) {
     IQuery<RegisterClaim> query = netRelay.getDatastore().createQuery(RegisterClaim.class);
-    query.setRootQueryPart(query.and(query.isEqual("email", email), query.isEqual("active", true)));
+    query.setSearchCondition(query.and(query.isEqual("email", email), query.isEqual("active", true)));
     List<?> recList = DatastoreBaseTest.findAll(context, query);
     context.assertEquals(1, recList.size(), "previous RegisterClaims are not deactivated");
     return (RegisterClaim) recList.get(0);

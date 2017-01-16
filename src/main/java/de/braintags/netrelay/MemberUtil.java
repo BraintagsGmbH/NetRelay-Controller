@@ -2,7 +2,7 @@
  * #%L
  * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -25,23 +25,23 @@ import io.vertx.ext.auth.mongo.impl.MongoUser;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class MemberUtil {
   public static final String USER_PROPERTY_BT = "userPropertyBt";
 
   /**
-   * 
+   *
    */
   private MemberUtil() {
   }
 
   /**
    * Method checks, wether the context.user must be set from a value from the current session
-   * 
+   *
    * @param context
    */
   public static final void recoverContextUser(RoutingContext context) {
@@ -53,7 +53,7 @@ public class MemberUtil {
   /**
    * Add the given user into the context and place it into the session, so that method
    * {@link #recoverContextUser(RoutingContext)} can recover it
-   * 
+   *
    * @param context
    * @param user
    */
@@ -66,7 +66,7 @@ public class MemberUtil {
 
   /**
    * Perform a logout, means. removes current user and user infos from context and session
-   * 
+   *
    * @param context
    */
   public static final void logout(RoutingContext context) {
@@ -82,7 +82,7 @@ public class MemberUtil {
    * stores it in the context, so that it can be fetched again by this method or by the method
    * {@link #getCurrentUser(RoutingContext)}. Additionally the IAuthenticatable is stored as result in the result
    * handler
-   * 
+   *
    * @param context
    *          the current context
    * @param netRelay
@@ -109,7 +109,7 @@ public class MemberUtil {
 
   /**
    * Fetch the instance of IAuthenticatable from the datastore and store it into the context
-   * 
+   *
    * @param context
    * @param netRelay
    * @param user
@@ -140,7 +140,7 @@ public class MemberUtil {
       Handler<AsyncResult<IAuthenticatable>> resultHandler, Class<? extends IAuthenticatable> mapperClass) {
     String id = user.principal().getString("_id");
     IQuery<? extends IAuthenticatable> query = netRelay.getDatastore().createQuery(mapperClass);
-    query.setRootQueryPart(query.isEqual(query.getMapper().getIdField().getName(), id));
+    query.setSearchCondition(query.isEqual(query.getMapper().getIdField().getName(), id));
     query.execute(qr -> {
       if (qr.failed()) {
         resultHandler.handle(Future.failedFuture(qr.cause()));
@@ -178,7 +178,7 @@ public class MemberUtil {
 
   /**
    * Get a member, which was previously added during the session
-   * 
+   *
    * @param context
    * @return
    */
@@ -188,7 +188,7 @@ public class MemberUtil {
 
   /**
    * Set the current user as property into the Context session
-   * 
+   *
    * @param user
    * @param context
    */
@@ -198,7 +198,7 @@ public class MemberUtil {
 
   /**
    * Remove a current user from the session, if set
-   * 
+   *
    * @param context
    */
   public static final void removeCurrentUser(RoutingContext context) {

@@ -1,8 +1,8 @@
 /*
  * #%L
- * netrelay
+ * NetRelay-Controller
  * %%
- * Copyright (C) 2015 Braintags GmbH
+ * Copyright (C) 2017 Braintags GmbH
  * %%
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQueryContainer;
+import de.braintags.io.vertx.pojomapper.dataaccess.query.ISearchConditionContainer;
 import de.braintags.io.vertx.pojomapper.mapping.IField;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
@@ -31,9 +31,9 @@ import de.braintags.netrelay.routing.CaptureCollection;
 
 /**
  * Utility class which builds the contract between a request uri and a record
- * 
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class RecordContractor {
   /**
@@ -54,14 +54,14 @@ public class RecordContractor {
   public static final char CLOSE_BRACKET = ')';
 
   /**
-   * 
+   *
    */
   private RecordContractor() {
   }
 
   /**
    * Method checks wether the entity definition references a subobject, like entity=Person(ID:4).phone
-   * 
+   *
    * @return true, if entity references a subobject
    */
   public static final boolean isSubobjectDefinition(CaptureMap map) {
@@ -101,7 +101,7 @@ public class RecordContractor {
    * If an insert of a subobject shall be executed by en entity definition like Person(ID:4).phoneNumbers, then this
    * method
    * extracts the needed objects and informations to execute the insert
-   * 
+   *
    * @param datastore
    *          a datastore to be able to get mapper informations
    * @param mainObject
@@ -144,7 +144,7 @@ public class RecordContractor {
    * If an insert of a subobject shall be executed by en entity definition like Person(ID:4).phoneNumbers, then this
    * method
    * extracts the needed objects and informations to execute the insert
-   * 
+   *
    * @param datastore
    *          a datastore to be able to get mapper informations
    * @param mainObject
@@ -228,7 +228,7 @@ public class RecordContractor {
    * Extracts the pure path of an entity definition, with out some record references. The first entry is the mapper name
    * of the main object, the rest are fields and subfields
    * Something like Person.phoneNumbers or Country.cities.streets
-   * 
+   *
    * @param map
    * @return
    */
@@ -245,7 +245,7 @@ public class RecordContractor {
 
   /**
    * Extracts the entity name from the given {@link CaptureMap}
-   * 
+   *
    * @param map
    *          the map to be used
    * @return the entity name
@@ -256,7 +256,7 @@ public class RecordContractor {
 
   /**
    * Extracts the pure entity name
-   * 
+   *
    * @param map
    *          the map to be used
    * @return the entity name
@@ -284,7 +284,7 @@ public class RecordContractor {
   /**
    * Method will extract the id parameter(s), improve the field names for the id specifications and will add the
    * suitable arguments to the query
-   * 
+   *
    * @param mapper
    *          the mapper to be used
    * @param map
@@ -294,16 +294,16 @@ public class RecordContractor {
    */
   public static void extractId(IMapper mapper, CaptureMap map, IQuery<?> query) {
     List<String[]> ids = extractIds(mapper, map);
-    IQueryContainer and = query.and();
+    ISearchConditionContainer and = query.and();
     for (String[] id : ids) {
-      and.getContent().add(query.isEqual(id[0], id[1]));
+      and.getConditions().add(query.isEqual(id[0], id[1]));
     }
-    query.setRootQueryPart(and);
+    query.setSearchCondition(and);
   }
 
   /**
    * Method will extract the id parameter(s) and improve the field names for the id specifications
-   * 
+   *
    * @param mapper
    *          the mapper to be used
    * @param map
@@ -324,7 +324,7 @@ public class RecordContractor {
 
   /**
    * Extracts the id specification(s) as key-value pairs
-   * 
+   *
    * @param spec
    *          the specification as String in the form of (ID:4)
    * @return
@@ -353,7 +353,7 @@ public class RecordContractor {
 
   /**
    * Creates the parameter sequence for a URL to reference a record
-   * 
+   *
    * @param captureCollection
    *          the CaptureCollection from a {@link PersistenceController}
    * @param action
@@ -377,7 +377,7 @@ public class RecordContractor {
   /**
    * Generates the sequence, by which a record is referenced inside a URL.
    * The reference will be like: entity=mapperName(ID:4)
-   * 
+   *
    * @param mapper
    *          the instance of {@link IMapper} which contains information of ID fields
    * @param entityParameterName
@@ -392,8 +392,8 @@ public class RecordContractor {
 
   /**
    * Generates the reference sequence for a record ( and the subrecords ), something like "mapperName(ID:4)".
-   * 
-   * 
+   *
+   *
    * @param mapper
    *          the instance of {@link IMapper} which contains information of ID fields
    * @param record
@@ -406,7 +406,7 @@ public class RecordContractor {
 
   /**
    * Generates the pure ( encoded ) id sequence to reference a record, something like (ID:4)
-   * 
+   *
    * @param mapper
    * @param record
    * @return
