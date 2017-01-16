@@ -294,11 +294,13 @@ public class RecordContractor {
    */
   public static void extractId(IMapper mapper, CaptureMap map, IQuery<?> query) {
     List<String[]> ids = extractIds(mapper, map);
-    ISearchConditionContainer and = query.and();
-    for (String[] id : ids) {
-      and.getConditions().add(query.isEqual(id[0], id[1]));
+    if (!ids.isEmpty()) {
+      ISearchConditionContainer and = query.and();
+      for (String[] id : ids) {
+        and.getConditions().add(query.isEqual(id[0], id[1]));
+      }
+      query.setSearchCondition(and);
     }
-    query.setSearchCondition(and);
   }
 
   /**
