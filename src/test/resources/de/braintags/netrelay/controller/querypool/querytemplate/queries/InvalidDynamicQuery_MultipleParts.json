@@ -1,5 +1,5 @@
 {
-  "description": "This is a valid dynamic query",
+  "description": "Invalid because there is a 'condition' and an 'or' inside the same JSON object",
   "mapper": "Person",
   "operation": "select",
   "dynamic": {
@@ -11,25 +11,16 @@
             "field": "firstname",
             "logic": "=",
             "value": "max"
-          }
-        },
-        {
-          "condition": {
-            "field": "score",
-            "logic": "=",
-            "value": 2.5
-          }
-        },
-        {
+          },
           "or": [
-            {
-              "condition": {
-                "field": "city",
-                "logic": "=",
-                "value": "willich"
-              }
-            },
-            {
+	          {
+	          	"condition": {
+	            	"field": "score",
+	            	"logic": "=",
+	            	"value": 2.5
+	          	}
+	          },
+	          {
               "condition": {
                 "field": "zip",
                 "logic": "=",
@@ -38,7 +29,7 @@
             }
           ]
         }
-      ]
+    	]
     }
   }
 }

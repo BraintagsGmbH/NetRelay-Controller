@@ -1,5 +1,5 @@
 {
-  "description": "This is a test query",
+  "description": "Invalid because the first native query has no datastore class",
   "mapper": "Person",
   "operation": "select",
   "native": [

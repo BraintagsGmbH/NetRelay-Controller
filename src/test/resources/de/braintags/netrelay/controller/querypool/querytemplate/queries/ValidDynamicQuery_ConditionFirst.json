@@ -1,5 +1,5 @@
 {
-  "description": "This is a test query",
+  "description": "This is a valid dynamic query",
   "mapper": "Person",
   "operation": "select",
   "dynamic": {

@@ -1,5 +1,5 @@
 {
-  "description": "This is a test query",
+  "description": "Invalid because there are multiple conditions without surrounding 'and' or 'or'",
   "mapper": "Person",
   "operation": "select",
   "dynamic": {

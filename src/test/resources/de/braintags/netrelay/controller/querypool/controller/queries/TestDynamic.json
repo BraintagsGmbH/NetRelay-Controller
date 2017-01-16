@@ -1,9 +1,9 @@
 {
-  "description": "This is a valid dynamic query",
+  "description": "This is a test query",
   "mapper": "Person",
   "operation": "select",
   "dynamic": {
-    "orderBy": "${request.params.order}",
+    "orderBy": "score asc",
     "query": {
       "and": [
         {
@@ -16,7 +16,7 @@
         {
           "condition": {
             "field": "score",
-            "logic": "=",
+            "logic": "<=",
             "value": 2.5
           }
         },
@@ -33,7 +33,7 @@
               "condition": {
                 "field": "zip",
                 "logic": "=",
-                "value": 47877
+                "value": "47877"
               }
             }
           ]

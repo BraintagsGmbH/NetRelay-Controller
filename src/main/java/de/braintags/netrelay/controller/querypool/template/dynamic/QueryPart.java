@@ -5,6 +5,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
+
 /**
  * A part of a query. All parts together form the complete condition of this query. A part my be<br>
  * <ul>
@@ -16,26 +18,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <br>
  * Copyright: Copyright (c) 19.12.2016 <br>
  * Company: Braintags GmbH <br>
- * 
+ *
  * @author sschmitt
  */
 
 public class QueryPart {
   private List<QueryPart> and;
   private List<QueryPart> or;
-  private Condition       condition;
+  private Condition condition;
 
   /**
    * The constructor filling the fields of this part. Exactly one of the given parameters must not be null, the others
    * must be null.
+   * 
+   * @throws InvalidSyntaxException
    */
   @JsonCreator
   public QueryPart(@JsonProperty("and") List<QueryPart> and, @JsonProperty("or") List<QueryPart> or,
-      @JsonProperty("condition") Condition condition) {
-    assert (and != null ^ or != null ^ condition != null);
-    this.and = and;
-    this.or = or;
-    this.condition = condition;
+      @JsonProperty("condition") Condition condition) throws InvalidSyntaxException {
+    if (and != null ^ or != null ^ condition != null ^ (and != null && or != null && condition != null)) {
+      this.and = and;
+      this.or = or;
+      this.condition = condition;
+    } else {
+      throw new InvalidSyntaxException(
+          "A query part must consist of exactly one 'and', 'or', or 'condition': " + and + " " + or + " " + condition);
+    }
   }
 
   /**
@@ -81,6 +89,15 @@ public class QueryPart {
   public Condition getCondition() {
     assert isCondition();
     return condition;
+  }
+
+  public static void main(String[] args) {
+    Object a = new Object();
+    Object b = new Object();
+    Object c = new Object();
+
+    boolean result = a != null ^ b != null ^ c != null ^ (a != null && b != null && c != null);
+    System.out.println(result);
   }
 
 }

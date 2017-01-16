@@ -15,25 +15,25 @@ import io.vertx.core.json.JsonObject;
  * <br>
  * Copyright: Copyright (c) 15.12.2016 <br>
  * Company: Braintags GmbH <br>
- * 
+ *
  * @author sschmitt
  */
 
 public class QueryTemplate {
 
-  private String            mapper;
-  private String            description;
-  private Operation         operation;
+  private String mapper;
+  private String description;
+  private Operation operation;
   private List<NativeQuery> nativeQueries;
-  private DynamicQuery      dynamicQuery;
+  private DynamicQuery dynamicQuery;
 
   @JsonIgnore
-  private JsonObject        source;
+  private JsonObject source;
 
   /**
    * Default constructor that fills all required fields. Each value is required to be not null, except native and
    * dynamic queries. Exactly one of native or dynamic query must not be null.
-   * 
+   *
    * @param mapper
    *          the name of the {@link IMapper}
    * @param description
