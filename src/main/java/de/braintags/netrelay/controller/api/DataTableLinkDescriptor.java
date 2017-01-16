@@ -23,8 +23,8 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.mapping.IField;
 import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
 import de.braintags.io.vertx.pojomapper.typehandler.ITypeHandler;
-import de.braintags.io.vertx.util.CounterObject;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
@@ -65,8 +65,7 @@ public class DataTableLinkDescriptor {
    * @return
    */
   public IQuery<?> toRecordsInTableQuery(IDataStore dataStore) {
-    IQuery<?> query = dataStore.createQuery(mapperClass);
-    return query;
+    return dataStore.createQuery(mapperClass);
   }
 
   /**
@@ -84,7 +83,7 @@ public class DataTableLinkDescriptor {
     query.setStart(displayStart);
     query.setReturnCompleteCount(true);
     List<ColDef> defs = clearColDefs();
-    if (defs.size() <= 0) {
+    if (defs.isEmpty()) {
       querySuccess(query, handler);
     } else {
       loopColumns(query, defs, dataStore, mf, handler);
@@ -101,36 +100,47 @@ public class DataTableLinkDescriptor {
     return ret;
   }
 
+  @SuppressWarnings("rawtypes")
   private void loopColumns(IQuery<?> query, List<ColDef> defs, IDataStore dataStore, IMapperFactory mf,
       Handler<AsyncResult<IQuery<?>>> handler) {
-    CounterObject<IQuery<?>> co = new CounterObject<>(defs.size(), handler);
+    List<Future> fl = new ArrayList<>(defs.size());
     for (ColDef def : defs) {
-      if (co.isError()) {
-        break;
+      fl.add(handleColumn(query, mf, def));
+    }
+    CompositeFuture cf = CompositeFuture.all(fl);
+    cf.setHandler(cfr -> {
+      if (cfr.failed()) {
+        handler.handle(Future.failedFuture(cfr.cause()));
+      } else {
+        querySuccess(query, handler);
       }
-      IField field = mf.getMapper(mapperClass).getField(def.name);
-      ITypeHandler th = field.getTypeHandler();
-      th.fromStore(def.searchValue, field, null, thResult -> {
-        if (thResult.failed()) {
-          co.setThrowable(thResult.cause());
-        } else {
-          Object value = thResult.result().getResult();
-          if (value != null && value.hashCode() != 0) {
-            if (allowContains(value)) {
-              query.setSearchCondition(query.contains(def.name, value));
-            } else {
-              query.setSearchCondition(query.isEqual(def.name, value));
-            }
-          }
-          if (def.sortable) {
-            query.addSort(def.name, def.asc);
-          }
-          if (co.reduce()) {
-            querySuccess(query, handler);
+    });
+  }
+
+  @SuppressWarnings({ "rawtypes" })
+  private Future handleColumn(IQuery<?> query, IMapperFactory mf, ColDef def) {
+    Future f = Future.future();
+    IField field = mf.getMapper(mapperClass).getField(def.name);
+    ITypeHandler th = field.getTypeHandler();
+    th.fromStore(def.searchValue, field, null, thResult -> {
+      if (thResult.failed()) {
+        f.fail(thResult.cause());
+      } else {
+        Object value = thResult.result().getResult();
+        if (value != null && value.hashCode() != 0) {
+          if (allowContains(value)) {
+            query.setSearchCondition(query.contains(def.name, value));
+          } else {
+            query.setSearchCondition(query.isEqual(def.name, value));
           }
         }
-      });
-    }
+        if (def.sortable) {
+          query.addSort(def.name, def.asc);
+        }
+        f.complete();
+      }
+    });
+    return f;
   }
 
   private boolean allowContains(Object value) {
@@ -182,10 +192,10 @@ public class DataTableLinkDescriptor {
   }
 
   class ColDef {
-    public String name;
-    public String searchValue;
-    public boolean sortable = false;
-    public boolean asc = true;
+    String name;
+    String searchValue;
+    boolean sortable = false;
+    boolean asc = true;
 
     ColDef(RoutingContext context, String name, int position) {
       this.name = name;
