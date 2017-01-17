@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.netrelay.controller.querypool.QueryPoolController.Operation;
+import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -27,6 +28,10 @@ public class QueryTemplate {
   private List<NativeQuery> nativeQueries;
   private DynamicQuery dynamicQuery;
 
+  private String orderBy;
+  private String offset;
+  private String limit;
+
   @JsonIgnore
   private JsonObject source;
 
@@ -44,20 +49,29 @@ public class QueryTemplate {
    *          an optional list of {@link NativeQuery}s, one for each datastore that should be able to execute it
    * @param dynamicQuery
    *          a {@link DynamicQuery} to be used independently from the currently configured datastore
+   * @throws InvalidSyntaxException
+   *           if there is a syntax error in the template
    */
   @JsonCreator
   public QueryTemplate(@JsonProperty(value = "mapper", required = true) String mapper,
       @JsonProperty(value = "description", required = true) String description,
       @JsonProperty(value = "operation", required = true) Operation operation,
       @JsonProperty(value = "native") List<NativeQuery> nativeQueries,
-      @JsonProperty(value = "dynamic") DynamicQuery dynamicQuery) {
-    assert dynamicQuery != null ^ nativeQueries != null;
+      @JsonProperty(value = "dynamic") DynamicQuery dynamicQuery, @JsonProperty(value = "orderBy") String orderBy,
+      @JsonProperty(value = "offset") String offset, @JsonProperty(value = "limit") String limit)
+      throws InvalidSyntaxException {
+    if (dynamicQuery != null && nativeQueries != null) {
+      throw new InvalidSyntaxException("A query template can not define a dynamic and native query at the same time");
+    }
 
     this.mapper = mapper;
     this.description = description;
     this.operation = operation;
     this.nativeQueries = nativeQueries;
     this.dynamicQuery = dynamicQuery;
+    this.orderBy = orderBy;
+    this.offset = offset;
+    this.limit = limit;
   }
 
   /**
@@ -110,5 +124,32 @@ public class QueryTemplate {
    */
   public void setSource(JsonObject source) {
     this.source = source;
+  }
+
+  /**
+   * @return the order fields of the query. Should be in the format<br>
+   *         <code>Fieldname [ASC|DESC], Fieldname [ASC|DESC],...</code>
+   */
+  public String getOrderBy() {
+    return orderBy;
+  }
+
+  /**
+   * The offset for the beginning of the results returned by the query. Saved as string to allow for variable values
+   *
+   * @return the offset
+   *         the offset, or starting point, of the query
+   */
+  public String getOffset() {
+    return offset;
+  }
+
+  /**
+   * The offset for the limit of the results returned by the query. Saved as string to allow for variable values
+   * 
+   * @return the limit for the query
+   */
+  public String getLimit() {
+    return limit;
   }
 }

@@ -1,14 +1,14 @@
 {
-  "description": "This is a test query",
+  "description": "Test query for a field condition that has a request parameter variable as value",
   "mapper": "Person",
   "operation": "select",
+  "orderBy": "score asc",
   "dynamic": {
-    "orderBy": "score asc",
     "query": {
       "condition": {
         "field": "firstname",
         "logic": "=",
-        "value": "${request.param}"
+        "value": "${request:param}"
       }
     }
   }

@@ -74,14 +74,14 @@ public class TQueryTemplate {
    * @throws IOException
    */
   @Test
-  public void testDynamicQuery_validJson_withoutQuery() throws JsonParseException, JsonMappingException, IOException {
-    File jsonFile = new File(TEST_RESOURCE_PATH + "ValidDynamicQuery_NoQuery.json");
+  public void testQuery_validJson_withoutQuery() throws JsonParseException, JsonMappingException, IOException {
+    File jsonFile = new File(TEST_RESOURCE_PATH + "ValidTemplate_NoQuery.json");
 
     ObjectMapper om = new ObjectMapper();
     QueryTemplate queryTemplate = om.readValue(jsonFile, QueryTemplate.class);
 
-    DynamicQuery dynamicQuery = queryTemplate.getDynamicQuery();
-    Assert.assertNull("Query of the dynamic query should not be null", dynamicQuery.getRootQueryPart());
+    Assert.assertNull("Dynamic query of the template should be null", queryTemplate.getDynamicQuery());
+    Assert.assertNull("Native query of the template should be null", queryTemplate.getNativeQueries());
   }
 
   /**

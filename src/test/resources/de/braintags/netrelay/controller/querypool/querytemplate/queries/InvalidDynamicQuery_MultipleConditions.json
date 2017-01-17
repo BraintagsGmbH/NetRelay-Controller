@@ -2,8 +2,8 @@
   "description": "Invalid because there are multiple conditions without surrounding 'and' or 'or'",
   "mapper": "Person",
   "operation": "select",
+  "orderBy": "${request.params.order}",
   "dynamic": {
-    "orderBy": "${request.params.order}",
     "query": [ 
 		    {
 				"condition": {

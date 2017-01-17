@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.querypool.mapper.Address;
 import de.braintags.netrelay.controller.querypool.mapper.Person;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -12,6 +13,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.web.Route;
 
 /**
  * Unit test for {@link QueryPoolController}<br>
@@ -31,8 +33,14 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    */
   private static final String TEST_RESOURCE_PATH = "src/test/resources/de/braintags/netrelay/controller/querypool/controller/";
 
+  /**
+   * Test a simple native query. The query should only return people under the age of 30
+   *
+   * @param context
+   * @throws Exception
+   */
   @Test
-  public void testNativeQuery_validJson(TestContext context) throws Exception {
+  public void testNativeQuery(TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
     Person wrongPerson = new Person();
     wrongPerson.firstname = "max";
@@ -46,7 +54,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     rightPerson.age = 20;
     DatastoreBaseTest.saveRecord(context, rightPerson);
 
-    testRequest(context, HttpMethod.GET, "/queries/testnative.html", null, resp -> {
+    testRequest(context, HttpMethod.GET, "/queries/testNative.html", null, resp -> {
       String response = resp.content;
       logger.debug(response);
       context.assertTrue(response.contains("ID: " + rightPerson.id));
@@ -54,53 +62,228 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     }, 200, "OK", null);
   }
 
+  /**
+   * Test a dynamic query that is sorted by the score of the person in ascending order.
+   *
+   * @param context
+   * @throws Exception
+   */
   @Test
-  public void testDynamicQuery_validJson(TestContext context) throws Exception {
+  public void testDynamicQuery_orderBy(TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
-    Person wrongPerson = new Person();
-    wrongPerson.firstname = "max";
-    wrongPerson.lastname = "mustermann0";
-    wrongPerson.score = 2.6;
-    DatastoreBaseTest.saveRecord(context, wrongPerson);
+    Person person_higherScore = new Person();
+    person_higherScore.firstname = "max";
+    person_higherScore.lastname = "mustermann1";
+    person_higherScore.zip = "47877";
+    person_higherScore.score = 2.5;
+    DatastoreBaseTest.saveRecord(context, person_higherScore);
 
-    Person rightPerson_higherScore = new Person();
-    rightPerson_higherScore.firstname = "max";
-    rightPerson_higherScore.lastname = "mustermann1";
-    rightPerson_higherScore.zip = "47877";
-    rightPerson_higherScore.score = 2.5;
-    DatastoreBaseTest.saveRecord(context, rightPerson_higherScore);
+    Person person_lowerScore = new Person();
+    person_lowerScore.firstname = "max";
+    person_lowerScore.lastname = "mustermann2";
+    person_lowerScore.city = "willich";
+    person_lowerScore.score = 1.5;
+    DatastoreBaseTest.saveRecord(context, person_lowerScore);
 
-    Person rightPerson_lowerScore = new Person();
-    rightPerson_lowerScore.firstname = "max";
-    rightPerson_lowerScore.lastname = "mustermann2";
-    rightPerson_lowerScore.city = "willich";
-    rightPerson_lowerScore.score = 1.5;
-    DatastoreBaseTest.saveRecord(context, rightPerson_lowerScore);
-
-    testRequest(context, HttpMethod.GET, "/queries/testdynamic.html", null, resp -> {
+    testRequest(context, HttpMethod.GET, "/queries/testDynamic_orderBy.html", null, resp -> {
       String response = resp.content;
       logger.debug(response);
-      context.assertFalse(response.contains("ID: " + wrongPerson.id));
-      int i = response.indexOf("ID: " + rightPerson_lowerScore.id);
-      context.assertTrue(i > 0, "Response must contain the ID of the lower score person");
-      i = response.indexOf("ID: " + rightPerson_higherScore.id, i + 1);
-      context.assertTrue(i > 0,
-          "Response must contain the ID of the higher score person, after the ID of the lower score person");
+      int lowerScorePos = response.indexOf("ID: " + person_lowerScore.id);
+      int higherScorePos = response.indexOf("ID: " + person_higherScore.id, lowerScorePos + 1);
+      context.assertTrue(lowerScorePos > 0, "Response must contain the ID of the lower score person");
+      context.assertTrue(higherScorePos > 0, "Response must contain the ID of the higher score person");
+      context.assertTrue(lowerScorePos < higherScorePos, "Lower score person must come before the higher score person");
     }, 200, "OK", null);
   }
 
+  /**
+   * Test a dynamic query that has a variable in its field value condition. The variable must be resolved against the
+   * request parameter.
+   *
+   * @param context
+   * @throws Exception
+   */
   @Test
-  public void testDynamicQuery_validJson_withVariable(TestContext context) throws Exception {
+  public void testDynamicQuery_withRequestParameterVariable(TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
     Person person = new Person();
     person.firstname = "paramvalue";
     DatastoreBaseTest.saveRecord(context, person);
 
-    testRequest(context, HttpMethod.GET, "/queries/testdynamic_withvariable.html?param=" + person.firstname, null,
-        resp -> {
+    testRequest(context, HttpMethod.GET,
+        "/queries/testDynamic_withRequestParameterVariable.html?param=" + person.firstname, null, resp -> {
           String response = resp.content;
           logger.debug(response);
           context.assertTrue(response.contains("ID: " + person.id));
+        }, 200, "OK", null);
+  }
+
+  /**
+   * Test a dynamic query that as a field value variable which must be filled from a mapper of the routing context. The
+   * variable is multiple fields deep, which means the mapper contains a mapper which contains the value: "person ->
+   * address -> street"
+   *
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testDynamicQuery_withDeepVariable(TestContext context) throws Exception {
+    DatastoreBaseTest.clearTable(context, Person.class);
+
+    String value = "deep";
+
+    Person person = new Person();
+    person.address = new Address();
+    person.address.street = value;
+    person.firstname = value;
+    DatastoreBaseTest.saveRecord(context, person);
+
+    Route route = null;
+    try {
+      // create a route to fill the routing context with the person before the query pool controller is called
+      route = netRelay.getRouter().get("/queries/testDynamic_withDeepVariable.html").order(1).handler(rt -> {
+        rt.put("person", person);
+        rt.next();
+      });
+
+      testRequest(context, HttpMethod.GET, "/queries/testDynamic_withDeepVariable.html", null, resp -> {
+        String response = resp.content;
+        logger.debug(response);
+        context.assertTrue(response.contains("ID: " + person.id));
+      }, 200, "OK", null);
+    } finally {
+      // ensure no following tests will be influenced
+      if (route != null)
+        route.remove();
+    }
+  }
+
+  /**
+   * Test a dynamic query with a variable that must be resolved by the data map of the routing context
+   *
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testDynamicQuery_withContextVariable(TestContext context) throws Exception {
+    DatastoreBaseTest.clearTable(context, Person.class);
+
+    String value = "con text";
+
+    Person person = new Person();
+    person.firstname = value;
+    DatastoreBaseTest.saveRecord(context, person);
+
+    Route route = null;
+    try {
+      // create a route to fill the routing context data with the test variable
+      route = netRelay.getRouter().get("/queries/testDynamic_withContextVariable.html").order(1).handler(rt -> {
+        rt.put("key", value);
+        rt.next();
+      });
+
+      testRequest(context, HttpMethod.GET, "/queries/testDynamic_withContextVariable.html", null, resp -> {
+        String response = resp.content;
+        logger.debug(response);
+        context.assertTrue(response.contains("ID: " + person.id));
+      }, 200, "OK", null);
+    } finally {
+      // ensure no following tests will be influenced
+      if (route != null)
+        route.remove();
+    }
+  }
+
+  /**
+   * Test a simple dynamic query with one field condition
+   *
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testDynamicQuery_simpleQuery(TestContext context) throws Exception {
+    DatastoreBaseTest.clearTable(context, Person.class);
+    Person rightPerson = new Person();
+    rightPerson.firstname = "max";
+    DatastoreBaseTest.saveRecord(context, rightPerson);
+
+    Person wrongPerson = new Person();
+    wrongPerson.firstname = "maximilian";
+    DatastoreBaseTest.saveRecord(context, wrongPerson);
+
+    testRequest(context, HttpMethod.GET, "/queries/testDynamic_simpleQuery.html", null, resp -> {
+      String response = resp.content;
+      logger.debug(response);
+      context.assertTrue(response.contains("ID: " + rightPerson.id));
+      context.assertFalse(response.contains("ID: " + wrongPerson.id));
+    }, 200, "OK", null);
+  }
+
+  /**
+   * Test the offset and limit function of the query, which should only return the second person since the offset and
+   * limit are 1
+   *
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testDynamicQuery_limit(TestContext context) throws Exception {
+    DatastoreBaseTest.clearTable(context, Person.class);
+    Person firstPerson = new Person();
+    firstPerson.firstname = "max";
+    firstPerson.score = 1.0;
+    DatastoreBaseTest.saveRecord(context, firstPerson);
+
+    Person secondPerson = new Person();
+    secondPerson.firstname = "max";
+    secondPerson.score = 2.0;
+    DatastoreBaseTest.saveRecord(context, secondPerson);
+
+    Person thirdPerson = new Person();
+    thirdPerson.firstname = "max";
+    thirdPerson.score = 3.0;
+    DatastoreBaseTest.saveRecord(context, thirdPerson);
+
+    testRequest(context, HttpMethod.GET, "/queries/testDynamic_limit.html", null, resp -> {
+      String response = resp.content;
+      logger.debug(response);
+      context.assertFalse(response.contains("ID: " + firstPerson.id),
+          "The first person should not have been found since the offset for the query is 1");
+      context.assertTrue(response.contains("ID: " + secondPerson.id),
+          "The second person should  have been found since the offset for the query is 1");
+      context.assertFalse(response.contains("ID: " + firstPerson.id),
+          "The third person should not have been found since the limit for the query is 1");
+    }, 200, "OK", null);
+  }
+
+  /**
+   * Test a dynamic query that has a variable inside the "orderBy" value
+   *
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testDynamicQuery_withOrderByVariable(TestContext context) throws Exception {
+    DatastoreBaseTest.clearTable(context, Person.class);
+    Person secondPerson = new Person();
+    secondPerson.firstname = "max";
+    secondPerson.lastname = "aaa";
+    DatastoreBaseTest.saveRecord(context, secondPerson);
+
+    Person firstPerson = new Person();
+    firstPerson.firstname = "max";
+    firstPerson.lastname = "zzz";
+    DatastoreBaseTest.saveRecord(context, firstPerson);
+
+    testRequest(context, HttpMethod.GET, "/queries/testDynamic_withOrderByVariable.html?sort=lastname&dir=desc", null,
+        resp -> {
+          String response = resp.content;
+          logger.debug(response);
+          int firstPersonPos = response.indexOf("ID: " + firstPerson.id);
+          int secondPersonPos = response.indexOf("ID: " + secondPerson.id, firstPersonPos + 1);
+          context.assertTrue(firstPersonPos > 0, "Response must contain the ID of the first person");
+          context.assertTrue(secondPersonPos > 0, "Response must contain the ID of the second person");
+          context.assertTrue(firstPersonPos < secondPersonPos, "First person must come before the second person");
         }, 200, "OK", null);
   }
 

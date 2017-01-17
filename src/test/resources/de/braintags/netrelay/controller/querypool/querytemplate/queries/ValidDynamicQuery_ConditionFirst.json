@@ -2,8 +2,8 @@
   "description": "This is a valid dynamic query",
   "mapper": "Person",
   "operation": "select",
+  "orderBy": "${request.params.order}",
   "dynamic": {
-    "orderBy": "${request.params.order}",
     "query": {
  	   "condition": {
      	  "field": "firstname",

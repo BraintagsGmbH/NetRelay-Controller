@@ -1,0 +1,17 @@
+{
+  "description": "Query for the test of offset and limit",
+  "mapper": "Person",
+  "operation": "select",
+  "offset":1,
+  "limit":1,
+  "orderBy": "score asc",
+  "dynamic": {
+    "query": {
+      "condition": {
+        "field": "firstname",
+        "logic": "=",
+        "value": "max"
+      }
+    }
+  }
+}

@@ -2,8 +2,8 @@
   "description": "Invalid because there is a 'condition' and an 'or' inside the same JSON object",
   "mapper": "Person",
   "operation": "select",
+  "orderBy": "${request.params.order}",
   "dynamic": {
-    "orderBy": "${request.params.order}",
     "query": {
       "and": [
         {

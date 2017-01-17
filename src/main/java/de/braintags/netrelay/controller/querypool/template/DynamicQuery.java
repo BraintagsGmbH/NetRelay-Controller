@@ -11,23 +11,13 @@ import de.braintags.netrelay.controller.querypool.template.dynamic.QueryPart;
  * <br>
  * Copyright: Copyright (c) 19.12.2016 <br>
  * Company: Braintags GmbH <br>
- * 
+ *
  * @author sschmitt
  */
 public class DynamicQuery {
 
-  @JsonProperty
-  private String    orderBy;
   @JsonProperty(value = "query")
   private QueryPart rootQueryPart;
-
-  /**
-   * @return the order fields of the query. Should be in the format<br>
-   *         <code>Fieldname [ASC|DESC], Fieldname [ASC|DESC],...</code>
-   */
-  public String getOrderBy() {
-    return orderBy;
-  }
 
   /**
    * @return the first {@link QueryPart} of the query, which might either contain a condition or more query parts

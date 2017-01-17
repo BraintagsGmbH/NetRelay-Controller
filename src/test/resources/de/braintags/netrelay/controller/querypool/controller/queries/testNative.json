@@ -1,5 +1,5 @@
 {
-  "description": "This is a test query",
+  "description": "A simple native test query",
   "mapper": "Person",
   "operation": "select",
   "native": [
