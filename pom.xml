@@ -15,8 +15,6 @@
 	</parent>
  
 	<properties>
-		<netrelay.version>10.2.0-SNAPSHOT</netrelay.version>
-
 		<jacoco.haltOnFailure>false</jacoco.haltOnFailure>
 		<ignoreFailedTests>true</ignoreFailedTests>
 		<testjar.skip>false</testjar.skip>
