@@ -29,8 +29,8 @@ public class QueryTemplate {
   private DynamicQuery dynamicQuery;
 
   private String orderBy;
-  private String offset;
-  private String limit;
+  private Integer offset;
+  private Integer limit;
 
   @JsonIgnore
   private JsonObject source;
@@ -58,7 +58,7 @@ public class QueryTemplate {
       @JsonProperty(value = "operation", required = true) Operation operation,
       @JsonProperty(value = "native") List<NativeQuery> nativeQueries,
       @JsonProperty(value = "dynamic") DynamicQuery dynamicQuery, @JsonProperty(value = "orderBy") String orderBy,
-      @JsonProperty(value = "offset") String offset, @JsonProperty(value = "limit") String limit)
+      @JsonProperty(value = "offset") Integer offset, @JsonProperty(value = "limit") Integer limit)
       throws InvalidSyntaxException {
     if (dynamicQuery != null && nativeQueries != null) {
       throw new InvalidSyntaxException("A query template can not define a dynamic and native query at the same time");
@@ -135,21 +135,21 @@ public class QueryTemplate {
   }
 
   /**
-   * The offset for the beginning of the results returned by the query. Saved as string to allow for variable values
+   * The offset for the beginning of the results returned by the query. Can be null.
    *
    * @return the offset
    *         the offset, or starting point, of the query
    */
-  public String getOffset() {
+  public Integer getOffset() {
     return offset;
   }
 
   /**
-   * The offset for the limit of the results returned by the query. Saved as string to allow for variable values
-   * 
+   * The offset for the limit of the results returned by the query. Can be null.
+   *
    * @return the limit for the query
    */
-  public String getLimit() {
+  public Integer getLimit() {
     return limit;
   }
 }

@@ -43,19 +43,19 @@ import io.vertx.ext.web.RoutingContext;
  * Config-Parameter:<br/>
  * None
  * <br>
- * 
+ *
  * Request-Parameter:<br/>
  * <UL>
  * <LI>{@value #MAPPER_KEY} - the name of the property, which specifies the mapper to be used
  * </UL>
  * <br/>
- * 
+ *
  * Result-Parameter:<br/>
  * sends the result as Json in the required form
  * <br/>
- * 
+ *
  * <pre>
- 
+
      {
       "name" : "DataTableController",
       "routes" : [ "/api/datatables" ],
@@ -64,13 +64,13 @@ import io.vertx.ext.web.RoutingContext;
         "cacheEnabled" : "false"
       }
     }
- * 
+ *
  * </pre>
- * 
- * 
- * 
+ *
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class DataTablesController extends AbstractController {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
@@ -85,7 +85,7 @@ public class DataTablesController extends AbstractController {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
@@ -135,7 +135,7 @@ public class DataTablesController extends AbstractController {
 
   private void execute(IQuery<?> query, DataTableLinkDescriptor descr, long tableCount,
       Handler<AsyncResult<JsonObject>> handler) {
-    query.execute(qr -> {
+    query.execute(null, descr.getDisplayLength(), descr.getDisplayStart(), qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
       } else {
@@ -199,7 +199,7 @@ public class DataTablesController extends AbstractController {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
    */
   @Override
@@ -209,7 +209,7 @@ public class DataTablesController extends AbstractController {
 
   /**
    * Creates a default definition for the current instance
-   * 
+   *
    * @return
    */
   public static RouterDefinition createDefaultRouterDefinition() {
@@ -225,7 +225,7 @@ public class DataTablesController extends AbstractController {
 
   /**
    * Get the default properties for an implementation of StaticController
-   * 
+   *
    * @return
    */
   public static Properties getDefaultProperties() {

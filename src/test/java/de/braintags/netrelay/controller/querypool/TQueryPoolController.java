@@ -1,5 +1,7 @@
 package de.braintags.netrelay.controller.querypool;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Test;
 
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
@@ -12,6 +14,7 @@ import de.braintags.netrelay.unit.NetRelayBaseConnectorTest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.web.Route;
 
@@ -54,9 +57,10 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     rightPerson.age = 20;
     DatastoreBaseTest.saveRecord(context, rightPerson);
 
-    testRequest(context, HttpMethod.GET, "/queries/testNative.html", null, resp -> {
+    String requestPath = "/queries/testNative.html";
+    testRequest(context, HttpMethod.GET, requestPath, null, resp -> {
       String response = resp.content;
-      logger.debug(response);
+      logger.debug(requestPath + ":\n" + response);
       context.assertTrue(response.contains("ID: " + rightPerson.id));
       context.assertFalse(response.contains("ID: " + wrongPerson.id));
     }, 200, "OK", null);
@@ -85,9 +89,10 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     person_lowerScore.score = 1.5;
     DatastoreBaseTest.saveRecord(context, person_lowerScore);
 
-    testRequest(context, HttpMethod.GET, "/queries/testDynamic_orderBy.html", null, resp -> {
+    String requestPath = "/queries/testDynamic_orderBy.html";
+    testRequest(context, HttpMethod.GET, requestPath, null, resp -> {
       String response = resp.content;
-      logger.debug(response);
+      logger.debug(requestPath + ":\n" + response);
       int lowerScorePos = response.indexOf("ID: " + person_lowerScore.id);
       int higherScorePos = response.indexOf("ID: " + person_higherScore.id, lowerScorePos + 1);
       context.assertTrue(lowerScorePos > 0, "Response must contain the ID of the lower score person");
@@ -110,12 +115,12 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     person.firstname = "paramvalue";
     DatastoreBaseTest.saveRecord(context, person);
 
-    testRequest(context, HttpMethod.GET,
-        "/queries/testDynamic_withRequestParameterVariable.html?param=" + person.firstname, null, resp -> {
-          String response = resp.content;
-          logger.debug(response);
-          context.assertTrue(response.contains("ID: " + person.id));
-        }, 200, "OK", null);
+    String requestPath = "/queries/testDynamic_withRequestParameterVariable.html?param=" + person.firstname;
+    testRequest(context, HttpMethod.GET, requestPath, null, resp -> {
+      String response = resp.content;
+      logger.debug(requestPath + ":\n" + response);
+      context.assertTrue(response.contains("ID: " + person.id));
+    }, 200, "OK", null);
   }
 
   /**
@@ -138,17 +143,18 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     person.firstname = value;
     DatastoreBaseTest.saveRecord(context, person);
 
+    String requestPath = "/queries/testDynamic_withDeepVariable.html";
     Route route = null;
     try {
       // create a route to fill the routing context with the person before the query pool controller is called
-      route = netRelay.getRouter().get("/queries/testDynamic_withDeepVariable.html").order(1).handler(rt -> {
+      route = netRelay.getRouter().get(requestPath).order(1).handler(rt -> {
         rt.put("person", person);
         rt.next();
       });
 
-      testRequest(context, HttpMethod.GET, "/queries/testDynamic_withDeepVariable.html", null, resp -> {
+      testRequest(context, HttpMethod.GET, requestPath, null, resp -> {
         String response = resp.content;
-        logger.debug(response);
+        logger.debug(requestPath + ":\n" + response);
         context.assertTrue(response.contains("ID: " + person.id));
       }, 200, "OK", null);
     } finally {
@@ -159,33 +165,53 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
   }
 
   /**
-   * Test a dynamic query with a variable that must be resolved by the data map of the routing context
+   * Test a dynamic query with a variable that must be resolved by the data map of the routing context.
+   * The request is made twice with a different value for the variable, to ensure that a once resolved variable field
+   * value is not cached.
    *
    * @param context
    * @throws Exception
    */
   @Test
-  public void testDynamicQuery_withContextVariable(TestContext context) throws Exception {
+  public void testDynamicQuery_withContextVariable_executedTwice(TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
 
     String value = "con text";
+    final AtomicInteger requestCount = new AtomicInteger(0);
 
     Person person = new Person();
     person.firstname = value;
     DatastoreBaseTest.saveRecord(context, person);
 
+    String requestPath = "/queries/testDynamic_withContextVariable.html";
     Route route = null;
     try {
       // create a route to fill the routing context data with the test variable
-      route = netRelay.getRouter().get("/queries/testDynamic_withContextVariable.html").order(1).handler(rt -> {
-        rt.put("key", value);
+      route = netRelay.getRouter().get(requestPath).order(1).handler(rt -> {
+        if (requestCount.getAndIncrement() == 0)
+          rt.put("key", value);
+        else
+          rt.put("key", "definitly not the value");
         rt.next();
       });
 
-      testRequest(context, HttpMethod.GET, "/queries/testDynamic_withContextVariable.html", null, resp -> {
+      Async async = context.async();
+      testRequest(context, HttpMethod.GET, requestPath, null, resp -> {
         String response = resp.content;
-        logger.debug(response);
+        logger.debug(requestPath + ":\n" + response);
         context.assertTrue(response.contains("ID: " + person.id));
+
+        try {
+          testRequest(context, HttpMethod.GET, requestPath, null, resp2 -> {
+            String response2 = resp2.content;
+            logger.debug(requestPath + ":\n" + response2);
+            context.assertFalse(response2.contains("ID: " + person.id));
+            async.complete();
+          }, 200, "OK", null);
+        } catch (Exception e) {
+          context.fail();
+        }
+
       }, 200, "OK", null);
     } finally {
       // ensure no following tests will be influenced
@@ -211,9 +237,10 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     wrongPerson.firstname = "maximilian";
     DatastoreBaseTest.saveRecord(context, wrongPerson);
 
-    testRequest(context, HttpMethod.GET, "/queries/testDynamic_simpleQuery.html", null, resp -> {
+    String requestPath = "/queries/testDynamic_simpleQuery.html";
+    testRequest(context, HttpMethod.GET, requestPath, null, resp -> {
       String response = resp.content;
-      logger.debug(response);
+      logger.debug(requestPath + ":\n" + response);
       context.assertTrue(response.contains("ID: " + rightPerson.id));
       context.assertFalse(response.contains("ID: " + wrongPerson.id));
     }, 200, "OK", null);
@@ -244,9 +271,10 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
     thirdPerson.score = 3.0;
     DatastoreBaseTest.saveRecord(context, thirdPerson);
 
-    testRequest(context, HttpMethod.GET, "/queries/testDynamic_limit.html", null, resp -> {
+    String requestPath = "/queries/testDynamic_limit.html";
+    testRequest(context, HttpMethod.GET, requestPath, null, resp -> {
       String response = resp.content;
-      logger.debug(response);
+      logger.debug(requestPath + ":\n" + response);
       context.assertFalse(response.contains("ID: " + firstPerson.id),
           "The first person should not have been found since the offset for the query is 1");
       context.assertTrue(response.contains("ID: " + secondPerson.id),
@@ -254,37 +282,6 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
       context.assertFalse(response.contains("ID: " + firstPerson.id),
           "The third person should not have been found since the limit for the query is 1");
     }, 200, "OK", null);
-  }
-
-  /**
-   * Test a dynamic query that has a variable inside the "orderBy" value
-   *
-   * @param context
-   * @throws Exception
-   */
-  @Test
-  public void testDynamicQuery_withOrderByVariable(TestContext context) throws Exception {
-    DatastoreBaseTest.clearTable(context, Person.class);
-    Person secondPerson = new Person();
-    secondPerson.firstname = "max";
-    secondPerson.lastname = "aaa";
-    DatastoreBaseTest.saveRecord(context, secondPerson);
-
-    Person firstPerson = new Person();
-    firstPerson.firstname = "max";
-    firstPerson.lastname = "zzz";
-    DatastoreBaseTest.saveRecord(context, firstPerson);
-
-    testRequest(context, HttpMethod.GET, "/queries/testDynamic_withOrderByVariable.html?sort=lastname&dir=desc", null,
-        resp -> {
-          String response = resp.content;
-          logger.debug(response);
-          int firstPersonPos = response.indexOf("ID: " + firstPerson.id);
-          int secondPersonPos = response.indexOf("ID: " + secondPerson.id, firstPersonPos + 1);
-          context.assertTrue(firstPersonPos > 0, "Response must contain the ID of the first person");
-          context.assertTrue(secondPersonPos > 0, "Response must contain the ID of the second person");
-          context.assertTrue(firstPersonPos < secondPersonPos, "First person must come before the second person");
-        }, 200, "OK", null);
   }
 
   /*

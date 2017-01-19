@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <br>
  * Copyright: Copyright (c) 19.12.2016 <br>
  * Company: Braintags GmbH <br>
- * 
+ *
  * @author sschmitt
  */
 
@@ -19,7 +19,7 @@ public class Condition {
 
   /**
    * The constructor filling all fields. Field and logic are required, value is optional.
-   * 
+   *
    * @param field
    *          the field name of this condition
    * @param logic
@@ -55,5 +55,4 @@ public class Condition {
   public Object getValue() {
     return value;
   }
-
 }

@@ -13,10 +13,8 @@
 package de.braintags.netrelay.controller.querypool;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,13 +27,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
+import de.braintags.io.vertx.pojomapper.dataaccess.query.IFieldValueResolver;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQueryResult;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.ISearchCondition;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.QueryOperator;
 import de.braintags.io.vertx.pojomapper.dataaccess.query.impl.QueryOr;
-import de.braintags.io.vertx.pojomapper.mapping.IField;
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.io.vertx.util.exception.NoSuchFileException;
 import de.braintags.io.vertx.util.file.FileSystemUtil;
@@ -95,12 +92,31 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class QueryPoolController extends AbstractController {
 
+  /**
+   * Name of the request parameter that sets the query offset
+   */
+  private static final String OFFSET_PARAMETER_NAME = "qoffset";
+  /**
+   * Name of the request parameter that sets the query limit
+   */
+  private static final String LIMIT_PARAMETER_NAME = "qlimit";
+
+  /**
+   * Name of the property key that defines the root directory where the query template JSON files are
+   */
   public static final String QUERY_DIRECTORY_PROPERTY = "queryDirectory";
+  /**
+   * Default directory name where query template JSON files are
+   */
   private static final String DEFAULT_QUERY_DIRECTORY = "queries/";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(QueryPoolController.class);
 
-  private Map<String, QueryTemplate> queries = new HashMap<>();
+  /**
+   * Cache for the built queries. A simple map should suffice, since the are only build and stored during initialization
+   * and shouldn't change afterwards
+   */
+  private Map<String, CacheEntry> queries = new HashMap<>();
 
   /**
    * The operation to be executed for a query. Even with a native query, we still need to know what kind of result is to
@@ -112,8 +128,12 @@ public class QueryPoolController extends AbstractController {
      */
     SELECT {
       @Override
-      public void executeQuery(IQuery<?> query, String mapper, RoutingContext context) {
-        query.execute(qeResult -> {
+      public void executeQuery(CacheEntry entry, IFieldValueResolver resolver, RoutingContext context) {
+        String limitValue = context.request().getParam(LIMIT_PARAMETER_NAME);
+        int limit = StringUtils.isNotBlank(limitValue) ? Integer.valueOf(limitValue) : entry.defaultLimit;
+        String offsetValue = context.request().getParam(OFFSET_PARAMETER_NAME);
+        int offset = StringUtils.isNotBlank(offsetValue) ? Integer.valueOf(offsetValue) : entry.defaultOffset;
+        entry.query.execute(resolver, limit, offset, qeResult -> {
           if (qeResult.failed()) {
             context.fail(qeResult.cause());
           } else {
@@ -125,7 +145,7 @@ public class QueryPoolController extends AbstractController {
                 if (nh.failed())
                   context.fail(nh.cause());
                 else {
-                  context.put(mapper, nh.result());
+                  context.put(entry.destination, nh.result());
                   context.next();
                 }
               });
@@ -134,7 +154,7 @@ public class QueryPoolController extends AbstractController {
                 if (array.failed()) {
                   context.fail(array.cause());
                 } else {
-                  context.put(mapper, Arrays.asList(array.result()));
+                  context.put(entry.destination, Arrays.asList(array.result()));
                   context.next();
                 }
               });
@@ -148,26 +168,29 @@ public class QueryPoolController extends AbstractController {
      */
     COUNT {
       @Override
-      public void executeQuery(IQuery<?> query, String mapper, RoutingContext context) {
-        query.executeCount(countResult -> {
+      public void executeQuery(CacheEntry entry, IFieldValueResolver resolver, RoutingContext context) {
+        entry.query.executeCount(resolver, countResult -> {
           if (countResult.failed()) {
             context.fail(countResult.cause());
           } else {
-            context.put(mapper, countResult.result().getCount());
+            context.put(entry.destination, countResult.result().getCount());
             context.next();
           }
         });
       }
     };
     /**
-     * Executes the configured operation for the given query and puts the result under the mapper name in the current
-     * context
-     *
-     * @param query
-     * @param mapper
+     * Executes the configured operation for the given query and puts the result under the destination name in the
+     * current context
+     * 
+     * @param entry
+     *          contains the query, and all information needed to execute it (i.e. destination, limit, offset)
+     * @param resolver
+     *          the variable resolver needed to translate field condition variables to their actual value
      * @param context
+     *          the current routing context
      */
-    public abstract void executeQuery(IQuery<?> query, String mapper, RoutingContext context);
+    public abstract void executeQuery(CacheEntry entry, IFieldValueResolver resolver, RoutingContext context);
 
     /**
      * Custom deserialization method to ignore the case of the JSON keys
@@ -196,35 +219,27 @@ public class QueryPoolController extends AbstractController {
   protected void handleController(RoutingContext context) {
     String queryPath = context.normalisedPath();
     queryPath = FilenameUtils.removeExtension(queryPath).toLowerCase(Locale.US);
-    if (queries.containsKey(queryPath)) {
-      handleQuery(queries.get(queryPath), context);
+    CacheEntry entry = queries.get(queryPath);
+    if (entry != null) {
+      handleQuery(entry, context);
     } else {
       context.next();
     }
   }
 
   /**
-   * Executes the cached query for the current path. The result will be made available to the current context under the
-   * mapper name configured in the query
+   * Executes the cached query. The result will be made available to the current context under the destination
+   * configured in the cache entry.
    *
-   * @param queryTemplate
-   *          the cached query
+   * @param entry
+   *          the cache entry containing the query and all needed information
    * @param context
    *          the current context
    */
-  private void handleQuery(QueryTemplate queryTemplate, RoutingContext context) {
-    String mapperName = queryTemplate.getMapper();
-    Class<?> mapperClass = getNetRelay().getSettings().getMappingDefinitions().getMapperClass(mapperName);
-    IQuery<?> query;
-    try {
-      query = parseQuery(queryTemplate, mapperClass, context);
-    } catch (QueryPoolException e) {
-      context.fail(e);
-      return;
-    }
-
-    Operation operation = queryTemplate.getOperation();
-    operation.executeQuery(query, mapperName, context);
+  private void handleQuery(CacheEntry entry, RoutingContext context) {
+    IFieldValueResolver resolver = new ContextFieldValueResolver(context, getNetRelay());
+    Operation operation = entry.operation;
+    operation.executeQuery(entry, resolver, context);
   }
 
   /**
@@ -240,17 +255,18 @@ public class QueryPoolController extends AbstractController {
    * @throws QueryPoolException
    *           if the query template can not be parsed, e.g. because of syntax exceptions
    */
-  private IQuery<?> parseQuery(QueryTemplate queryTemplate, Class<?> mapperClass, RoutingContext context)
-      throws QueryPoolException {
+  private IQuery<?> parseQuery(QueryTemplate queryTemplate) throws QueryPoolException {
+    Class<?> mapperClass = getNetRelay().getSettings().getMappingDefinitions()
+        .getMapperClass(queryTemplate.getMapper());
     try {
       IQuery<?> query = getNetRelay().getDatastore().createQuery(mapperClass);
       if (queryTemplate.getNativeQueries() != null) {
-        parseNativeQuery(queryTemplate.getNativeQueries(), query, context);
+        parseNativeQuery(queryTemplate.getNativeQueries(), query);
       } else if (queryTemplate.getDynamicQuery() != null) {
-        parseDynamicQuery(queryTemplate.getDynamicQuery(), query, context);
+        parseDynamicQuery(queryTemplate.getDynamicQuery(), query);
       }
-      addOrderBy(queryTemplate, query, context);
-      addLimit(queryTemplate, query, context);
+      if (StringUtils.isNotBlank(queryTemplate.getOrderBy()))
+        addOrderBy(queryTemplate, query);
       return query;
     } catch (QueryPoolException e) {
       // add the underlying JSON to the exception
@@ -271,10 +287,9 @@ public class QueryPoolController extends AbstractController {
    * @throws QueryPoolException
    *           if there is an error during the parsing, e.g. invalid syntax
    */
-  private IQuery<?> parseDynamicQuery(DynamicQuery dynamicQuery, IQuery<?> query, RoutingContext context)
-      throws QueryPoolException {
+  private IQuery<?> parseDynamicQuery(DynamicQuery dynamicQuery, IQuery<?> query) throws QueryPoolException {
     if (dynamicQuery.getRootQueryPart() != null) {
-      ISearchCondition searchCondition = parseQueryParts(dynamicQuery.getRootQueryPart(), query, context);
+      ISearchCondition searchCondition = parseQueryParts(dynamicQuery.getRootQueryPart(), query);
       query.setSearchCondition(searchCondition);
     }
     return query;
@@ -293,13 +308,12 @@ public class QueryPoolController extends AbstractController {
    * @throws InvalidSyntaxException
    *           if the part is of an unknown type
    */
-  private ISearchCondition parseQueryParts(QueryPart queryPart, IQuery<?> query, RoutingContext context)
-      throws InvalidSyntaxException {
+  private ISearchCondition parseQueryParts(QueryPart queryPart, IQuery<?> query) throws InvalidSyntaxException {
     if (queryPart.isAnd()) {
       List<QueryPart> queryParts = queryPart.getAnd();
       ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
       for (int i = 0; i < queryParts.size(); i++) {
-        ISearchCondition subQueryPart = parseQueryParts(queryParts.get(i), query, context);
+        ISearchCondition subQueryPart = parseQueryParts(queryParts.get(i), query);
         searchConditions[i] = subQueryPart;
       }
       return query.and(searchConditions);
@@ -307,7 +321,7 @@ public class QueryPoolController extends AbstractController {
       List<QueryPart> queryParts = queryPart.getOr();
       ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
       for (int i = 0; i < queryParts.size(); i++) {
-        ISearchCondition subQueryPart = parseQueryParts(queryParts.get(i), query, context);
+        ISearchCondition subQueryPart = parseQueryParts(queryParts.get(i), query);
         searchConditions[i] = subQueryPart;
       }
       return new QueryOr(searchConditions);
@@ -316,82 +330,10 @@ public class QueryPoolController extends AbstractController {
       String field = condition.getField();
       QueryOperator operator = QueryOperator.translate(condition.getLogic());
       Object value = condition.getValue();
-      if (value instanceof String) {
-        String textValue = (String) value;
-        value = replaceVariable(textValue, context);
-      }
       return query.condition(field, operator, value);
     } else {
       throw new InvalidSyntaxException("Query part is neither and nor or nor condition");
     }
-  }
-
-  /**
-   * Checks if the value is a variable in the form of "${location.variablename}". If yes, and the location is known,
-   * returns the replaced value of the variable. Otherwise, simply returns the given value unchanged.
-   *
-   * @param value
-   * @param context
-   * @return
-   */
-  private Object replaceVariable(String value, RoutingContext context) {
-    if (value.startsWith("${") && value.endsWith("}")) {
-      String fullVariable = value.substring(2, value.length() - 1);
-      int i = fullVariable.indexOf(':');
-
-      String location = fullVariable.substring(0, i);
-      String name = fullVariable.substring(i + 1);
-      switch (location) {
-      case "request":
-        return context.request().getParam(name);
-      case "mapper":
-        int j = name.indexOf('.');
-        if (j > 0) {
-          String mapperName = name.substring(0, j);
-          String path = name.substring(j + 1);
-          Object mapperValue = context.get(mapperName);
-          if (mapperValue instanceof Iterable) {
-            List<Object> result = new ArrayList<>();
-            Iterator<?> it = ((Iterable<?>) mapperValue).iterator();
-            while (it.hasNext()) {
-              Object resultValue = extractMapperValue(path, mapperValue);
-              result.add(resultValue);
-            }
-            return result;
-          } else {
-            return extractMapperValue(path, mapperValue);
-          }
-        } else {
-          throw new IllegalArgumentException(
-              "Mapper variable must have at least 2 parts: the mapper name and the field: " + value);
-        }
-      case "context":
-        return context.get(name);
-      default:
-        throw new IllegalArgumentException("Unknown variable location: " + location);
-      }
-    } else
-      return value;
-  }
-
-  private Object extractMapperValue(String path, Object value) {
-    IMapper<?> mapper = getNetRelay().getDatastore().getMapperFactory().getMapper(value.getClass());
-    if (mapper == null)
-      throw new IllegalArgumentException(
-          "Can not extract value from a class that is not a mapper: " + value.getClass());
-
-    String fieldName = path;
-    int i = path.indexOf('.');
-    if (i > 0) {
-      fieldName = path.substring(0, i);
-    }
-
-    IField field = mapper.getField(fieldName);
-    Object fieldValue = field.getPropertyAccessor().readData(value);
-    if (fieldValue != null && i > 0) {
-      return extractMapperValue(path.substring(i + 1), fieldValue);
-    } else
-      return fieldValue;
   }
 
   /**
@@ -403,39 +345,17 @@ public class QueryPoolController extends AbstractController {
    *          the query to which the order by fields should be added
    * @param context
    */
-  private void addOrderBy(QueryTemplate queryTemplate, IQuery<?> query, RoutingContext context) {
-    if (StringUtils.isNotBlank(queryTemplate.getOrderBy())) {
-      String[] orderBys = queryTemplate.getOrderBy().split(",");
-      for (int i = 0; i < orderBys.length; i++) {
-        String orderBy = orderBys[i].trim();
-        int j = orderBy.indexOf(' ');
-        boolean ascending = true;
-        if (j > 0) {
-          String direction = orderBy.substring(j + 1);
-          orderBy = orderBy.substring(0, j);
-          direction = (String) replaceVariable(direction, context);
-          if ("desc".equalsIgnoreCase(direction))
-            ascending = false;
-        }
-        orderBy = (String) replaceVariable(orderBy, context);
-        query.addSort(orderBy, ascending);
+  private void addOrderBy(QueryTemplate queryTemplate, IQuery<?> query) {
+    String[] orderBys = queryTemplate.getOrderBy().split(",");
+    for (int i = 0; i < orderBys.length; i++) {
+      String[] orderBy = orderBys[i].trim().split("\\s+");
+      boolean ascending = true;
+      if (orderBy.length > 1) {
+        String direction = orderBy[1];
+        if ("desc".equalsIgnoreCase(direction))
+          ascending = false;
       }
-    }
-  }
-
-  /**
-   * @param queryTemplate
-   * @param query
-   * @param context
-   */
-  private void addLimit(QueryTemplate queryTemplate, IQuery<?> query, RoutingContext context) {
-    if (StringUtils.isNotBlank(queryTemplate.getLimit())) {
-      String limit = (String) replaceVariable(queryTemplate.getLimit(), context);
-      query.setLimit(Integer.valueOf(limit));
-    }
-    if (StringUtils.isNotBlank(queryTemplate.getOffset())) {
-      String offset = (String) replaceVariable(queryTemplate.getOffset(), context);
-      query.setStart(Integer.valueOf(offset));
+      query.addSort(orderBy[0], ascending);
     }
   }
 
@@ -452,8 +372,7 @@ public class QueryPoolController extends AbstractController {
    *           if there is an error during parsing, or if the current datastore was not found in the list of native
    *           queries
    */
-  private IQuery<?> parseNativeQuery(List<NativeQuery> nativeQueries, IQuery<?> query, RoutingContext context)
-      throws QueryPoolException {
+  private IQuery<?> parseNativeQuery(List<NativeQuery> nativeQueries, IQuery<?> query) throws QueryPoolException {
     IDataStore datastore = getNetRelay().getDatastore();
     for (NativeQuery nativeQuery : nativeQueries) {
       Class<?> datastoreClass = nativeQuery.getDatastore();
@@ -503,23 +422,30 @@ public class QueryPoolController extends AbstractController {
     ObjectMapper om = new ObjectMapper();
     List<String> files = FileSystemUtil.getChildren(getVertx(), directory, true, null);
     for (String file : files) {
-      getVertx().fileSystem().readFile(file, readFileHandler -> {
-        if (readFileHandler.failed()) {
-          throw new InitException("could not read query file: " + file);
-        } else {
-          String queryName = buildQueryName(file, directory);
-          QueryTemplate template;
-          Buffer fileResult = readFileHandler.result();
-          try {
-            template = om.readValue(fileResult.toString(), QueryTemplate.class);
-          } catch (IOException e) {
-            throw new InitException("Invalid query template file: " + file, e);
-          }
-          template.setSource(fileResult.toJsonObject());
-          queries.put(queryName, template);
+      Buffer fileResult = getVertx().fileSystem().readFileBlocking(file);
+      String queryName = buildQueryName(file, directory);
+      QueryTemplate template;
+      try {
+        template = om.readValue(fileResult.toString(), QueryTemplate.class);
+      } catch (IOException e) {
+        throw new InitException("Invalid query template file: " + file, e);
+      }
+      template.setSource(fileResult.toJsonObject());
 
-        }
-      });
+      IQuery<?> query;
+      try {
+        query = parseQuery(template);
+      } catch (QueryPoolException e) {
+        throw new InitException("Could not parse query template: " + template.getSource(), e);
+      }
+
+      int defaultLimit = template.getLimit() != null ? template.getLimit()
+          : getNetRelay().getDatastore().getDefaultQueryLimit();
+      int defaultOffset = template.getOffset() != null ? template.getOffset() : 0;
+
+      CacheEntry cacheEntry = new CacheEntry(query, template.getOperation(), defaultLimit, defaultOffset,
+          template.getMapper());
+      queries.put(queryName, cacheEntry);
     }
   }
 
@@ -566,5 +492,25 @@ public class QueryPoolController extends AbstractController {
     Properties json = new Properties();
     json.put(QUERY_DIRECTORY_PROPERTY, DEFAULT_QUERY_DIRECTORY);
     return json;
+  }
+
+  /**
+   * Small POJO to hold all needed information for a query in the cache
+   */
+  private static class CacheEntry {
+    private final IQuery<?> query;
+    private final int defaultLimit;
+    private final int defaultOffset;
+    private final Operation operation;
+    private final String destination;
+
+    public CacheEntry(IQuery<?> query, Operation operation, int limit, int offset, String destination) {
+      this.query = query;
+      this.operation = operation;
+      this.defaultLimit = limit;
+      this.defaultOffset = offset;
+      this.destination = destination;
+    }
+
   }
 }

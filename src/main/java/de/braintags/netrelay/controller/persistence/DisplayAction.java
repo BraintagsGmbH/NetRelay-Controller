@@ -27,9 +27,9 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * Executes the commands to search for a record or for records and to put them into the context.
- * 
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class DisplayAction extends AbstractAction {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
@@ -37,7 +37,7 @@ public class DisplayAction extends AbstractAction {
   private static final String MESSAGE = "Adding %s to context for entity %s / size: %s";
 
   /**
-   * 
+   *
    */
   public DisplayAction(PersistenceController persitenceController) {
     super(persitenceController);
@@ -58,10 +58,22 @@ public class DisplayAction extends AbstractAction {
     handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 
-  protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map, IMapper mapper,
-      Handler<AsyncResult<Void>> handler) {
+  protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map,
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
+    int limit;
+    if (map.containsKey(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)) {
+      limit = Integer.parseInt(map.get(PersistenceController.SELECTION_SIZE_CAPTURE_KEY));
+    } else
+      limit = query.getDataStore().getDefaultQueryLimit();
+
+    int offset;
+    if (map.containsKey(PersistenceController.SELECTION_START_CAPTURE_KEY)) {
+      offset = Integer.parseInt(map.get(PersistenceController.SELECTION_START_CAPTURE_KEY));
+    } else
+      offset = 0;
+
     try {
-      query.execute(result -> {
+      query.execute(null, limit, offset, result -> {
         if (result.failed()) {
           handler.handle(Future.failedFuture(result.cause()));
         } else {
@@ -129,12 +141,6 @@ public class DisplayAction extends AbstractAction {
    * @param map
    */
   private void addQueryCritera(IQuery<?> query, CaptureMap map) {
-    if (map.containsKey(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)) {
-      query.setLimit(Integer.parseInt(map.get(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)));
-    }
-    if (map.containsKey(PersistenceController.SELECTION_START_CAPTURE_KEY)) {
-      query.setStart(Integer.parseInt(map.get(PersistenceController.SELECTION_START_CAPTURE_KEY)));
-    }
     if (map.containsKey(PersistenceController.ORDERBY_CAPTURE_KEY)) {
       addSortDefintions(query, map);
     }
