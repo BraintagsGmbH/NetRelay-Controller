@@ -49,10 +49,10 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
   }
 
   private ResourceTemplateResolver createResolver(boolean multiPath, String templateDirectory) {
-    ResourceTemplateResolver templateResolver = multiPath ? new MultiPathResourceResolver(templateDirectory)
+    ResourceTemplateResolver ts = multiPath ? new MultiPathResourceResolver(templateDirectory)
         : new ResourceTemplateResolver();
-    templateResolver.setTemplateMode(ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE);
-    return templateResolver;
+    ts.setTemplateMode(ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE);
+    return ts;
   }
 
   @Override
@@ -81,7 +81,7 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
         LanguageHeader locale = null;
 
-        if (acceptableLocales.size() > 0) {
+        if (!acceptableLocales.isEmpty()) {
           // this is the users preferred locale
           locale = acceptableLocales.get(0);
         }
@@ -94,10 +94,12 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
           @Override
           public void flush() throws IOException {
+            // not used
           }
 
           @Override
           public void close() throws IOException {
+            // not used
           }
         });
       }
@@ -113,10 +115,17 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
     private final java.util.Locale locale;
 
     private WebIContext(Map<String, Object> data, LanguageHeader locale) {
-      String variant;
       this.data = data;
-      this.locale = locale == null ? java.util.Locale.getDefault()
-          : new java.util.Locale(locale.tag(), locale.subtag(), (variant = locale.subtag(2)) == null ? "" : variant);
+      this.locale = locale == null ? java.util.Locale.getDefault() : generate(locale);
+    }
+
+    private static java.util.Locale generate(LanguageHeader locale) {
+      String variant;
+      String lang = locale.tag();
+      String country = locale.subtag();
+      return lang != null && country != null
+          ? new java.util.Locale(lang, country, (variant = locale.subtag(2)) == null ? "" : variant)
+          : (lang != null ? new java.util.Locale(lang) : java.util.Locale.getDefault());
     }
 
     @Override
