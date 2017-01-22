@@ -14,8 +14,8 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
-import de.braintags.io.vertx.util.ResultObject;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
+import de.braintags.vertx.util.ResultObject;
 import de.braintags.netrelay.controller.api.DataTablesController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;

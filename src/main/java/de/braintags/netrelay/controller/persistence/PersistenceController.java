@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import de.braintags.io.vertx.pojomapper.mapping.IMapperFactory;
-import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
+import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController;
 import de.braintags.netrelay.controller.Action;

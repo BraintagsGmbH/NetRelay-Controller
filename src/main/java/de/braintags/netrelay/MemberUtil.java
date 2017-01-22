@@ -12,8 +12,8 @@
  */
 package de.braintags.netrelay;
 
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
-import de.braintags.io.vertx.pojomapper.exception.NoSuchRecordException;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.exception.NoSuchRecordException;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.impl.DatastoreUser;

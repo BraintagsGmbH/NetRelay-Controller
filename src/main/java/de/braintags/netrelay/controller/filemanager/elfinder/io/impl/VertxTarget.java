@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.apache.tika.Tika;
 
-import de.braintags.io.vertx.util.file.BufferInputStream;
+import de.braintags.vertx.util.file.BufferInputStream;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;

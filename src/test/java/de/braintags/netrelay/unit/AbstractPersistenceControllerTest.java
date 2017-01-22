@@ -12,7 +12,7 @@
  */
 package de.braintags.netrelay.unit;
 
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.init.Settings;

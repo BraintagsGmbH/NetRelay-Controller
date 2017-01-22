@@ -12,7 +12,7 @@
  */
 package de.braintags.netrelay.model;
 
-import de.braintags.io.vertx.pojomapper.annotation.Entity;
+import de.braintags.vertx.jomnigate.annotation.Entity;
 
 @Entity
 public class Street extends AbstractRecord {

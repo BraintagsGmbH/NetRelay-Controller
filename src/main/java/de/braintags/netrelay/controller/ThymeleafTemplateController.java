@@ -17,7 +17,7 @@ import java.util.Properties;
 import org.thymeleaf.dialect.IDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 
-import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.templateengine.thymeleaf.ThymeleafTemplateEngineImplBt;
 import io.vertx.ext.web.RoutingContext;

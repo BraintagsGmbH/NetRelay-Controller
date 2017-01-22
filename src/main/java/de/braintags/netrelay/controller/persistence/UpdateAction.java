@@ -15,8 +15,8 @@ package de.braintags.netrelay.controller.persistence;
 import java.util.List;
 import java.util.Map;
 
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.io.vertx.util.exception.ParameterRequiredException;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.util.exception.ParameterRequiredException;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.mapping.NetRelayStoreObjectFactory;
 import io.vertx.core.AsyncResult;

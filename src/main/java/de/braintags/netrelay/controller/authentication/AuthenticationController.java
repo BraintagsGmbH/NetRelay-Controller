@@ -14,7 +14,7 @@ package de.braintags.netrelay.controller.authentication;
 
 import java.util.Properties;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
+import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
