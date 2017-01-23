@@ -79,8 +79,6 @@ public class DataTableLinkDescriptor {
    */
   public void toQuery(IDataStore dataStore, IMapperFactory mf, Handler<AsyncResult<IQuery<?>>> handler) {
     IQuery<?> query = dataStore.createQuery(mapperClass);
-    query.setLimit(displayLength);
-    query.setStart(displayStart);
     query.setReturnCompleteCount(true);
     List<ColDef> defs = clearColDefs();
     if (defs.isEmpty()) {

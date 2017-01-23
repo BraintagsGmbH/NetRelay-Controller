@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+import de.braintags.netrelay.controller.AbstractController;
+import de.braintags.netrelay.controller.api.DataTableLinkDescriptor.ColDef;
+import de.braintags.netrelay.mapping.NetRelayMapperFactory;
+import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.mapping.IField;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
@@ -25,10 +29,6 @@ import de.braintags.vertx.jomnigate.mapping.IStoreObject;
 import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
 import de.braintags.vertx.util.HttpContentType;
 import de.braintags.vertx.util.exception.ParameterRequiredException;
-import de.braintags.netrelay.controller.AbstractController;
-import de.braintags.netrelay.controller.api.DataTableLinkDescriptor.ColDef;
-import de.braintags.netrelay.mapping.NetRelayMapperFactory;
-import de.braintags.netrelay.routing.RouterDefinition;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -135,7 +135,7 @@ public class DataTablesController extends AbstractController {
 
   private void execute(IQuery<?> query, DataTableLinkDescriptor descr, long tableCount,
       Handler<AsyncResult<JsonObject>> handler) {
-    query.execute(qr -> {
+    query.execute(null, descr.getDisplayLength(), descr.getDisplayStart(), qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
       } else {
