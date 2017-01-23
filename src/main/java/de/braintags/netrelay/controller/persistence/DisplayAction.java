@@ -15,11 +15,11 @@ package de.braintags.netrelay.controller.persistence;
 import java.util.Arrays;
 import java.util.List;
 
+import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQueryResult;
 import de.braintags.vertx.jomnigate.exception.NoSuchRecordException;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
-import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -60,17 +60,15 @@ public class DisplayAction extends AbstractAction {
 
   protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map,
       IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
-    int limit;
+    int limit = query.getDataStore().getDefaultQueryLimit();
     if (map.containsKey(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)) {
       limit = Integer.parseInt(map.get(PersistenceController.SELECTION_SIZE_CAPTURE_KEY));
-    } else
-      limit = query.getDataStore().getDefaultQueryLimit();
+    }
 
-    int offset;
+    int offset = 0;
     if (map.containsKey(PersistenceController.SELECTION_START_CAPTURE_KEY)) {
       offset = Integer.parseInt(map.get(PersistenceController.SELECTION_START_CAPTURE_KEY));
-    } else
-      offset = 0;
+    }
 
     try {
       query.execute(null, limit, offset, result -> {

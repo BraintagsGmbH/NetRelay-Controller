@@ -122,6 +122,8 @@
  * 
  * {@link de.braintags.netrelay.controller.filemanager.elfinder}
  * 
+ * {@link de.braintags.netrelay.controller.querypool}
+ * 
  * [source, json]
  * ----
  * 
