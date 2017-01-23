@@ -14,9 +14,6 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
-import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.authentication.PasswordLostController;
@@ -26,6 +23,9 @@ import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
 import de.braintags.vertx.auth.datastore.test.model.TestMemberEncrypted;
+import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.logging.Logger;
