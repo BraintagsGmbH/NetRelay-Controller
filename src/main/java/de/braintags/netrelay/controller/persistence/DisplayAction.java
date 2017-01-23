@@ -61,11 +61,10 @@ public class DisplayAction extends AbstractAction {
   protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map,
       IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     int limit = query.getDataStore().getDefaultQueryLimit();
+    int offset = 0;
     if (map.containsKey(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)) {
       limit = Integer.parseInt(map.get(PersistenceController.SELECTION_SIZE_CAPTURE_KEY));
     }
-
-    int offset = 0;
     if (map.containsKey(PersistenceController.SELECTION_START_CAPTURE_KEY)) {
       offset = Integer.parseInt(map.get(PersistenceController.SELECTION_START_CAPTURE_KEY));
     }
