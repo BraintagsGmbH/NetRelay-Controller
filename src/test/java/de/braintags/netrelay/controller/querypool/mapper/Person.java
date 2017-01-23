@@ -1,9 +1,9 @@
 package de.braintags.netrelay.controller.querypool.mapper;
 
-import de.braintags.io.vertx.pojomapper.annotation.Entity;
-import de.braintags.io.vertx.pojomapper.annotation.field.Embedded;
 import de.braintags.netrelay.controller.querypool.TQueryPoolController;
 import de.braintags.netrelay.model.AbstractRecord;
+import de.braintags.vertx.jomnigate.annotation.Entity;
+import de.braintags.vertx.jomnigate.annotation.field.Embedded;
 
 /**
  * Test mapper for {@link TQueryPoolController}<br>

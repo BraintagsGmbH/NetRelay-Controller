@@ -25,7 +25,7 @@
  *   "operation": "select",
  *   "native": [
  *     {
- *       "datastore": "de.braintags.io.vertx.pojomapper.mongo.MongoDataStore",
+ *       "datastore": "de.braintags.vertx.jomnigate.mongo.MongoDataStore",
  *       "query": {
  *         "firstname": "Max",
  *         "lastname": "Mustermann",
@@ -35,7 +35,7 @@
  *       }
  *     },
  *     {
- *       "datastore": "de.braintags.io.vertx.pojomapper.mysql.MySqlDataStore",
+ *       "datastore": "de.braintags.vertx.jomnigate.mysql.MySqlDataStore",
  *       "query": "SELECT * FROM Person WHERE firstname = 'MAX' AND lastname = 'Mustermann'"
  *     }
  *   ]

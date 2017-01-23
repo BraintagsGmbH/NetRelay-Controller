@@ -18,11 +18,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IFieldValueResolver;
-import de.braintags.io.vertx.pojomapper.dataaccess.query.exception.VariableSyntaxException;
-import de.braintags.io.vertx.pojomapper.mapping.IField;
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.netrelay.NetRelay;
+import de.braintags.vertx.jomnigate.dataaccess.query.IFieldValueResolver;
+import de.braintags.vertx.jomnigate.dataaccess.query.exception.VariableSyntaxException;
+import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import io.vertx.ext.web.RoutingContext;
 
 /**
@@ -79,8 +79,8 @@ public class ContextFieldValueResolver implements IFieldValueResolver {
 
   /*
    * (non-Javadoc)
-   *
-   * @see de.braintags.io.vertx.pojomapper.dataaccess.query.IFieldValueResolver#resolve(java.lang.String)
+   * 
+   * @see de.braintags.vertx.jomnigate.dataaccess.query.IFieldValueResolver#resolve(java.lang.String)
    */
   @Override
   public Object resolve(String variable) throws VariableSyntaxException {

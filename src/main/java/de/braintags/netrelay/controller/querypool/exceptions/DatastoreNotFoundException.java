@@ -1,6 +1,6 @@
 package de.braintags.netrelay.controller.querypool.exceptions;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
+import de.braintags.vertx.jomnigate.IDataStore;
 import io.vertx.core.json.JsonObject;
 
 /**

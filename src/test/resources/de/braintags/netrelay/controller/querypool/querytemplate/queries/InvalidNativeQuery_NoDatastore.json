@@ -13,7 +13,7 @@
       }
     },
     {
-      "datastore": "de.braintags.io.vertx.pojomapper.mysql.MySqlDataStore",
+      "datastore": "de.braintags.vertx.jomnigate.mysql.MySqlDataStore",
       "query": "SELECT * FROM Person WHERE firstname = 'MAX' AND lastname = 'Mustermann'"
     }
   ]

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.netrelay.controller.querypool.QueryPoolController.Operation;
 import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import io.vertx.core.json.JsonObject;
 
 /**

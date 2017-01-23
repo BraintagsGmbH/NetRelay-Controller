@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
+import de.braintags.vertx.jomnigate.IDataStore;
 
 /**
  * The native query part of {@link QueryTemplate}. Native queries only work for their configured datastore and can
@@ -23,9 +23,9 @@ import de.braintags.io.vertx.pojomapper.IDataStore;
  * @author sschmitt
  */
 public class NativeQuery {
-  private Class< ? extends IDataStore> datastore;
+  private Class<? extends IDataStore> datastore;
   @JsonDeserialize(using = RawDeserializer.class)
-  private String                       query;
+  private String query;
 
   /**
    * Constructor using all fields. All parameters are required
@@ -36,7 +36,7 @@ public class NativeQuery {
    *          the query, converted to string
    */
   @JsonCreator
-  public NativeQuery(@JsonProperty(value = "datastore", required = true) Class< ? extends IDataStore> datastore,
+  public NativeQuery(@JsonProperty(value = "datastore", required = true) Class<? extends IDataStore> datastore,
       @JsonProperty(value = "query", required = true) String query) {
     this.datastore = datastore;
     this.query = query;
@@ -45,7 +45,7 @@ public class NativeQuery {
   /**
    * @return the specific {@link IDataStore} for this query
    */
-  public Class< ? extends IDataStore> getDatastore() {
+  public Class<? extends IDataStore> getDatastore() {
     return datastore;
   }
 
@@ -64,6 +64,7 @@ public class NativeQuery {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser,
      * com.fasterxml.jackson.databind.DeserializationContext)
      */

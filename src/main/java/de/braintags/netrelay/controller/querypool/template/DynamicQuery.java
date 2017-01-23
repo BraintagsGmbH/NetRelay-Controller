@@ -2,8 +2,8 @@ package de.braintags.netrelay.controller.querypool.template;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.netrelay.controller.querypool.template.dynamic.QueryPart;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 
 /**
  * The dynamic query part of the {@link QueryTemplate}. The dynamic query will be translated to a {@link IQuery}, which

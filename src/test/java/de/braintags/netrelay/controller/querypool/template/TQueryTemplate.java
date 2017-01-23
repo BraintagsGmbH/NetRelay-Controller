@@ -11,10 +11,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.braintags.io.vertx.pojomapper.mongo.MongoDataStore;
-import de.braintags.io.vertx.pojomapper.mysql.MySqlDataStore;
 import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
 import de.braintags.netrelay.controller.querypool.template.dynamic.QueryPart;
+import de.braintags.vertx.jomnigate.mongo.MongoDataStore;
+import de.braintags.vertx.jomnigate.mysql.MySqlDataStore;
 import io.vertx.core.json.JsonObject;
 
 /**

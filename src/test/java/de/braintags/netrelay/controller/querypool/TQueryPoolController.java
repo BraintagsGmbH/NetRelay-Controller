@@ -4,13 +4,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.querypool.mapper.Address;
 import de.braintags.netrelay.controller.querypool.mapper.Person;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.unit.NetRelayBaseConnectorTest;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
