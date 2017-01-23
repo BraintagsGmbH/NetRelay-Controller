@@ -38,7 +38,7 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  *
  */
-public class NetRelayBaseConnectorTest extends NetRelayBaseTest {
+public abstract class NetRelayBaseConnectorTest extends NetRelayBaseTest {
 
   /**
    *
