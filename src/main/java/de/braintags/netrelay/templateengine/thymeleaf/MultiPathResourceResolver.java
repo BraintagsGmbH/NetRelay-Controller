@@ -20,8 +20,8 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
-import de.braintags.io.vertx.util.ExceptionUtil;
-import de.braintags.io.vertx.util.exception.NoSuchFileException;
+import de.braintags.vertx.util.ExceptionUtil;
+import de.braintags.vertx.util.exception.NoSuchFileException;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.impl.Utils;
 

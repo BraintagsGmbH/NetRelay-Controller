@@ -12,7 +12,7 @@
  */
 package de.braintags.netrelay.model;
 
-import de.braintags.io.vertx.pojomapper.annotation.field.Encoder;
+import de.braintags.vertx.jomnigate.annotation.field.Encoder;
 
 /**
  * 

@@ -23,7 +23,7 @@
 		<source.skip>false</source.skip>
 		<maven.compiler.plugin>false</maven.compiler.plugin>
 		<sonar.skip>false</sonar.skip>
-		<surefireArgLine> -Ddb_name=NetRelayControllerDatabase -DIDatastoreContainer=de.braintags.io.vertx.pojomapper.mongo.vertxunit.MongoDataStoreContainer -DstartMongoLocal=true</surefireArgLine>
+		<surefireArgLine> -Ddb_name=NetRelayControllerDatabase -DIDatastoreContainer=de.braintags.vertx.jomnigate.mongo.vertxunit.MongoDataStoreContainer -DstartMongoLocal=true</surefireArgLine>
 	</properties>
 
 	<dependencies>

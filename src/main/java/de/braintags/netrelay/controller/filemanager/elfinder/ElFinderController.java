@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.CommandFactory;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand;

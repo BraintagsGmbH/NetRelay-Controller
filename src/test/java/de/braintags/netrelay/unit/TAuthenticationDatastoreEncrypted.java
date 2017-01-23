@@ -23,8 +23,13 @@ import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
 import de.braintags.vertx.auth.datastore.test.model.TestMemberEncrypted;
+import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.unit.TestContext;
 
@@ -35,26 +40,23 @@ import io.vertx.ext.unit.TestContext;
  * 
  */
 public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest {
-  /**
-   * Comment for <code>PROTECTED_URL</code>
-   */
-  public static final String PROTECTED_URL = "/private/privatePage.html";
-  private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
-      .getLogger(TAuthenticationDatastoreEncrypted.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TAuthenticationDatastoreEncrypted.class);
+
+  private static final String PROTECTED_URL = "/private/privatePage.html";
+  private static final String TESTPASSWORD = "psspass";
 
   /**
    * Perform login and logout by resusing sent cookie
    */
   @Test
   public void loginLogout(TestContext context) {
-    TestMemberEncrypted member = TAuthenticationMongoEncrypted.createMember(context,
-        TAuthenticationMongoEncrypted.TESTPASSWORD);
+    TestMemberEncrypted member = createMember(context, TESTPASSWORD);
     Buffer cookie = Buffer.buffer();
     try {
       resetRoutes(null);
       MultipartUtil mu = new MultipartUtil();
       mu.addFormField("username", member.getEmail());
-      mu.addFormField("password", TAuthenticationMongoEncrypted.TESTPASSWORD);
+      mu.addFormField("password", TESTPASSWORD);
 
       // first perform the login and remember cookie
       String url = AuthenticationController.DEFAULT_LOGIN_ACTION_URL;
@@ -83,6 +85,43 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
     } catch (Exception e) {
       context.fail(e);
     }
+  }
+
+  /**
+   * @param context
+   * @return
+   */
+  private TestMemberEncrypted createMember(TestContext context, String password) {
+    TestMemberEncrypted member = new TestMemberEncrypted();
+    member.setEmail("testuser");
+    member.setPassword(password);
+    member = createOrFindMember(context, netRelay.getDatastore(), member);
+    context.assertNotNull(member, "Member must not be null");
+    return member;
+  }
+
+  /**
+   * Searches in the database, wether a member with the given username / password exists.
+   * If not, it is created. After the found or created member is returned
+   *
+   * @param context
+   * @param datastore
+   * @param member
+   * @return
+   */
+  private final TestMemberEncrypted createOrFindMember(TestContext context, IDataStore datastore,
+      TestMemberEncrypted member) {
+    IQuery<TestMemberEncrypted> query = datastore.createQuery(TestMemberEncrypted.class);
+    String password = member.getPassword();
+    context.assertNotNull(password, "password must not be null");
+    query.setSearchCondition(query.isEqual("email", member.getEmail()));
+    TestMemberEncrypted returnMember = (TestMemberEncrypted) DatastoreBaseTest.findFirst(context, query);
+    if (returnMember == null) {
+      DatastoreBaseTest.saveRecord(context, member);
+      context.assertNotEquals(password, member.getPassword(), "password was not encrypted");
+      returnMember = member;
+    }
+    return returnMember;
   }
 
   /**

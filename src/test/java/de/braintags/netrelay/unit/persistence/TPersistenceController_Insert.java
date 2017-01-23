@@ -14,9 +14,9 @@ package de.braintags.netrelay.unit.persistence;
 
 import org.junit.Test;
 
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
-import de.braintags.io.vertx.pojomapper.testdatastore.mapper.SimpleMapper;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
+import de.braintags.vertx.jomnigate.testdatastore.mapper.SimpleMapper;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.controller.persistence.RecordContractor;

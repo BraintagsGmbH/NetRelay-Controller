@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
-import de.braintags.io.vertx.pojomapper.dataaccess.write.IWrite;
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.io.vertx.pojomapper.mapping.IStoreObjectFactory;
-import de.braintags.io.vertx.pojomapper.util.QueryHelper;
-import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
+import de.braintags.vertx.jomnigate.util.QueryHelper;
+import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.api.MailController;

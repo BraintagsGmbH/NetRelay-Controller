@@ -12,10 +12,10 @@
  */
 package de.braintags.netrelay.controller.persistence;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
-import de.braintags.io.vertx.pojomapper.dataaccess.delete.IDelete;
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.jomnigate.dataaccess.delete.IDelete;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -60,7 +60,7 @@ public class DeleteAction extends AbstractAction {
    * 
    * @see de.braintags.netrelay.controller.persistence.AbstractAction#handleSubobjectEntityDefinition(io.vertx.ext.web.
    * RoutingContext, java.lang.String, de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap,
-   * de.braintags.io.vertx.pojomapper.mapping.IMapper, io.vertx.core.Handler)
+   * de.braintags.vertx.jomnigate.mapping.IMapper, io.vertx.core.Handler)
    */
   @Override
   protected void handleSubobjectEntityDefinition(RoutingContext context, String entityName, CaptureMap captureMap,

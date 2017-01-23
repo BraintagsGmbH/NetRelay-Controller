@@ -19,8 +19,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.braintags.io.vertx.util.HttpContentType;
-import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.vertx.util.HttpContentType;
+import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.NetRelay;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;

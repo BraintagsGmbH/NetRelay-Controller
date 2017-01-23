@@ -15,10 +15,10 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.List;
 import java.util.Properties;
 
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
-import de.braintags.io.vertx.pojomapper.dataaccess.write.IWrite;
-import de.braintags.io.vertx.pojomapper.util.QueryHelper;
-import de.braintags.io.vertx.util.exception.InitException;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
+import de.braintags.vertx.jomnigate.util.QueryHelper;
+import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.api.MailController;

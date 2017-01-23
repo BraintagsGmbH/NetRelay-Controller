@@ -14,7 +14,7 @@ package de.braintags.netrelay.controller.persistence;
 
 import java.util.List;
 
-import de.braintags.io.vertx.util.security.CRUDPermissionMap;
+import de.braintags.vertx.util.security.CRUDPermissionMap;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
