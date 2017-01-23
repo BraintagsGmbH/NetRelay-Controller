@@ -14,13 +14,13 @@ package de.braintags.netrelay.controller.authentication;
 
 import java.util.Properties;
 
+import de.braintags.netrelay.controller.AbstractController;
+import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.mapping.IField;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.jomnigate.mongo.MongoDataStore;
 import de.braintags.vertx.util.exception.InitException;
-import de.braintags.netrelay.controller.AbstractController;
-import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
