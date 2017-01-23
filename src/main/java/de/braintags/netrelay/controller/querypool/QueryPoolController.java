@@ -63,6 +63,14 @@ import io.vertx.ext.web.RoutingContext;
  * and request is "http://localhost/article/list"<br>
  * the controller will look for the file "queries/article/list.json"<br>
  * <br>
+ * The offset and limit of the query are defined by the first non-null value in the following places:
+ * <ol>
+ * <li>request parameters {@value #OFFSET_PARAMETER_NAME} and {@value #LIMIT_PARAMETER_NAME}</li>
+ * <li>the entries "limit" and "offset" in the JSON file</li>
+ * <li>the datastore default values</li>
+ * </ol>
+ * <br>
+ * <br>
  * The queries will be loaded once at startup and are kept in cache for better performance. <br>
  * <br>
  * The possible configuration parameters are:<br>
@@ -70,20 +78,19 @@ import io.vertx.ext.web.RoutingContext;
  * <li>{@value #QUERY_DIRECTORY_PROPERTY} - the name of the folder where the query JSON files are stored - default:
  * {@value #DEFAULT_QUERY_DIRECTORY}</li>
  * </ul>
- * <br>
  * Example Configuration:<br>
  *
  * <pre>
  * {
-      "name" : "QueryPoolController",
-      "routes" : [   "*" ],
-      "controller" : "de.braintags.netrelay.controller.querypool.QueryPoolController",
-      "handlerProperties" : {
-        "queryDirectory": "queries/"
-      }
-    }
+ *  "name" : "QueryPoolController",
+ *  "routes" : [ "*" ],
+ *  "controller" : "de.braintags.netrelay.controller.querypool.QueryPoolController",
+ *  "handlerProperties" : {
+ *    "queryDirectory": "queries/"
+ *  }
+ * }
  * </pre>
- *
+ * 
  * <br>
  * Copyright: Copyright (c) 13.12.2016 <br>
  * Company: Braintags GmbH <br>
@@ -247,10 +254,6 @@ public class QueryPoolController extends AbstractController {
    *
    * @param queryTemplate
    *          the template created from the original JSON
-   * @param mapperClass
-   *          the class of the mapper configured in the query
-   * @param context
-   *          the current context
    * @return the parsed {@link IQuery}
    * @throws QueryPoolException
    *           if the query template can not be parsed, e.g. because of syntax exceptions
@@ -280,30 +283,26 @@ public class QueryPoolController extends AbstractController {
    *
    * @param dynamicQuery
    *          the dynamic query part of the {@link QueryTemplate}
-   * @param mapperClass
-   *          the class of the configured mapper for this query
-   * @param context
-   * @return the parsed {@link IQuery}
+   * @param query
+   *          the query where the content of the dynamic content will be added to
    * @throws QueryPoolException
    *           if there is an error during the parsing, e.g. invalid syntax
    */
-  private IQuery<?> parseDynamicQuery(DynamicQuery dynamicQuery, IQuery<?> query) throws QueryPoolException {
+  private void parseDynamicQuery(DynamicQuery dynamicQuery, IQuery<?> query) throws QueryPoolException {
     if (dynamicQuery.getRootQueryPart() != null) {
       ISearchCondition searchCondition = parseQueryParts(dynamicQuery.getRootQueryPart(), query);
       query.setSearchCondition(searchCondition);
     }
-    return query;
   }
 
   /**
-   * Convert the {@link DynamicQuery} of the {@link QueryTemplate} to an {@link ISearchCondition} of the {@link IQuery}.
-   * Recursively converts query parts of containers
+   * Recursively convert the {@link DynamicQuery} of the {@link QueryTemplate} to an {@link ISearchCondition} of the
+   * {@link IQuery}.
    *
    * @param queryPart
    *          the query part to convert
    * @param query
    *          the query, to create valid search condition parts
-   * @param context
    * @return the converted {@link ISearchCondition}
    * @throws InvalidSyntaxException
    *           if the part is of an unknown type
@@ -332,7 +331,7 @@ public class QueryPoolController extends AbstractController {
       Object value = condition.getValue();
       return query.condition(field, operator, value);
     } else {
-      throw new InvalidSyntaxException("Query part is neither and nor or nor condition");
+      throw new InvalidSyntaxException("Query part is neither 'and' nor 'or' nor 'condition'");
     }
   }
 
@@ -343,7 +342,6 @@ public class QueryPoolController extends AbstractController {
    *          the template with the orderBy configuration
    * @param query
    *          the query to which the order by fields should be added
-   * @param context
    */
   private void addOrderBy(QueryTemplate queryTemplate, IQuery<?> query) {
     String[] orderBys = queryTemplate.getOrderBy().split(",");
@@ -364,25 +362,25 @@ public class QueryPoolController extends AbstractController {
    *
    * @param nativeQueries
    *          a list of native queries, with one {@link IDataStore} and query per entry
-   * @param mapperClass
-   *          the mapper class of the query
-   * @param context
-   * @return the parsed query
-   * @throws QueryPoolException
-   *           if there is an error during parsing, or if the current datastore was not found in the list of native
-   *           queries
+   * @param query
+   *          the query to which the natiev query should be set to
+   * @throws DatastoreNotFoundException
+   *           if the current datastore was not found in the list of native queries
    */
-  private IQuery<?> parseNativeQuery(List<NativeQuery> nativeQueries, IQuery<?> query) throws QueryPoolException {
+  private void parseNativeQuery(List<NativeQuery> nativeQueries, IQuery<?> query) throws DatastoreNotFoundException {
     IDataStore datastore = getNetRelay().getDatastore();
+    boolean found = false;
     for (NativeQuery nativeQuery : nativeQueries) {
       Class<?> datastoreClass = nativeQuery.getDatastore();
       if (datastoreClass.equals(datastore.getClass())) {
         query.setNativeCommand(nativeQuery.getQuery());
-        return query;
+        found = true;
+        break;
       }
     }
-    throw new DatastoreNotFoundException("Query has a native block, but the current datastore ('"
-        + datastore.getClass().getName() + "') is not defined");
+    if (!found)
+      throw new DatastoreNotFoundException("Query has a native block, but the current datastore ('"
+          + datastore.getClass().getName() + "') is not defined");
   }
 
   /*

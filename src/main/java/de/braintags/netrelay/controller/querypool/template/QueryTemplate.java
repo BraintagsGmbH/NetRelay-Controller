@@ -49,6 +49,12 @@ public class QueryTemplate {
    *          an optional list of {@link NativeQuery}s, one for each datastore that should be able to execute it
    * @param dynamicQuery
    *          a {@link DynamicQuery} to be used independently from the currently configured datastore
+   * @param orderBy
+   *          the order fields of the query, separated by comma
+   * @param offset
+   *          the default offset, or starting position, of the query
+   * @param limit
+   *          the default limit of the query
    * @throws InvalidSyntaxException
    *           if there is a syntax error in the template
    */

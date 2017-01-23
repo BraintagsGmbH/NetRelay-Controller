@@ -90,14 +90,4 @@ public class QueryPart {
     assert isCondition();
     return condition;
   }
-
-  public static void main(String[] args) {
-    Object a = new Object();
-    Object b = new Object();
-    Object c = new Object();
-
-    boolean result = a != null ^ b != null ^ c != null ^ (a != null && b != null && c != null);
-    System.out.println(result);
-  }
-
 }

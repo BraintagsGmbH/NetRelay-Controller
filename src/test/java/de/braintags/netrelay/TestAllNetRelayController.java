@@ -16,6 +16,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import de.braintags.netrelay.controller.querypool.TQueryPoolController;
+import de.braintags.netrelay.controller.querypool.template.TQueryTemplate;
 import de.braintags.netrelay.unit.TAuthenticationDatastore;
 import de.braintags.netrelay.unit.TAuthenticationDatastoreEncrypted;
 import de.braintags.netrelay.unit.TAuthenticationMongo;
@@ -44,7 +46,7 @@ import de.braintags.netrelay.unit.persistence.TPersistenceSuite;
     TMailProcessor.class, TPersistenceSuite.class, TAuthenticationMongo.class, TAuthenticationDatastore.class,
     TAuthenticationDatastoreEncrypted.class, TAuthorization.class, TRegistration.class, TPasswordLost.class,
     TDataTablesController.class, TMailController.class, TVirtualHostController.class, TProtocolController.class,
-    ElFinderTestSuite.class })
+    ElFinderTestSuite.class, TQueryPoolController.class, TQueryTemplate.class })
 
 public class TestAllNetRelayController {
   // -DBlockedThreadCheckInterval=10000000 -DWarningExceptionTime=10000000 -DtestTimeout=5
