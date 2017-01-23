@@ -1,0 +1,35 @@
+{
+  "description": "Invalid because there is a 'condition' and an 'or' inside the same JSON object",
+  "mapper": "Person",
+  "operation": "select",
+  "orderBy": "${request.params.order}",
+  "dynamic": {
+    "query": {
+      "and": [
+        {
+          "condition": {
+            "field": "firstname",
+            "logic": "=",
+            "value": "max"
+          },
+          "or": [
+	          {
+	          	"condition": {
+	            	"field": "score",
+	            	"logic": "=",
+	            	"value": 2.5
+	          	}
+	          },
+	          {
+              "condition": {
+                "field": "zip",
+                "logic": "=",
+                "value": 47877
+              }
+            }
+          ]
+        }
+    	]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "description": "Invalid because the datastore class doesn't exist'",
+  "mapper": "Person",
+  "operation": "select",
+  "native": [
+    {
+      "datastore": "this.class.doesnt.exist.Datastore",
+      "query": {
+        "firstname": "Max",
+        "lastname": "Mustermann",
+        "age": {
+        	"$lt":30
+        } 
+      }
+    },
+    {
+      "datastore": "de.braintags.vertx.jomnigate.mysql.MySqlDataStore",
+      "query": "SELECT * FROM Person WHERE firstname = 'MAX' AND lastname = 'Mustermann'"
+    }
+  ]
+}

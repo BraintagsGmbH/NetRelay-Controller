@@ -27,9 +27,9 @@ import io.vertx.ext.web.RoutingContext;
 
 /**
  * Executes the commands to search for a record or for records and to put them into the context.
- * 
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class DisplayAction extends AbstractAction {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
@@ -37,7 +37,7 @@ public class DisplayAction extends AbstractAction {
   private static final String MESSAGE = "Adding %s to context for entity %s / size: %s";
 
   /**
-   * 
+   *
    */
   public DisplayAction(PersistenceController persitenceController) {
     super(persitenceController);
@@ -58,8 +58,8 @@ public class DisplayAction extends AbstractAction {
     handler.handle(Future.failedFuture(new UnsupportedOperationException()));
   }
 
-  protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map, IMapper mapper,
-      Handler<AsyncResult<Void>> handler) {
+  protected void handleQuery(IQuery<?> query, String entityName, RoutingContext context, CaptureMap map,
+      IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     int limit = query.getDataStore().getDefaultQueryLimit();
     int offset = 0;
     if (map.containsKey(PersistenceController.SELECTION_SIZE_CAPTURE_KEY)) {

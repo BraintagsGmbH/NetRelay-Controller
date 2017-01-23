@@ -1,0 +1,20 @@
+{
+  "description": "Invalid because the first native query has no datastore class",
+  "mapper": "Person",
+  "operation": "select",
+  "native": [
+    {
+      "query": {
+        "firstname": "Max",
+        "lastname": "Mustermann",
+        "age": {
+        	"$lt":30
+        } 
+      }
+    },
+    {
+      "datastore": "de.braintags.vertx.jomnigate.mysql.MySqlDataStore",
+      "query": "SELECT * FROM Person WHERE firstname = 'MAX' AND lastname = 'Mustermann'"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "description": "Simple test query with a static field condition",
+  "mapper": "Person",
+  "operation": "select",
+  "dynamic": {
+    "query": {
+      "condition": {
+        "field": "firstname",
+        "logic": "=",
+        "value": "max"
+      }
+    }
+  }
+}

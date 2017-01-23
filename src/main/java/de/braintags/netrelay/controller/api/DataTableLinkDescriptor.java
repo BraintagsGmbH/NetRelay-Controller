@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.mapping.IField;
@@ -91,7 +93,7 @@ public class DataTableLinkDescriptor {
   private List<ColDef> clearColDefs() {
     ArrayList<ColDef> ret = new ArrayList<>();
     for (ColDef def : columns) {
-      if (def != null && def.name.hashCode() != 0) {
+      if (def != null && StringUtils.isNotBlank(def.name)) {
         ret.add(def);
       }
     }

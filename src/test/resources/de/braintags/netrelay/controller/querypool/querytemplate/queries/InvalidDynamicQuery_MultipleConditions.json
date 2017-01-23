@@ -1,0 +1,24 @@
+{
+  "description": "Invalid because there are multiple conditions without surrounding 'and' or 'or'",
+  "mapper": "Person",
+  "operation": "select",
+  "orderBy": "${request.params.order}",
+  "dynamic": {
+    "query": [ 
+		    {
+				"condition": {
+		        	"field": "firstname",
+		            "logic": "=",
+		            "value": "max"
+				}
+			}, 
+		    {
+		    	"condition": {
+		        	"field": "score",
+		            "logic": "=",
+		            "value": 2.5
+				}
+			}
+		]          
+    }
+}

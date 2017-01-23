@@ -1,0 +1,15 @@
+{
+  "description": "Test query for a field condition that has a context variable as value",
+  "mapper": "Person",
+  "operation": "select",
+  "orderBy": "score asc",
+  "dynamic": {
+    "query": {
+      "condition": {
+        "field": "firstname",
+        "logic": "=",
+        "value": "${context:key}"
+      }
+    }
+  }
+}

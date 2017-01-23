@@ -1,0 +1,44 @@
+{
+  "description": "This is a valid dynamic query",
+  "mapper": "Person",
+  "operation": "select",
+  "orderBy": "${request.params.order}",
+  "dynamic": {
+    "query": {
+      "and": [
+        {
+          "condition": {
+            "field": "firstname",
+            "logic": "=",
+            "value": "max"
+          }
+        },
+        {
+          "condition": {
+            "field": "score",
+            "logic": "=",
+            "value": 2.5
+          }
+        },
+        {
+          "or": [
+            {
+              "condition": {
+                "field": "city",
+                "logic": "=",
+                "value": "willich"
+              }
+            },
+            {
+              "condition": {
+                "field": "zip",
+                "logic": "=",
+                "value": 47877
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

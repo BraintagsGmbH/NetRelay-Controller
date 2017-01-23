@@ -1,0 +1,15 @@
+{
+  "description": "Test query for a field condition that has a mapper variable as value, which is also multiple levels deep",
+  "mapper": "Person",
+  "operation": "select",
+  "orderBy": "score asc",
+  "dynamic": {
+    "query": {
+      "condition": {
+        "field": "firstname",
+        "logic": "=",
+        "value": "${mapper:person.address.street}"
+      }
+    }
+  }
+}
