@@ -3,12 +3,21 @@ apply from: 'gradle/vertx/vertxbase.gradle'
 dependencies {
   compile group: 'de.braintags', name: 'netrelay', version:netrelayVersion
   compile group: 'de.braintags', name: 'vertx-auth-datastore', version:vertxAuthDatastoreVersion
+  compile group: 'de.braintags', name: 'vertx-pojo-mapper-common', version:btVertxVersion
+
   compile group: 'io.vertx', name: 'vertx-mail-client', version:vertxVersion
   compile group: 'org.thymeleaf', name: 'thymeleaf', version:thymeleafVersion
   compile group: 'org.apache.tika', name: 'tika-core', version:'1.9'
 
-  testCompile group: 'de.braintags', name: 'netrelay', version:netrelayVersion, classifier:'tests'
-  testCompile group: 'de.braintags', name: 'vertx-auth-datastore', version:vertxAuthDatastoreVersion, classifier:'tests'
+  if (isIncludedBuild) {
+    testCompile group: 'de.braintags', name: 'netrelay', version:netrelayVersion, configuration:'commonTests'
+    testCompile group: 'de.braintags', name: 'vertx-auth-datastore', version:vertxAuthDatastoreVersion, configuration:'commonTests'
+  } else {
+    testCompile group: 'de.braintags', name: 'netrelay', version:netrelayVersion, classifier:'tests'
+    testCompile group: 'de.braintags', name: 'vertx-auth-datastore', version:vertxAuthDatastoreVersion, classifier:'tests'
+  }
+  
+  testCompile group: 'de.braintags', name: 'vertx-pojo-mapper-common-test', version:btVertxVersion
 }
 
 test {

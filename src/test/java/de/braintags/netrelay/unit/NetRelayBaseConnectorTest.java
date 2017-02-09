@@ -12,10 +12,6 @@
  */
 package de.braintags.netrelay.unit;
 
-import de.braintags.vertx.jomnigate.IDataStore;
-import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
-import de.braintags.vertx.jomnigate.testdatastore.ResultContainer;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.CookieController;
 import de.braintags.netrelay.controller.CurrentMemberController;
@@ -30,6 +26,10 @@ import de.braintags.netrelay.model.Street;
 import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
+import de.braintags.vertx.jomnigate.testdatastore.ResultContainer;
 import io.vertx.ext.unit.TestContext;
 
 /**

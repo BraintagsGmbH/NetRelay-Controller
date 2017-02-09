@@ -42,8 +42,8 @@ import de.braintags.netrelay.unit.persistence.TPersistenceSuite;
  * 
  */
 @RunWith(Suite.class)
-@SuiteClasses({ TestAllNetRelay.class, TFailureController.class, TTemplateController.class, TCaptureParameters.class,
-    TMailProcessor.class, TPersistenceSuite.class, TAuthenticationMongo.class, TAuthenticationDatastore.class,
+@SuiteClasses({ TFailureController.class, TTemplateController.class, TCaptureParameters.class, TMailProcessor.class,
+    TPersistenceSuite.class, TAuthenticationMongo.class, TAuthenticationDatastore.class,
     TAuthenticationDatastoreEncrypted.class, TAuthorization.class, TRegistration.class, TPasswordLost.class,
     TDataTablesController.class, TMailController.class, TVirtualHostController.class, TProtocolController.class,
     ElFinderTestSuite.class, TQueryPoolController.class, TQueryTemplate.class })
