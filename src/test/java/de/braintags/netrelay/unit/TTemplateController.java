@@ -80,7 +80,7 @@ public class TTemplateController extends NetRelayBaseConnectorTest {
   @Test
   public void testDefinedRoute(TestContext context) throws Exception {
     resetRoutes(false, new String[] { "/testRoute/*" });
-    testRequest(context, HttpMethod.GET, "/testRoute/index.html", 200, "OK");
+    testRequest(context, HttpMethod.GET, "/testRoute/route/routeIndex.html", 200, "OK");
     testRequest(context, HttpMethod.GET, "/index.html", 404, "Not Found");
   }
 
