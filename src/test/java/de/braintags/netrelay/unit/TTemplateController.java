@@ -71,6 +71,19 @@ public class TTemplateController extends NetRelayBaseConnectorTest {
     testRequest(context, HttpMethod.GET, "/index.html", 200, "OK");
   }
 
+  /**
+   * Define a route for Templatehandler
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testDefinedRoute(TestContext context) throws Exception {
+    resetRoutes(false, new String[] { "/testRoute/*" });
+    testRequest(context, HttpMethod.GET, "/testRoute/index.html", 200, "OK");
+    testRequest(context, HttpMethod.GET, "/index.html", 404, "Not Found");
+  }
+
   @Test
   public void testRedirect(TestContext context) throws Exception {
     resetRoutes(false);
@@ -88,9 +101,15 @@ public class TTemplateController extends NetRelayBaseConnectorTest {
   }
 
   private void resetRoutes(boolean multiPath) throws Exception {
+    resetRoutes(multiPath, null);
+    netRelay.resetRoutes();
+  }
+
+  private void resetRoutes(boolean multiPath, String[] routes) throws Exception {
     RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
         .getNamedDefinition(ThymeleafTemplateController.class.getSimpleName());
     def.getHandlerProperties().put(ThymeleafTemplateController.MULTIPATH_PROPERTY, String.valueOf(multiPath));
+    def.setRoutes(routes);
     netRelay.resetRoutes();
   }
 
