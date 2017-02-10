@@ -19,12 +19,12 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.braintags.vertx.util.HttpContentType;
-import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.NetRelay;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.vertx.util.HttpContentType;
+import de.braintags.vertx.util.exception.InitException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;

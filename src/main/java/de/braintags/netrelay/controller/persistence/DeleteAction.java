@@ -12,11 +12,11 @@
  */
 package de.braintags.netrelay.controller.persistence;
 
+import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.delete.IDelete;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
-import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

@@ -12,8 +12,8 @@
  */
 package de.braintags.netrelay.controller.persistence;
 
-import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

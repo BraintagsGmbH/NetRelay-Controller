@@ -19,10 +19,10 @@ import java.util.List;
 
 import org.apache.tika.Tika;
 
-import de.braintags.vertx.util.file.BufferInputStream;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import de.braintags.vertx.util.file.BufferInputStream;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.AsyncFile;
 import io.vertx.core.file.FileProps;

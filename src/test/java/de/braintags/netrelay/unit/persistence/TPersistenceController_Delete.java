@@ -14,11 +14,6 @@ package de.braintags.netrelay.unit.persistence;
 
 import org.junit.Test;
 
-import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
-import de.braintags.vertx.jomnigate.mapping.IMapper;
-import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
-import de.braintags.vertx.util.ResultObject;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -32,6 +27,12 @@ import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.unit.AbstractPersistenceControllerTest;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
+import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
+import de.braintags.vertx.util.ResultObject;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -145,7 +146,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.setSearchCondition(query.isEqual(query.getMapper().getIdField().getName(), id));
+    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField().getName(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 
@@ -187,7 +188,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.setSearchCondition(query.isEqual(query.getMapper().getIdField().getName(), id));
+    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField().getName(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 

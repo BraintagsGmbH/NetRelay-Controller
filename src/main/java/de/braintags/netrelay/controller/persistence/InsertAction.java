@@ -18,10 +18,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import de.braintags.vertx.jomnigate.mapping.IMapper;
-import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.exception.FileNameException;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

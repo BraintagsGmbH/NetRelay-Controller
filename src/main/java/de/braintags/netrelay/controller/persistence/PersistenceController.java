@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
-import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController;
 import de.braintags.netrelay.controller.Action;
@@ -25,6 +23,8 @@ import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.netrelay.routing.CaptureDefinition;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
+import de.braintags.vertx.util.exception.InitException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;

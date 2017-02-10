@@ -19,12 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
-import de.braintags.vertx.jomnigate.mapping.IMapper;
-import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
-import de.braintags.vertx.jomnigate.util.QueryHelper;
-import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.api.MailController;
@@ -36,6 +30,13 @@ import de.braintags.netrelay.model.RegisterClaim;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
+import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
+import de.braintags.vertx.jomnigate.util.QueryHelper;
+import de.braintags.vertx.util.exception.InitException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -326,7 +327,7 @@ public class RegisterController extends AbstractAuthProviderController {
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
     IQuery<RegisterClaim> query = getNetRelay().getDatastore().createQuery(RegisterClaim.class);
-    query.setSearchCondition(query.and(query.isEqual("email", email), query.isEqual("active", true)));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
     QueryHelper.executeToList(query, qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
@@ -363,7 +364,7 @@ public class RegisterController extends AbstractAuthProviderController {
       handler.handle(Future.failedFuture(RegistrationCode.EMAIL_REQUIRED.toString()));
     } else if (!allowDuplicateEmail) {
       IQuery<? extends IAuthenticatable> query = getNetRelay().getDatastore().createQuery(this.authenticatableCLass);
-      query.setSearchCondition(query.isEqual("email", email));
+      query.setSearchCondition(ISearchCondition.isEqual("email", email));
       query.executeCount(qr -> {
         if (qr.failed()) {
           LOGGER.error("", qr.cause());

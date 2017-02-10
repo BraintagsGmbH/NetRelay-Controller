@@ -28,6 +28,7 @@ import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
 import de.braintags.vertx.jomnigate.testdatastore.ResultContainer;
 import io.vertx.ext.unit.TestContext;
@@ -79,7 +80,7 @@ public abstract class NetRelayBaseConnectorTest extends NetRelayBaseTest {
   public static final Member createOrFindMember(TestContext context, IDataStore datastore, Member member) {
     IQuery<Member> query = datastore.createQuery(Member.class);
     query.setSearchCondition(
-        query.and(query.isEqual("userName", member.getUserName()), query.isEqual("password", member.getPassword())));
+        ISearchCondition.and(ISearchCondition.isEqual("userName", member.getUserName()), ISearchCondition.isEqual("password", member.getPassword())));
     Member returnMember = (Member) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       ResultContainer cont = DatastoreBaseTest.saveRecord(context, member);
