@@ -23,7 +23,8 @@ import org.junit.runners.Suite.SuiteClasses;
  * 
  */
 @RunWith(Suite.class)
-@SuiteClasses({ ElFinderVolumeTest.class, ElFinderControllerTest.class, ElFinderListenerTest.class })
-public class ElFinderTestSuite {
+@SuiteClasses({ ElFinderVolumeTest.class, ElFinderControllerTest.class, ElFinderListenerTest.class,
+    JsTreeVolumeTest.class, JsTreeControllerTest.class, JsTreeListenerTest.class })
+public class FinderManagerTestSuite {
 
 }

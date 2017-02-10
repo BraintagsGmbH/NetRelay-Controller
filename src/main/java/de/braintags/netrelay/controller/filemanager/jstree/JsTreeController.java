@@ -12,9 +12,11 @@
  */
 package de.braintags.netrelay.controller.filemanager.jstree;
 
-import java.util.Properties;
+import java.nio.file.Path;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
+import io.vertx.core.file.FileSystem;
 
 /**
  * 
@@ -27,10 +29,12 @@ public class JsTreeController extends ElFinderController {
   /*
    * (non-Javadoc)
    * 
-   * @see de.braintags.netrelay.controller.AbstractController#initProperties(java.util.Properties)
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController#createVolume(io.vertx.core.file.
+   * FileSystem, java.lang.String, java.nio.file.Path)
    */
   @Override
-  public void initProperties(Properties properties) {
+  protected VertxVolume createVolume(FileSystem fs, String volumeId, Path path) {
+    return new VertxVolume(fs, path, volumeId, null, new JsTreeTargetSerializer());
   }
 
 }

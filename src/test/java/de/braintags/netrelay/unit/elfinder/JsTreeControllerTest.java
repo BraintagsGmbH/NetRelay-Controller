@@ -23,6 +23,7 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.TargetSerializer;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
+import de.braintags.netrelay.controller.filemanager.jstree.JsTreeController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
@@ -41,9 +42,9 @@ import io.vertx.ext.unit.TestContext;
  * @author Michael Remme
  *
  */
-public class ElFinderControllerTest extends AbstractCaptureParameterTest {
+public class JsTreeControllerTest extends AbstractCaptureParameterTest {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
-      .getLogger(ElFinderControllerTest.class);
+      .getLogger(JsTreeControllerTest.class);
   private static final String VOLUME_ID = "ROOTVOLUME";
   private static final String ROOT_DIR = "tmp";
   private static final String ROOT_WEBROOT = "webroot";
@@ -442,7 +443,8 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void initialRequest(TestContext context) {
-    String url = API_ELFINDER + "?cmd=open&target=&init=1&tree=1&_=1474899867097";
+    // String url = API_ELFINDER + "?cmd=open&target=&init=1&tree=1&_=1474899867097";
+    String url = API_ELFINDER + "?cmd=open&target=&init=1";
 
     try {
       MultipartUtil mu = new MultipartUtil();
@@ -478,7 +480,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
   public void modifySettings(TestContext context, Settings settings) {
     super.modifySettings(context, settings);
     // defineRouterDefinitions adds the default key-definitions
-    RouterDefinition def = defineRouterDefinition(ElFinderController.class, API_ELFINDER);
+    RouterDefinition def = defineRouterDefinition(JsTreeController.class, API_ELFINDER);
     def.getHandlerProperties().put(ElFinderController.ROOT_DIRECTORIES_PROPERTY, VOLUME_ID + ":" + ROOT_DIR);
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
     settings.getMappingDefinitions().addMapperDefinition("Member", Member.class);
