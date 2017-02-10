@@ -84,6 +84,19 @@ public class TTemplateController extends NetRelayBaseConnectorTest {
     testRequest(context, HttpMethod.GET, "/index.html", 404, "Not Found");
   }
 
+  /**
+   * Define a route for Templatehandler
+   * 
+   * @param context
+   * @throws Exception
+   */
+  @Test
+  public void testDefinedRouteRegex(TestContext context) throws Exception {
+    resetRoutes(false, new String[] { "regex:/route/.*" });
+    testRequest(context, HttpMethod.GET, "/route/routeIndex.html", 200, "OK");
+    testRequest(context, HttpMethod.GET, "/index.html", 404, "Not Found");
+  }
+
   @Test
   public void testRedirect(TestContext context) throws Exception {
     resetRoutes(false);
