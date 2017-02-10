@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.ICommandListener;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand;
@@ -39,8 +38,8 @@ import io.vertx.core.json.JsonObject;
  *          defines the return type of the abstract method
  *          {@link AbstractCommand#execute(ElFinderContext, JsonObject, Handler)}
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class AbstractCommand<T> implements ICommand {
-  private static final String CMD_TMB_TARGET = "?cmd=tmb&target=%s";
   private ICommandListener listener;
 
   @Override
@@ -244,50 +243,20 @@ public abstract class AbstractCommand<T> implements ICommand {
     return target.isFolder() && !target.hasChildren();
   }
 
+  /**
+   * @deprecated
+   */
+  @Deprecated
   protected JsonObject getTargetInfo(ElFinderContext efContext, ITarget target) {
-    JsonObject info = new JsonObject();
-
-    info.put(ElFinderConstants.ELFINDER_PARAMETER_HASH, target.getHash());
-    info.put(ElFinderConstants.ELFINDER_PARAMETER_MIME, target.getMimeType());
-    info.put(ElFinderConstants.ELFINDER_PARAMETER_TIMESTAMP, target.getLastModified());
-    info.put(ElFinderConstants.ELFINDER_PARAMETER_SIZE, target.getSize());
-    info.put(ElFinderConstants.ELFINDER_PARAMETER_READ,
-        target.isReadable() ? ElFinderConstants.ELFINDER_TRUE_RESPONSE : ElFinderConstants.ELFINDER_FALSE_RESPONSE);
-    info.put(ElFinderConstants.ELFINDER_PARAMETER_WRITE,
-        target.isWritable() ? ElFinderConstants.ELFINDER_TRUE_RESPONSE : ElFinderConstants.ELFINDER_FALSE_RESPONSE);
-    info.put(ElFinderConstants.ELFINDER_PARAMETER_LOCKED,
-        target.isLocked() ? ElFinderConstants.ELFINDER_TRUE_RESPONSE : ElFinderConstants.ELFINDER_FALSE_RESPONSE);
-
-    if (target.getMimeType() != null && target.getMimeType().startsWith("image")) {
-      String uri = efContext.getRoutingContext().request().absoluteURI()
-          + String.format(CMD_TMB_TARGET, target.getHash());
-      info.put(ElFinderConstants.ELFINDER_PARAMETER_THUMBNAIL, uri);
-    }
-
-    if (target.isRoot()) {
-      info.put(ElFinderConstants.ELFINDER_PARAMETER_DIRECTORY_FILE_NAME, target.getVolume().getAlias());
-      info.put(ElFinderConstants.ELFINDER_PARAMETER_VOLUME_ID, target.getVolume().getId());
-    } else {
-      info.put(ElFinderConstants.ELFINDER_PARAMETER_DIRECTORY_FILE_NAME, target.getName());
-      info.put(ElFinderConstants.ELFINDER_PARAMETER_PARENTHASH, target.getParent().getHash());
-    }
-
-    if (target.isFolder()) {
-      info.put(ElFinderConstants.ELFINDER_PARAMETER_HAS_DIR, target.hasChildFolder()
-          ? ElFinderConstants.ELFINDER_TRUE_RESPONSE : ElFinderConstants.ELFINDER_FALSE_RESPONSE);
-    }
-    return info;
+    return (JsonObject) target.getSerializer().serialize(efContext, target);
   }
 
+  /**
+   * @deprecated
+   */
+  @Deprecated
   protected JsonObject getOptions(ElFinderContext efContext, ITarget target) {
-    JsonObject options = new JsonObject();
-    options.put(ElFinderConstants.ELFINDER_PARAMETER_PATH, target.getName());
-    options.put(ElFinderConstants.ELFINDER_PARAMETER_COMMAND_DISABLED, new JsonArray());
-    options.put(ElFinderConstants.ELFINDER_PARAMETER_FILE_SEPARATOR,
-        ElFinderConstants.ELFINDER_PARAMETER_FILE_SEPARATOR);
-    options.put(ElFinderConstants.ELFINDER_PARAMETER_OVERWRITE_FILE, ElFinderConstants.ELFINDER_TRUE_RESPONSE);
-    // options.put(ElFinderConstants.ELFINDER_PARAMETER_ARCHIVERS, ArchiverOption.JSON_INSTANCE);
-    return options;
+    return (JsonObject) target.getSerializer().serializeoptions(efContext, target);
   }
 
   /**

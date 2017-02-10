@@ -18,12 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.CommandFactory;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.TargetSerializer;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
+import de.braintags.vertx.util.exception.InitException;
 import io.vertx.core.file.FileSystem;
 import io.vertx.ext.web.RoutingContext;
 
@@ -149,15 +150,23 @@ public class ElFinderController extends AbstractController {
       if (!fs.existsBlocking(dirName)) {
         throw new InitException("Root directory with path '" + dirName + "' does not exist");
       }
-
       Path path = FileSystems.getDefault().getPath(dirName);
       LOGGER.debug("ElFinder-Path: " + path);
       if (dirName.endsWith("/")) {
         dirName = dirName.substring(0, dirName.length() - 1);
       }
-
-      rootVolumes.add(new VertxVolume(fs, path, volumeId, null));
+      rootVolumes.add(createVolume(fs, volumeId, path));
     }
+  }
+
+  /**
+   * @param fs
+   * @param volumeId
+   * @param path
+   * @return
+   */
+  protected VertxVolume createVolume(FileSystem fs, String volumeId, Path path) {
+    return new VertxVolume(fs, path, volumeId, null, new TargetSerializer());
   }
 
 }

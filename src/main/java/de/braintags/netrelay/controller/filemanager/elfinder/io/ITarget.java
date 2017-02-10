@@ -38,7 +38,13 @@ import java.util.List;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.AsyncFile;
 
-public interface ITarget {
+/**
+ * The definition of a target like file, volume etc.
+ * 
+ * @author Michael Remme
+ *
+ */
+public interface ITarget<T> {
 
   /**
    * The IVolume, where this target resides in
@@ -230,4 +236,10 @@ public interface ITarget {
    */
   String getExtension();
 
+  /**
+   * Serialize the target into the defined format
+   * 
+   * @return
+   */
+  ITargetSerializer<T> getSerializer();
 }

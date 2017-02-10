@@ -36,7 +36,13 @@ import java.util.List;
 
 import io.vertx.core.file.FileSystem;
 
-public interface IVolume {
+/**
+ * Definition for a volume, which shall be mapped
+ * 
+ * @author Michael Remme
+ *
+ */
+public interface IVolume<T> {
 
   /**
    * Get a volume identifier for the current volume
@@ -63,4 +69,11 @@ public interface IVolume {
    * @return
    */
   FileSystem getFileSystem();
+
+  /**
+   * the serializer used for the current implementation
+   * 
+   * @return
+   */
+  ITargetSerializer<T> getTargetSerializer();
 }

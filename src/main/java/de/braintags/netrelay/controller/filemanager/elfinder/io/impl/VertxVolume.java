@@ -21,10 +21,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import de.braintags.vertx.util.ExceptionUtil;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.ITargetSerializer;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import de.braintags.vertx.util.ExceptionUtil;
 import io.vertx.core.file.FileSystem;
+import io.vertx.core.json.JsonObject;
 
 /**
  * An implementation of {@link IVolume} based on vertx filesystem
@@ -32,7 +34,7 @@ import io.vertx.core.file.FileSystem;
  * @author Michael Remme
  * 
  */
-public class VertxVolume implements IVolume {
+public class VertxVolume implements IVolume<JsonObject> {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(VertxVolume.class);
 
@@ -40,19 +42,23 @@ public class VertxVolume implements IVolume {
   private VertxTarget rootDir;
   private String volumeId;
   private String alias;
+  private ITargetSerializer<JsonObject> serializer;
 
-  public VertxVolume(FileSystem fs, String rootDir, String volumeId, String alias) {
-    this(fs, FileSystems.getDefault().getPath(rootDir), volumeId, alias);
+  public VertxVolume(FileSystem fs, String rootDir, String volumeId, String alias,
+      ITargetSerializer<JsonObject> serializer) {
+    this(fs, FileSystems.getDefault().getPath(rootDir), volumeId, alias, serializer);
   }
 
   /**
    * 
    */
-  public VertxVolume(FileSystem fs, Path rootDir, String volumeId, String alias) {
+  public VertxVolume(FileSystem fs, Path rootDir, String volumeId, String alias,
+      ITargetSerializer<JsonObject> serializer) {
     this.fs = fs;
     this.rootDir = new VertxTarget(this, rootDir, true);
     this.volumeId = volumeId;
     this.alias = alias == null ? volumeId : alias;
+    this.serializer = serializer;
   }
 
   /*
@@ -194,6 +200,16 @@ public class VertxVolume implements IVolume {
   @Override
   public ITarget getParent(Path path) {
     return fromPath(path.getParent());
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume#getTargetSerializer()
+   */
+  @Override
+  public ITargetSerializer<JsonObject> getTargetSerializer() {
+    return serializer;
   }
 
 }

@@ -19,13 +19,15 @@ import java.util.List;
 
 import org.apache.tika.Tika;
 
-import de.braintags.vertx.util.file.BufferInputStream;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.ITargetSerializer;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import de.braintags.vertx.util.file.BufferInputStream;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.AsyncFile;
 import io.vertx.core.file.FileProps;
+import io.vertx.core.json.JsonObject;
 
 /**
  * An implementation of ITarget for vertx
@@ -33,7 +35,7 @@ import io.vertx.core.file.FileProps;
  * @author Michael Remme
  * 
  */
-public class VertxTarget implements ITarget {
+public class VertxTarget implements ITarget<JsonObject> {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(VertxTarget.class);
   private final Tika tika = new Tika();
@@ -407,6 +409,16 @@ public class VertxTarget implements ITarget {
     } else {
       return null;
     }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget#getSerializer()
+   */
+  @Override
+  public ITargetSerializer<JsonObject> getSerializer() {
+    return getVolume().getTargetSerializer();
   }
 
 }

@@ -21,6 +21,7 @@ import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController;
 import de.braintags.netrelay.controller.filemanager.elfinder.ICommandListener;
 import de.braintags.netrelay.controller.filemanager.elfinder.command.ICommand;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.TargetSerializer;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
@@ -118,7 +119,7 @@ public class ElFinderListenerTest extends AbstractCaptureParameterTest {
 
   IVolume getVolume() {
     if (vol == null) {
-      vol = new VertxVolume(vertx.fileSystem(), ROOT_DIR, VOLUME_ID, null);
+      vol = new VertxVolume(vertx.fileSystem(), ROOT_DIR, VOLUME_ID, null, new TargetSerializer());
     }
     return vol;
   }

@@ -22,6 +22,7 @@ import org.junit.Test;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.IVolume;
+import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.TargetSerializer;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
 import de.braintags.netrelay.unit.AbstractCaptureParameterTest;
 import io.vertx.ext.unit.TestContext;
@@ -41,7 +42,7 @@ public class ElFinderVolumeTest extends AbstractCaptureParameterTest {
   @Test
   public void testVolume(TestContext context) {
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null);
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
     context.assertTrue(vv.getRoot().exists());
     LOGGER.debug("DIRECTORY: " + vv.getRoot().toString());
     List<IVolume> rootVolumes = new ArrayList<>();
@@ -69,7 +70,7 @@ public class ElFinderVolumeTest extends AbstractCaptureParameterTest {
   @Test
   public void listChildren(TestContext context) {
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null);
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
     context.assertTrue(vv.getRoot().exists());
     vv.getRoot().listChildren();
 
