@@ -14,9 +14,6 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.vertx.jomnigate.mapping.IMapper;
-import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
-import de.braintags.vertx.jomnigate.testdatastore.ResultContainer;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
@@ -32,6 +29,9 @@ import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.model.TestPhone;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
+import de.braintags.vertx.jomnigate.testdatastore.ResultContainer;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.auth.mongo.MongoAuth;

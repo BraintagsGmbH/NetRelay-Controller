@@ -315,7 +315,7 @@ public class QueryPoolController extends AbstractController {
         ISearchCondition subQueryPart = parseQueryParts(queryParts.get(i), query);
         searchConditions[i] = subQueryPart;
       }
-      return query.and(searchConditions);
+      return ISearchCondition.and(searchConditions);
     } else if (queryPart.isOr()) {
       List<QueryPart> queryParts = queryPart.getOr();
       ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
@@ -329,7 +329,7 @@ public class QueryPoolController extends AbstractController {
       String field = condition.getField();
       QueryOperator operator = QueryOperator.translate(condition.getLogic());
       Object value = condition.getValue();
-      return query.condition(field, operator, value);
+      return ISearchCondition.condition(field, operator, value);
     } else {
       throw new InvalidSyntaxException("Query part is neither 'and' nor 'or' nor 'condition'");
     }

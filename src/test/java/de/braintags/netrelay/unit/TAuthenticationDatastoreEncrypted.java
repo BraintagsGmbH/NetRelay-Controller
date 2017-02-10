@@ -25,6 +25,7 @@ import de.braintags.netrelay.util.MultipartUtil;
 import de.braintags.vertx.auth.datastore.test.model.TestMemberEncrypted;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -114,7 +115,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
     IQuery<TestMemberEncrypted> query = datastore.createQuery(TestMemberEncrypted.class);
     String password = member.getPassword();
     context.assertNotNull(password, "password must not be null");
-    query.setSearchCondition(query.isEqual("email", member.getEmail()));
+    query.setSearchCondition(ISearchCondition.isEqual("email", member.getEmail()));
     TestMemberEncrypted returnMember = (TestMemberEncrypted) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       DatastoreBaseTest.saveRecord(context, member);

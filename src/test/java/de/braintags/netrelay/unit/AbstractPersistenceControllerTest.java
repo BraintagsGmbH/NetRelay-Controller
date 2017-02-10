@@ -12,7 +12,6 @@
  */
 package de.braintags.netrelay.unit;
 
-import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.init.Settings;
@@ -20,6 +19,7 @@ import de.braintags.netrelay.mapper.SimpleNetRelayMapper;
 import de.braintags.netrelay.model.Country;
 import de.braintags.netrelay.model.TestCustomer;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import io.vertx.ext.unit.TestContext;
 
 /**

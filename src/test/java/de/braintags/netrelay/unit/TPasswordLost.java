@@ -16,8 +16,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
@@ -30,6 +28,9 @@ import de.braintags.netrelay.model.PasswordLostClaim;
 import de.braintags.netrelay.model.RegisterClaim;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.util.MultipartUtil;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.unit.TestContext;
 
@@ -128,7 +129,7 @@ public class TPasswordLost extends NetRelayBaseConnectorTest {
     }, 200, "OK", null);
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
-    query.setSearchCondition(query.isEqual("email", USER_BRAINTAGS_DE));
+    query.setSearchCondition(ISearchCondition.isEqual("email", USER_BRAINTAGS_DE));
     Member member = (Member) DatastoreBaseTest.findFirst(context, query);
     context.assertNotNull(member, "Member was not created");
     context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
@@ -170,7 +171,7 @@ public class TPasswordLost extends NetRelayBaseConnectorTest {
    */
   private PasswordLostClaim validateNoMultipleRequests(TestContext context, String email) {
     IQuery<PasswordLostClaim> query = netRelay.getDatastore().createQuery(PasswordLostClaim.class);
-    query.setSearchCondition(query.and(query.isEqual("email", email), query.isEqual("active", true)));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
     List<?> recList = DatastoreBaseTest.findAll(context, query);
     context.assertEquals(1, recList.size(),
         "previous PasswordLostClaims are not deactivated ( > 1 ) OR PasswordLostClaim not written (0)");

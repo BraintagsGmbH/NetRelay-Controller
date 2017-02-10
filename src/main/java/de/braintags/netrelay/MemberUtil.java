@@ -12,11 +12,12 @@
  */
 package de.braintags.netrelay;
 
-import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.exception.NoSuchRecordException;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.impl.DatastoreUser;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
+import de.braintags.vertx.jomnigate.exception.NoSuchRecordException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -140,7 +141,7 @@ public class MemberUtil {
       Handler<AsyncResult<IAuthenticatable>> resultHandler, Class<? extends IAuthenticatable> mapperClass) {
     String id = user.principal().getString("_id");
     IQuery<? extends IAuthenticatable> query = netRelay.getDatastore().createQuery(mapperClass);
-    query.setSearchCondition(query.isEqual(query.getMapper().getIdField().getName(), id));
+    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField().getName(), id));
     query.execute(qr -> {
       if (qr.failed()) {
         resultHandler.handle(Future.failedFuture(qr.cause()));

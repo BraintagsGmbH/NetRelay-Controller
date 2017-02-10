@@ -17,17 +17,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.dataaccess.query.ISearchConditionContainer;
-import de.braintags.vertx.jomnigate.mapping.IField;
-import de.braintags.vertx.jomnigate.mapping.IMapper;
-import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
-import de.braintags.vertx.util.assertion.Assert;
 import de.braintags.netrelay.controller.AbstractCaptureController.CaptureMap;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.exception.FieldNotFoundException;
 import de.braintags.netrelay.exception.ObjectRequiredException;
 import de.braintags.netrelay.routing.CaptureCollection;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchConditionContainer;
+import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
+import de.braintags.vertx.util.assertion.Assert;
 
 /**
  * Utility class which builds the contract between a request uri and a record
@@ -295,9 +296,9 @@ public class RecordContractor {
   public static void extractId(IMapper mapper, CaptureMap map, IQuery<?> query) {
     List<String[]> ids = extractIds(mapper, map);
     if (!ids.isEmpty()) {
-      ISearchConditionContainer and = query.and();
+      ISearchConditionContainer and = ISearchCondition.and();
       for (String[] id : ids) {
-        and.getConditions().add(query.isEqual(id[0], id[1]));
+        and.getConditions().add(ISearchCondition.isEqual(id[0], id[1]));
       }
       query.setSearchCondition(and);
     }

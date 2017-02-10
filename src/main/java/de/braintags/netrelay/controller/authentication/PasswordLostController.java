@@ -15,10 +15,6 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.List;
 import java.util.Properties;
 
-import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
-import de.braintags.vertx.jomnigate.util.QueryHelper;
-import de.braintags.vertx.util.exception.InitException;
 import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.api.MailController;
@@ -28,6 +24,11 @@ import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.model.PasswordLostClaim;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
+import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
+import de.braintags.vertx.jomnigate.util.QueryHelper;
+import de.braintags.vertx.util.exception.InitException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -296,7 +297,7 @@ public class PasswordLostController extends AbstractController {
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
     IQuery<PasswordLostClaim> query = getNetRelay().getDatastore().createQuery(PasswordLostClaim.class);
-    query.setSearchCondition(query.and(query.isEqual("email", email), query.isEqual("active", true)));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
     QueryHelper.executeToList(query, qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
@@ -349,7 +350,7 @@ public class PasswordLostController extends AbstractController {
       handler.handle(Future.failedFuture(PasswordLostCode.EMAIL_REQUIRED.toString()));
     } else {
       IQuery<? extends IAuthenticatable> query = getNetRelay().getDatastore().createQuery(this.authenticatableCLass);
-      query.setSearchCondition(query.isEqual("email", email));
+      query.setSearchCondition(ISearchCondition.isEqual("email", email));
       QueryHelper.executeToList(query, qr -> {
         if (qr.failed()) {
           LOGGER.error("", qr.cause());

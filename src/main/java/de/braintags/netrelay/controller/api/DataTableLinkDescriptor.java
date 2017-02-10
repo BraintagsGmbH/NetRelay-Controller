@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.mapping.IField;
 import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
 import de.braintags.vertx.jomnigate.typehandler.ITypeHandler;
@@ -129,9 +130,9 @@ public class DataTableLinkDescriptor {
         Object value = thResult.result().getResult();
         if (value != null && value.hashCode() != 0) {
           if (allowContains(value)) {
-            query.setSearchCondition(query.contains(def.name, value));
+            query.setSearchCondition(ISearchCondition.contains(def.name, value));
           } else {
-            query.setSearchCondition(query.isEqual(def.name, value));
+            query.setSearchCondition(ISearchCondition.isEqual(def.name, value));
           }
         }
         if (def.sortable) {

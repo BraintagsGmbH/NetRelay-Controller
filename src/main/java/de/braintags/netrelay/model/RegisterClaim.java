@@ -13,6 +13,7 @@
 package de.braintags.netrelay.model;
 
 import de.braintags.netrelay.controller.authentication.RegisterController;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import io.vertx.core.http.HttpServerRequest;
 
 /**

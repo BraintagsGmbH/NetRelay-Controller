@@ -15,10 +15,10 @@ package de.braintags.netrelay.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.braintags.vertx.jomnigate.annotation.Entity;
-import de.braintags.vertx.jomnigate.annotation.field.Id;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.jomnigate.annotation.Entity;
+import de.braintags.vertx.jomnigate.annotation.field.Id;
 
 /**
  * Defines a member, which can be used inside a web application for authorization and authentication

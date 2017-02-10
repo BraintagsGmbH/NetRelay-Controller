@@ -14,11 +14,11 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
-import de.braintags.vertx.util.ResultObject;
 import de.braintags.netrelay.controller.api.DataTablesController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
+import de.braintags.vertx.jomnigate.testdatastore.DatastoreBaseTest;
+import de.braintags.vertx.util.ResultObject;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;

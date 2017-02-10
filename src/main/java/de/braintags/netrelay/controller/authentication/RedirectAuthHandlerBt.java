@@ -15,8 +15,8 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import de.braintags.vertx.util.security.CRUDPermissionMap;
 import de.braintags.netrelay.RequestUtil;
+import de.braintags.vertx.util.security.CRUDPermissionMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
