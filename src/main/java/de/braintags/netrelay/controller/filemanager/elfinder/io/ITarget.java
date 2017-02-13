@@ -61,6 +61,13 @@ public interface ITarget<T> {
   Path getPath();
 
   /**
+   * Get the relative path inside the volume
+   * 
+   * @return
+   */
+  String getRelativePath();
+
+  /**
    * Return the absolute path of the target as String
    * 
    * @return

@@ -45,6 +45,7 @@ public class VertxTarget implements ITarget<JsonObject> {
   private boolean isRoot = false;
   private FileProps fileProps;
   private String mimeType = null;
+  private String relativePath;
 
   /**
    * Create a new instance
@@ -78,12 +79,18 @@ public class VertxTarget implements ITarget<JsonObject> {
         throw new IllegalArgumentException(
             "path '" + path + "' is not a subpath of volume root " + volume.getRoot().getPath());
       }
+      this.relativePath = pathPath.substring(volumeRootPath.length() + 1);
     }
     this.isRoot = isRoot;
     if (path == null) {
       throw new IllegalArgumentException("Path must not be null");
     }
     this.path = path;
+  }
+
+  @Override
+  public String getRelativePath() {
+    return relativePath;
   }
 
   /*

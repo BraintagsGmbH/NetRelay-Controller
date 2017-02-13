@@ -77,4 +77,20 @@ public class JsTreeVolumeTest extends AbstractCaptureParameterTest {
 
   }
 
+  @Test
+  public void getRelativeChildPath(TestContext context) {
+    Path path = FileSystems.getDefault().getPath(ROOTDIR);
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
+    context.assertTrue(vv.getRoot().exists());
+    List<ITarget> children = vv.getRoot().listChildren();
+    context.assertFalse(children.isEmpty());
+    ITarget child = children.get(0);
+    String cp = child.getPath().toString();
+    String vp = vv.getRoot().getPath().toAbsolutePath().toString();
+    context.assertTrue(cp.startsWith(vp));
+
+    String rp = child.getRelativePath();
+    context.assertFalse(rp.startsWith(vp));
+  }
+
 }

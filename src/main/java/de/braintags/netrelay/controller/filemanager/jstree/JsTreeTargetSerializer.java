@@ -12,6 +12,8 @@
  */
 package de.braintags.netrelay.controller.filemanager.jstree;
 
+import java.util.List;
+
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
@@ -35,7 +37,7 @@ public class JsTreeTargetSerializer implements ITargetSerializer<JsonObject> {
   public static final String LI_ATTR = "li_attr";
   public static final String A_ATTR = "a_attr";
   public static final String CLASS = "class";
-  public static final String DATA_PAGE = "data_page";
+  public static final String DATA_PAGE = "data-page";
 
   public static final String CSS_SELECTABLE_PAGE = "selectable-page";
   public static final String CSS_NO_SELECTABLE_PAGE = "no-selectable-page";
@@ -62,25 +64,33 @@ public class JsTreeTargetSerializer implements ITargetSerializer<JsonObject> {
    */
   @Override
   public JsonObject serialize(ElFinderContext efContext, ITarget<JsonObject> target) {
-    JsonObject info = new JsonObject();
-    info.put(ID, target.getHash());
-    info.put(TEXT, target.getName());
+    return createInfo(efContext, target, true);
+  }
 
+  private JsonObject createInfo(ElFinderContext efContext, ITarget<JsonObject> target, boolean addChildren) {
+    JsonObject jo = new JsonObject();
+    jo.put(ID, target.getHash());
     if (target.isRoot()) {
-      info.put(TEXT, target.getVolume().getAlias());
+      jo.put(TEXT, target.getVolume().getAlias());
     } else {
-      info.put(TEXT, target.getName());
+      jo.put(TEXT, target.getName());
     }
-
-    JsonArray array = new JsonArray();
-    if (target.isFolder()) {
-      target.listChildren().forEach(t -> array.add(new JsonObject().put(TEXT, t.getName())));
-      info.put(CHILDREN, array);
+    if (addChildren && target.isFolder()) {
+      JsonArray array = new JsonArray();
+      List<ITarget> childTargets = target.listChildren();
+      for (ITarget<JsonObject> ct : childTargets) {
+        array.add(createInfo(efContext, ct, false));
+      }
+      jo.put(CHILDREN, array);
     }
+    addA_Attributes(jo, target);
+    if (addChildren) {
+      addFurtherAttributes(efContext, jo, target);
+    }
+    return jo;
+  }
 
-    info.put(A_ATTR, new JsonObject().put(CLASS, target.isFolder() ? CSS_NO_SELECTABLE_PAGE : CSS_SELECTABLE_PAGE)
-        .put(DATA_PAGE, target.getAbsolutePath()));
-
+  private void addFurtherAttributes(ElFinderContext efContext, JsonObject info, ITarget<JsonObject> target) {
     info.put(ElFinderConstants.ELFINDER_PARAMETER_MIME, target.getMimeType());
     info.put(ElFinderConstants.ELFINDER_PARAMETER_TIMESTAMP, target.getLastModified());
     info.put(ElFinderConstants.ELFINDER_PARAMETER_SIZE, target.getSize());
@@ -101,7 +111,12 @@ public class JsTreeTargetSerializer implements ITargetSerializer<JsonObject> {
       info.put(ElFinderConstants.ELFINDER_PARAMETER_HAS_DIR, target.hasChildFolder()
           ? ElFinderConstants.ELFINDER_TRUE_RESPONSE : ElFinderConstants.ELFINDER_FALSE_RESPONSE);
     }
-    return info;
+  }
+
+  private void addA_Attributes(JsonObject jo, ITarget<JsonObject> target) {
+    String path = target.getPath().toString();
+    jo.put(A_ATTR, new JsonObject().put(CLASS, target.isFolder() ? CSS_NO_SELECTABLE_PAGE : CSS_SELECTABLE_PAGE)
+        .put(DATA_PAGE, target.getRelativePath()));
   }
 
   /*

@@ -457,6 +457,12 @@ public class JsTreeControllerTest extends AbstractCaptureParameterTest {
         JsonObject reply = new JsonObject(resp.content);
         context.assertTrue(reply.containsKey("api"), "api key not contained");
         context.assertTrue(reply.containsKey("files"), "files key not contained");
+        context.assertTrue(reply.containsKey("cwd"), "cwd key not contained");
+
+        Object cwd = reply.getValue("cwd");
+        // JsonArray cwd = reply.getJsonArray("cwd");
+        LOGGER.info("CWD: " + cwd);
+        // context.assertEquals(1, cwd.size(), "only one root expected");
 
       }, 200, "OK", null);
     } catch (Exception e) {
