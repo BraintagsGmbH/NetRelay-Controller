@@ -39,7 +39,7 @@ public class CommandFactory {
     try {
       command = commandMap.get(commandName);
       if (command == null) {
-        command = (ICommand) Class.forName(generateCommandClassName(commandName)).newInstance();
+        command = generateCommand(commandName);
         if (commandListenerMap.containsKey(commandName)) {
           command.addListener(commandListenerMap.get(commandName));
         }
@@ -67,8 +67,26 @@ public class CommandFactory {
     }
   }
 
-  protected String generateCommandClassName(String commandName) {
+  @SuppressWarnings("unchecked")
+  protected ICommand generateCommand(String commandName)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException {
     String packageName = getClass().getPackage().getName();
+    Class<? extends ICommand> commandClass = null;
+    try {
+      String commandClassName = generateCommandClassName(packageName, commandName);
+      commandClass = (Class<? extends ICommand>) Class.forName(commandClassName);
+    } catch (ClassNotFoundException e) {
+      // extending class of CommandFactory: command not found
+      LOGGER.warn(e);
+    }
+    if (commandClass == null) {
+      commandClass = (Class<? extends ICommand>) Class.forName(
+          generateCommandClassName("de.braintags.netrelay.controller.filemanager.elfinder.command", commandName));
+    }
+    return commandClass.newInstance();
+  }
+
+  protected String generateCommandClassName(String packageName, String commandName) {
     String simpleName = commandName.substring(0, 1).toUpperCase() + commandName.substring(1);
     return String.format(CLASSNAME_PATTERN, packageName, simpleName);
   }

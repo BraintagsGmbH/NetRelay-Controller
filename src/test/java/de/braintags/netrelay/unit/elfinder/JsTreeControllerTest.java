@@ -32,7 +32,6 @@ import de.braintags.netrelay.util.MultipartUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 
@@ -431,9 +430,8 @@ public class JsTreeControllerTest extends AbstractCaptureParameterTest {
         LOGGER.info("RESPONSE: " + resp.content);
         LOGGER.info("HEADERS: " + resp.headers);
         context.assertFalse(resp.content.contains("error"));
-        JsonNode jo = Json.decodeValue(resp.content, JsonNode.class);
-        JsonNode files = jo.get("files");
-        JsonArray array = new JsonArray(files.toString());
+        JsonObject reply = new JsonObject(resp.content);
+        context.assertTrue(reply.containsKey("id"), "id key not contained");
 
       }, 200, "OK", null);
     } catch (Exception e) {
@@ -455,14 +453,7 @@ public class JsTreeControllerTest extends AbstractCaptureParameterTest {
         LOGGER.info("HEADERS: " + resp.headers);
         context.assertFalse(resp.content.contains("error"));
         JsonObject reply = new JsonObject(resp.content);
-        context.assertTrue(reply.containsKey("api"), "api key not contained");
-        context.assertTrue(reply.containsKey("files"), "files key not contained");
-        context.assertTrue(reply.containsKey("cwd"), "cwd key not contained");
-
-        Object cwd = reply.getValue("cwd");
-        // JsonArray cwd = reply.getJsonArray("cwd");
-        LOGGER.info("CWD: " + cwd);
-        // context.assertEquals(1, cwd.size(), "only one root expected");
+        context.assertTrue(reply.containsKey("id"), "id key not contained");
 
       }, 200, "OK", null);
     } catch (Exception e) {

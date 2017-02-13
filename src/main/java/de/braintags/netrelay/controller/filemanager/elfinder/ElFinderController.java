@@ -74,7 +74,8 @@ import io.vertx.ext.web.RoutingContext;
 public class ElFinderController extends AbstractController {
   private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
       .getLogger(ElFinderController.class);
-  private CommandFactory commandFactory = new CommandFactory();
+  protected CommandFactory commandFactory = new CommandFactory();
+
   /**
    * Defines the root directories as comma separated list, which shall be used for serving contents
    */
@@ -123,13 +124,13 @@ public class ElFinderController extends AbstractController {
     commandFactory.addCommandListener(command, listener);
   }
 
-  private void sendException(RoutingContext context, Throwable e) {
+  protected void sendException(RoutingContext context, Throwable e) {
     LOGGER.error("", e);
     String message = String.format(ElFinderConstants.ELFINDER_ERROR_EXCEPTION, e.toString());
     sendJson(context, message);
   }
 
-  private ElFinderContext createContext(RoutingContext context) {
+  protected ElFinderContext createContext(RoutingContext context) {
     return new ElFinderContext(context, rootVolumes);
   }
 

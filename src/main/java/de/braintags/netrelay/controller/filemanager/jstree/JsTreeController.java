@@ -16,6 +16,7 @@ import java.nio.file.Path;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume;
+import de.braintags.netrelay.controller.filemanager.jstree.command.JsCommandFactory;
 import io.vertx.core.file.FileSystem;
 
 /**
@@ -63,6 +64,10 @@ import io.vertx.core.file.FileSystem;
  * 
  */
 public class JsTreeController extends ElFinderController {
+
+  public JsTreeController() {
+    this.commandFactory = new JsCommandFactory();
+  }
 
   /*
    * (non-Javadoc)
