@@ -67,7 +67,7 @@ public class JsTreeTargetSerializer implements ITargetSerializer<JsonObject> {
     return createInfo(efContext, target, true);
   }
 
-  private JsonObject createInfo(ElFinderContext efContext, ITarget<JsonObject> target, boolean addChildren) {
+  private JsonObject createInfo(ElFinderContext efContext, ITarget<JsonObject> target, boolean addChildNames) {
     JsonObject jo = new JsonObject();
     jo.put(ID, target.getHash());
     if (target.isRoot()) {
@@ -75,16 +75,20 @@ public class JsTreeTargetSerializer implements ITargetSerializer<JsonObject> {
     } else {
       jo.put(TEXT, target.getName());
     }
-    if (addChildren && target.isFolder()) {
-      JsonArray array = new JsonArray();
-      List<ITarget> childTargets = target.listChildren();
-      for (ITarget<JsonObject> ct : childTargets) {
-        array.add(createInfo(efContext, ct, false));
+    if (target.isFolder()) {
+      if (addChildNames) {
+        JsonArray array = new JsonArray();
+        List<ITarget> childTargets = target.listChildren();
+        for (ITarget<JsonObject> ct : childTargets) {
+          array.add(createInfo(efContext, ct, false));
+        }
+        jo.put(CHILDREN, array);
+      } else {
+        jo.put(CHILDREN, target.hasChildren());
       }
-      jo.put(CHILDREN, array);
     }
     addA_Attributes(jo, target);
-    if (addChildren) {
+    if (addChildNames) {
       addFurtherAttributes(efContext, jo, target);
     }
     return jo;
