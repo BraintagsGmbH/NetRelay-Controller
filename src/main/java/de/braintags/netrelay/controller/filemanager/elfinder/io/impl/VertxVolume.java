@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITarget;
 import de.braintags.netrelay.controller.filemanager.elfinder.io.ITargetSerializer;
@@ -43,22 +44,26 @@ public class VertxVolume implements IVolume<JsonObject> {
   private String volumeId;
   private String alias;
   private ITargetSerializer<JsonObject> serializer;
+  private List<Pattern> ignorePatterns = new ArrayList<>();
 
   public VertxVolume(FileSystem fs, String rootDir, String volumeId, String alias,
       ITargetSerializer<JsonObject> serializer) {
-    this(fs, FileSystems.getDefault().getPath(rootDir), volumeId, alias, serializer);
+    this(fs, FileSystems.getDefault().getPath(rootDir), volumeId, alias, serializer, null);
   }
 
   /**
    * 
    */
   public VertxVolume(FileSystem fs, Path rootDir, String volumeId, String alias,
-      ITargetSerializer<JsonObject> serializer) {
+      ITargetSerializer<JsonObject> serializer, List<String> ignores) {
     this.fs = fs;
     this.rootDir = new VertxTarget(this, rootDir, true);
     this.volumeId = volumeId;
     this.alias = alias == null ? volumeId : alias;
     this.serializer = serializer;
+    if (ignores != null) {
+      ignores.forEach(pat -> ignorePatterns.add(Pattern.compile(pat)));
+    }
   }
 
   /*
@@ -210,6 +215,13 @@ public class VertxVolume implements IVolume<JsonObject> {
   @Override
   public ITargetSerializer<JsonObject> getTargetSerializer() {
     return serializer;
+  }
+
+  /**
+   * @return the ignores
+   */
+  public List<Pattern> getIgnores() {
+    return ignorePatterns;
   }
 
 }

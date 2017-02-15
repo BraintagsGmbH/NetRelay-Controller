@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.tika.Tika;
 
@@ -226,9 +227,34 @@ public class VertxTarget implements ITarget<JsonObject> {
     }
     List<String> childList = volume.getFileSystem().readDirBlocking(getAbsolutePath());
     List<ITarget> targetList = new ArrayList<>();
-    childList.forEach(sub -> targetList.add(getVolume().fromPath(path.resolve(sub))));
+    for (String child : childList) {
+      Path tmpPath = path.resolve(child);
+      if (!toSuppress(tmpPath)) {
+        targetList.add(getVolume().fromPath(tmpPath));
+      }
+    }
     targetList.forEach(target -> ((VertxTarget) target).loadDetails());
     return targetList;
+  }
+
+  /**
+   * Files and directories are displayed, if we are not inside aroot directory or if we are in root and the file is not
+   * defined to be excluded
+   * 
+   * @param fileName
+   * @return
+   */
+  private boolean toSuppress(Path path) {
+    if (volume.getIgnores() == null || volume.getIgnores().isEmpty()) {
+      return Boolean.FALSE;
+    } else {
+      for (Pattern p : volume.getIgnores()) {
+        if (p.matcher(path.toString()).matches()) {
+          return Boolean.TRUE;
+        }
+      }
+    }
+    return Boolean.FALSE;
   }
 
   @Override

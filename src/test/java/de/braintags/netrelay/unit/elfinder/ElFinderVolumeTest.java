@@ -15,6 +15,7 @@ package de.braintags.netrelay.unit.elfinder;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -39,15 +40,45 @@ public class ElFinderVolumeTest extends AbstractCaptureParameterTest {
 
   public static final String ROOTDIR = "webroot";
 
+  /**
+   * check webroot and ignore directory "images"
+   * 
+   * @param context
+   */
   @Test
-  public void testVolume(TestContext context) {
+  public void testVolumeIgnore(TestContext context) {
+    List<String> ignores = Arrays.asList(".*/demofolder");
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer(), ignores);
     context.assertTrue(vv.getRoot().exists());
     LOGGER.debug("DIRECTORY: " + vv.getRoot().toString());
     List<IVolume> rootVolumes = new ArrayList<>();
     rootVolumes.add(vv);
-    ElFinderContext efContext = new ElFinderContext(null, rootVolumes);
+    ElFinderContext efContext = new ElFinderContext(null, rootVolumes, ignores);
+
+    List<ITarget> children = vv.getRoot().listChildren();
+    int count = (int) children.stream().filter(target -> target.getName().equals("images")).count();
+    context.assertEquals(1, count);
+
+    // check manually the existence of the directory "demofolder"
+    ITarget sub = vv.fromPath("demofolder");
+    String subPath = sub.getAbsolutePath();
+    context.assertTrue(sub.exists());
+    // check that directory is suppressed in child output
+    count = (int) children.stream().filter(target -> target.getName().equals("demofolder")).count();
+    context.assertEquals(0, count);
+
+  }
+
+  @Test
+  public void testVolume(TestContext context) {
+    Path path = FileSystems.getDefault().getPath(ROOTDIR);
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer(), null);
+    context.assertTrue(vv.getRoot().exists());
+    LOGGER.debug("DIRECTORY: " + vv.getRoot().toString());
+    List<IVolume> rootVolumes = new ArrayList<>();
+    rootVolumes.add(vv);
+    ElFinderContext efContext = new ElFinderContext(null, rootVolumes, null);
     ITarget sub = vv.fromPath("images");
     String subPath = sub.getAbsolutePath();
     String rootPath = vv.getRoot().getAbsolutePath();
@@ -70,7 +101,7 @@ public class ElFinderVolumeTest extends AbstractCaptureParameterTest {
   @Test
   public void listChildren(TestContext context) {
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer(), null);
     context.assertTrue(vv.getRoot().exists());
     vv.getRoot().listChildren();
 
@@ -79,7 +110,7 @@ public class ElFinderVolumeTest extends AbstractCaptureParameterTest {
   @Test
   public void getRelativeChildPath(TestContext context) {
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer(), null);
     context.assertTrue(vv.getRoot().exists());
     List<ITarget> children = vv.getRoot().listChildren();
     context.assertFalse(children.isEmpty());

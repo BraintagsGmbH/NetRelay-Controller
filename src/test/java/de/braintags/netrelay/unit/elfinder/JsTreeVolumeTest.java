@@ -43,12 +43,12 @@ public class JsTreeVolumeTest extends AbstractCaptureParameterTest {
   @Test
   public void testVolume(TestContext context) {
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer(), null);
     context.assertTrue(vv.getRoot().exists());
     LOGGER.debug("DIRECTORY: " + vv.getRoot().toString());
     List<IVolume> rootVolumes = new ArrayList<>();
     rootVolumes.add(vv);
-    ElFinderContext efContext = new ElFinderContext(null, rootVolumes);
+    ElFinderContext efContext = new ElFinderContext(null, rootVolumes, null);
     ITarget sub = vv.fromPath("images");
     String subPath = sub.getAbsolutePath();
     String rootPath = vv.getRoot().getAbsolutePath();
@@ -71,7 +71,7 @@ public class JsTreeVolumeTest extends AbstractCaptureParameterTest {
   @Test
   public void listChildren(TestContext context) {
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new JsTreeTargetSerializer());
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new JsTreeTargetSerializer(), null);
     context.assertTrue(vv.getRoot().exists());
     vv.getRoot().listChildren();
 
@@ -80,7 +80,7 @@ public class JsTreeVolumeTest extends AbstractCaptureParameterTest {
   @Test
   public void getRelativeChildPath(TestContext context) {
     Path path = FileSystems.getDefault().getPath(ROOTDIR);
-    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer());
+    VertxVolume vv = new VertxVolume(vertx.fileSystem(), path, "ROOTDIR", null, new TargetSerializer(), null);
     context.assertTrue(vv.getRoot().exists());
     List<ITarget> children = vv.getRoot().listChildren();
     context.assertFalse(children.isEmpty());

@@ -32,6 +32,9 @@ import io.vertx.core.file.FileSystem;
  * <LI>rootDirectories - defines directories to be used in the form of VolumeId:rootDirectory.
  * Note: the path of the defined root directory in the example above defines the name of the volume before the colon,
  * like it is displayed in the elfinder component.
+ * *
+ * <LI>{@value #IGNORES} used to define subfiles and directories, which shall be omitted. comma
+ * separated list of regex patterns
  * 
  * </UL>
  * <br>
@@ -77,7 +80,7 @@ public class JsTreeController extends ElFinderController {
    */
   @Override
   protected VertxVolume createVolume(FileSystem fs, String volumeId, Path path) {
-    return new VertxVolume(fs, path, volumeId, null, new JsTreeTargetSerializer());
+    return new VertxVolume(fs, path, volumeId, null, new JsTreeTargetSerializer(), ignores);
   }
 
 }

@@ -26,6 +26,7 @@ import de.braintags.netrelay.controller.filemanager.elfinder.io.impl.VertxVolume
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.model.Member;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.netrelay.routing.RouterDefinitions;
 import de.braintags.netrelay.unit.AbstractCaptureParameterTest;
 import de.braintags.netrelay.util.MultipartUtil;
 import io.vertx.core.buffer.Buffer;
@@ -68,18 +69,19 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void duplicateCommand(TestContext context) {
-    String fn = "file2Duplicate.txt";
-    String fnDuplicated = "file2Duplicate(1).txt";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
-    }
-    if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnDuplicated)) {
-      vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnDuplicated);
-    }
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
-    String url = API_ELFINDER + "?cmd=" + "duplicate&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
-        + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String fn = "file2Duplicate.txt";
+      String fnDuplicated = "file2Duplicate(1).txt";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
+      }
+      if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnDuplicated)) {
+        vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnDuplicated);
+      }
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+      String url = API_ELFINDER + "?cmd=" + "duplicate&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
+          + "&_=1475075436203";
       testRequest(context, HttpMethod.GET, url, req -> {
       }, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
@@ -99,17 +101,18 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void getCommand(TestContext context) {
-    // unimplemented as test yet
-    String fileContent = "content of a magic file";
-    String fn = "file2Open.txt";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
-    String url = API_ELFINDER + "?cmd=" + "get&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
-        + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      // unimplemented as test yet
+      String fileContent = "content of a magic file";
+      String fn = "file2Open.txt";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+      String url = API_ELFINDER + "?cmd=" + "get&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
+          + "&_=1475075436203";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -145,21 +148,23 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void putCommand(TestContext context) {
-    // target: ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290L2luZGV4Lmh0bWw_E
-    // content: testcontent um auch zu ändern to change
-
-    String fileContent = "content of a magic file";
-    String fn = "file2Open.txt";
-    String filePath = ROOT_DIR + "/" + fn;
-    if (vertx.fileSystem().existsBlocking(filePath)) {
-      vertx.fileSystem().deleteBlocking(filePath);
-    }
-
-    vertx.fileSystem().writeFileBlocking(filePath, Buffer.buffer(fileContent));
-    String editedContent = fileContent + " edited";
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
-    String url = API_ELFINDER;
     try {
+      resetRoutes(null);
+      // target:
+      // ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290L2luZGV4Lmh0bWw_E
+      // content: testcontent um auch zu ändern to change
+
+      String fileContent = "content of a magic file";
+      String fn = "file2Open.txt";
+      String filePath = ROOT_DIR + "/" + fn;
+      if (vertx.fileSystem().existsBlocking(filePath)) {
+        vertx.fileSystem().deleteBlocking(filePath);
+      }
+
+      vertx.fileSystem().writeFileBlocking(filePath, Buffer.buffer(fileContent));
+      String editedContent = fileContent + " edited";
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+      String url = API_ELFINDER;
       MultipartUtil mu = new MultipartUtil();
       mu.addFormField("cmd", "put");
       mu.addFormField(ElFinderConstants.ELFINDER_PARAMETER_TARGET, hash);
@@ -183,19 +188,20 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void renameCommand(TestContext context) {
-    String fn = "file2Rename.txt";
-    String fnRenamed = "fileRenamed.txt";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
-    }
-    if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnRenamed)) {
-      vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnRenamed);
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
-    String url = API_ELFINDER + "?cmd=" + "rename&name=" + fnRenamed + "&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET
-        + "=" + hash + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String fn = "file2Rename.txt";
+      String fnRenamed = "fileRenamed.txt";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
+      }
+      if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fnRenamed)) {
+        vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fnRenamed);
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+      String url = API_ELFINDER + "?cmd=" + "rename&name=" + fnRenamed + "&"
+          + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash + "&_=1475075436203";
       testRequest(context, HttpMethod.GET, url, req -> {
       }, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
@@ -225,11 +231,12 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void searchCommand(TestContext context) {
-    // http://localhost:8080/fileManager/api?cmd=search&q=some&target=ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290&_=1475659740124
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(ROOT_WEBROOT));
-    String url = API_ELFINDER + "?cmd=" + "search&q=some&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
-        + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      // http://localhost:8080/fileManager/api?cmd=search&q=some&target=ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290&_=1475659740124
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(ROOT_WEBROOT));
+      String url = API_ELFINDER + "?cmd=" + "search&q=some&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
+          + "&_=1475075436203";
       testRequest(context, HttpMethod.GET, url, req -> {
       }, resp -> {
         LOGGER.info("RESPONSE: " + resp.content);
@@ -244,16 +251,17 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void openFile(TestContext context) {
-    String fileContent = "content of a magic file";
-    String fn = "file2Open.txt";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
-    String url = API_ELFINDER + "?cmd=" + "file&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
-        + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String fileContent = "content of a magic file";
+      String fn = "file2Open.txt";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().writeFileBlocking(ROOT_DIR + "/" + fn, Buffer.buffer(fileContent));
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+      String url = API_ELFINDER + "?cmd=" + "file&" + ElFinderConstants.ELFINDER_PARAMETER_TARGET + "=" + hash
+          + "&_=1475075436203";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -270,15 +278,16 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void deleteFile(TestContext context) {
-    String fn = "file2Delete.txt";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
-    String url = API_ELFINDER + "?cmd=" + "rm&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
-        + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String fn = "file2Delete.txt";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+      String url = API_ELFINDER + "?cmd=" + "rm&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
+          + "&_=1475075436203";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -295,19 +304,20 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void deleteFullDirectory(TestContext context) {
-    String dir = "untertemp2DeleteFull";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + dir)) {
-      vertx.fileSystem().mkdirBlocking(ROOT_DIR + "/" + dir);
-    }
-    String fn = dir + "/myFile.txt";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(dir));
-    String url = API_ELFINDER + "?cmd=" + "rm&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
-        + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String dir = "untertemp2DeleteFull";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + dir)) {
+        vertx.fileSystem().mkdirBlocking(ROOT_DIR + "/" + dir);
+      }
+      String fn = dir + "/myFile.txt";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().createFileBlocking(ROOT_DIR + "/" + fn);
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(dir));
+      String url = API_ELFINDER + "?cmd=" + "rm&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "=" + hash
+          + "&_=1475075436203";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -325,15 +335,16 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void deleteDirectory(TestContext context) {
-    String fn = "untertemp2Delete";
-    if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().mkdirBlocking(ROOT_DIR + "/" + fn);
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
-    String url = API_ELFINDER + "?cmd=" + "rm&name=" + fn + "&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "="
-        + hash + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String fn = "untertemp2Delete";
+      if (!vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().mkdirBlocking(ROOT_DIR + "/" + fn);
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot().createChildTarget(fn));
+      String url = API_ELFINDER + "?cmd=" + "rm&name=" + fn + "&" + ElFinderConstants.ELFINDER_PARAMETER_TARGETS + "="
+          + hash + "&_=1475075436203";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -350,14 +361,15 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void createDirectory(TestContext context) {
-    String fn = "untertemp";
-    if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fn);
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot());
-    String url = API_ELFINDER + "?cmd=" + "mkdir&name=" + fn + "&target=" + hash + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String fn = "untertemp";
+      if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fn);
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot());
+      String url = API_ELFINDER + "?cmd=" + "mkdir&name=" + fn + "&target=" + hash + "&_=1475075436203";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -374,14 +386,15 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void createFile(TestContext context) {
-    String fn = "testfile.txt";
-    if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
-      vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fn);
-    }
-
-    String hash = ElFinderContext.getHash(getVolume().getRoot());
-    String url = API_ELFINDER + "?cmd=" + "mkfile&name=" + fn + "&target=" + hash + "&_=1475075436203";
     try {
+      resetRoutes(null);
+      String fn = "testfile.txt";
+      if (vertx.fileSystem().existsBlocking(ROOT_DIR + "/" + fn)) {
+        vertx.fileSystem().deleteBlocking(ROOT_DIR + "/" + fn);
+      }
+
+      String hash = ElFinderContext.getHash(getVolume().getRoot());
+      String url = API_ELFINDER + "?cmd=" + "mkfile&name=" + fn + "&target=" + hash + "&_=1475075436203";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -402,6 +415,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
         + "size&targets%5B0%5D=ROOTVOLUME_L1VzZXJzL21yZW1tZS93b3Jrc3BhY2UvdmVydHgvTmV0UmVsYXktQ29udHJvbGxlci93ZWJyb290L2ltYWdlcw_E_E&_=1475072637217";
 
     try {
+      resetRoutes(null);
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -419,10 +433,11 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void openSubDir(TestContext context) {
-    String hash = ElFinderContext.getHash(getVolume().getRoot());
-    String url = API_ELFINDER + "?cmd=open&target=" + hash + "&_=1475072637216";
 
     try {
+      resetRoutes(null);
+      String hash = ElFinderContext.getHash(getVolume().getRoot());
+      String url = API_ELFINDER + "?cmd=open&target=" + hash + "&_=1475072637216";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -442,9 +457,9 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
 
   @Test
   public void initialRequest(TestContext context) {
-    String url = API_ELFINDER + "?cmd=open&target=&init=1&tree=1&_=1474899867097";
-
     try {
+      resetRoutes(null);
+      String url = API_ELFINDER + "?cmd=open&target=&init=1&tree=1&_=1474899867097";
       MultipartUtil mu = new MultipartUtil();
       testRequest(context, HttpMethod.POST, url, req -> {
         mu.finish(req);
@@ -467,6 +482,20 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
       vol = new VertxVolume(vertx.fileSystem(), ROOT_DIR, VOLUME_ID, null, new TargetSerializer());
     }
     return vol;
+  }
+
+  private void resetRoutes(String ignores) throws Exception {
+    RouterDefinition def = defineRouterDefinition(ElFinderController.class, API_ELFINDER);
+    def.getHandlerProperties().put(ElFinderController.ROOT_DIRECTORIES_PROPERTY, VOLUME_ID + ":" + ROOT_DIR);
+    if (ignores == null) {
+      def.getHandlerProperties().remove(ElFinderController.IGNORES);
+    } else {
+      def.getHandlerProperties().put(ElFinderController.IGNORES, ignores);
+    }
+
+    RouterDefinitions defs = netRelay.getSettings().getRouterDefinitions();
+    defs.addOrReplace(def);
+    netRelay.resetRoutes();
   }
 
   /*

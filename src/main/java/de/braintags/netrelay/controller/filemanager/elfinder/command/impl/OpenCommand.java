@@ -44,6 +44,7 @@ public class OpenCommand extends AbstractCommand<Map<String, ITarget>> {
    * @param json
    * @return
    */
+  @SuppressWarnings({ "rawtypes", "deprecation" })
   protected Map<String, ITarget> fillJsonObject(ElFinderContext efContext, JsonObject json) {
     RoutingContext context = efContext.getRoutingContext();
     boolean init = context.request().getParam(ElFinderConstants.ELFINDER_PARAMETER_INIT) != null;

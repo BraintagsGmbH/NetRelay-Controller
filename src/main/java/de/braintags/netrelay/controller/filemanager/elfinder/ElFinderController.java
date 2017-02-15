@@ -15,6 +15,7 @@ package de.braintags.netrelay.controller.filemanager.elfinder;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -39,8 +40,9 @@ import io.vertx.ext.web.RoutingContext;
  * <UL>
  * <LI>rootDirectories - defines directories to be used in the form of VolumeId:rootDirectory.
  * Note: the path of the defined root directory in the example above defines the name of the volume before the colon,
- * like it is displayed in the elfinder component.
- * 
+ * like it is displayed in the elfinder component. comma separated list
+ * <LI>{@value #IGNORES} used to define subfiles and directories, which shall be omitted. comma
+ * separated list of regex patterns
  * </UL>
  * <br>
  * 
@@ -81,7 +83,13 @@ public class ElFinderController extends AbstractController {
    */
   public static final String ROOT_DIRECTORIES_PROPERTY = "rootDirectories";
 
+  /**
+   * used to define subfiles and directories of the root directory, which shall be omitted
+   */
+  public static final String IGNORES = "ignores";
+
   private List<IVolume> rootVolumes = new ArrayList<>();
+  protected List<String> ignores;
 
   /*
    * (non-Javadoc)
@@ -131,7 +139,7 @@ public class ElFinderController extends AbstractController {
   }
 
   protected ElFinderContext createContext(RoutingContext context) {
-    return new ElFinderContext(context, rootVolumes);
+    return new ElFinderContext(context, rootVolumes, ignores);
   }
 
   /*
@@ -141,6 +149,11 @@ public class ElFinderController extends AbstractController {
    */
   @Override
   public void initProperties(Properties properties) {
+    String ign = readProperty(IGNORES, null, false);
+    if (ign != null) {
+      String[] arr = ign.split(",");
+      ignores = Arrays.asList(arr);
+    }
     String dirs = readProperty(ROOT_DIRECTORIES_PROPERTY, null, true);
     String[] volSpecs = dirs.split(",");
     for (String volSpec : volSpecs) {
@@ -158,6 +171,7 @@ public class ElFinderController extends AbstractController {
       }
       rootVolumes.add(createVolume(fs, volumeId, path));
     }
+
   }
 
   /**
@@ -167,7 +181,7 @@ public class ElFinderController extends AbstractController {
    * @return
    */
   protected VertxVolume createVolume(FileSystem fs, String volumeId, Path path) {
-    return new VertxVolume(fs, path, volumeId, null, new TargetSerializer());
+    return new VertxVolume(fs, path, volumeId, null, new TargetSerializer(), ignores);
   }
 
 }

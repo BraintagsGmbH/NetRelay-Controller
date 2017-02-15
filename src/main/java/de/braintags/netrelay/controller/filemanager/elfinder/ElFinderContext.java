@@ -32,15 +32,21 @@ public class ElFinderContext {
 
   private RoutingContext routingContext;
   private List<IVolume> rootVolumes;
+  private List<String> ignores;
 
   /**
    * 
    * @param context
+   *          the routing context to be used
    * @param rootVolumes
+   *          the defined volumes to be used
+   * @param ignores
+   *          list of filenames, which shall be ignored at first level of the root
    */
-  public ElFinderContext(RoutingContext context, List<IVolume> rootVolumes) {
+  public ElFinderContext(RoutingContext context, List<IVolume> rootVolumes, List<String> ignores) {
     this.routingContext = context;
     this.rootVolumes = rootVolumes;
+    this.ignores = ignores;
   }
 
   public RoutingContext getRoutingContext() {
@@ -155,6 +161,13 @@ public class ElFinderContext {
    */
   public List<String> getParameterValues(String parameter) {
     return routingContext.request().params().getAll(parameter);
+  }
+
+  /**
+   * @return the ignores
+   */
+  public List<String> getIgnores() {
+    return ignores;
   }
 
 }
