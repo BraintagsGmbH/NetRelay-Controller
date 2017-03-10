@@ -84,6 +84,16 @@ public abstract class AbstractAuthProviderController extends AbstractController 
   public static final String AUTH_PROVIDER_DATASTORE = "AuthProviderDatastore";
 
   /**
+   * Used if a custom {@link AuthProvider} should be used
+   */
+  public static final String AUTH_PROVIDER_CUSTOM = "CustomAuthProvider";
+  /**
+   * Property for the class name that implements CustomAuthProvider if the configured provider is
+   * {@link #AUTH_PROVIDER_CUSTOM}
+   */
+  public static final String AUTH_PROVIDER_CUSTOM_CLASS = "CustomAuthProviderClass";
+
+  /**
    * The name of the key, which is used, to store the name of the mapper in the {@link User#principal()}
    */
   public static final String MAPPERNAME_IN_PRINCIPAL = "mapper";
@@ -114,13 +124,23 @@ public abstract class AbstractAuthProviderController extends AbstractController 
     return authProvider;
   }
 
-  protected AuthProviderProxy createAuthProvider(Properties properties) {
+  protected AuthProvider createAuthProvider(Properties properties) {
     String tmpAuthProvider = readProperty(AUTH_PROVIDER_PROP, AUTH_PROVIDER_DATASTORE, false);
-    String mapper = readProperty(MongoAuth.PROPERTY_COLLECTION_NAME, null, true);
     if (tmpAuthProvider.equals(AUTH_PROVIDER_MONGO)) {
+      String mapper = readProperty(MongoAuth.PROPERTY_COLLECTION_NAME, null, true);
       return new AuthProviderProxy(initMongoAuthProvider(mapper), mapper);
     } else if (tmpAuthProvider.equals(AUTH_PROVIDER_DATASTORE)) {
+      String mapper = readProperty(MongoAuth.PROPERTY_COLLECTION_NAME, null, true);
       return new AuthProviderProxy(initDatastoreAuthProvider(mapper), mapper);
+    } else if (tmpAuthProvider.equals(AUTH_PROVIDER_CUSTOM)) {
+      String className = readProperty(AUTH_PROVIDER_CUSTOM_CLASS, null, true);
+      try {
+        CustomAuthProvider provider = (CustomAuthProvider) Class.forName(className).newInstance();
+        provider.init(properties, getNetRelay().getVertx());
+        return provider;
+      } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+        throw new InitException("Could not create custom auth provider " + className, e);
+      }
     } else {
       throw new UnsupportedOperationException("unsupported authprovider: " + tmpAuthProvider);
     }

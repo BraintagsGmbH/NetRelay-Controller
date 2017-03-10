@@ -327,7 +327,8 @@ public class RegisterController extends AbstractAuthProviderController {
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
     IQuery<RegisterClaim> query = getNetRelay().getDatastore().createQuery(RegisterClaim.class);
-    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
+    query.setSearchCondition(
+        ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
     QueryHelper.executeToList(query, qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
@@ -557,7 +558,7 @@ public class RegisterController extends AbstractAuthProviderController {
   }
 
   @Override
-  protected AuthProviderProxy createAuthProvider(Properties properties) {
+  protected AuthProvider createAuthProvider(Properties properties) {
     String tmpAuthProvider = readProperty(AUTH_PROVIDER_PROP, null, false);
     if (tmpAuthProvider != null) {
       return super.createAuthProvider(properties);
