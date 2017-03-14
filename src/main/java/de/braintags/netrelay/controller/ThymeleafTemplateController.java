@@ -20,6 +20,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.netrelay.templateengine.thymeleaf.ThymeleafTemplateEngineImplBt;
 import de.braintags.vertx.util.exception.InitException;
+import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.TemplateHandler;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
@@ -42,10 +43,10 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
  * <br/>
  * Result-Parameter:<br/>
  * <br/>
- * 
- * 
+ *
+ *
  * Example configuration:<br/>
- * 
+ *
  * <pre>
   {
       "name" : "ThymeleafTemplateController",
@@ -58,8 +59,8 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
       }
     }
  * </pre>
- * 
- * 
+ *
+ *
  * @author Michael Remme
  */
 public class ThymeleafTemplateController extends AbstractController {
@@ -114,7 +115,7 @@ public class ThymeleafTemplateController extends AbstractController {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
@@ -134,19 +135,21 @@ public class ThymeleafTemplateController extends AbstractController {
   @Override
   public void initProperties(Properties properties) {
     LOGGER.info("init " + getName());
-    ThymeleafTemplateEngine thEngine = createTemplateEngine(properties);
+    ThymeleafTemplateEngine thEngine = createTemplateEngine(getNetRelay().getVertx(), properties);
     templateHandler = TemplateHandler.create(thEngine, getTemplateDirectory(properties), getContentType(properties));
   }
 
   /**
    * Creates a ThymeleafEngine by using the defined properties
-   * 
+   *
    * @param properties
    * @return
    */
-  public static ThymeleafTemplateEngine createTemplateEngine(Properties properties) {
+  public static ThymeleafTemplateEngine createTemplateEngine(Vertx vertx, Properties properties) {
+
     boolean multiPath = Boolean.valueOf((String) properties.getOrDefault(MULTIPATH_PROPERTY, "false"));
-    ThymeleafTemplateEngine thEngine = new ThymeleafTemplateEngineImplBt(multiPath, getTemplateDirectory(properties));
+    ThymeleafTemplateEngine thEngine = new ThymeleafTemplateEngineImplBt(vertx, multiPath,
+        getTemplateDirectory(properties));
     String tms = properties.getProperty(TEMPLATE_MODE_PROPERTY, ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE.name());
     TemplateMode tm = TemplateMode.valueOf(tms);
     thEngine.setMode(tm);
@@ -179,7 +182,7 @@ public class ThymeleafTemplateController extends AbstractController {
 
   /**
    * Get the info about the defined template directory in the properties
-   * 
+   *
    * @param props
    *          the configuration
    * @return the defined value inside the properties or {@value #DEFAULT_TEMPLATE_DIRECTORY}
@@ -198,7 +201,7 @@ public class ThymeleafTemplateController extends AbstractController {
 
   /**
    * Creates a default definition for the current instance
-   * 
+   *
    * @return
    */
   public static RouterDefinition createDefaultRouterDefinition() {
@@ -213,7 +216,7 @@ public class ThymeleafTemplateController extends AbstractController {
 
   /**
    * Get the default properties for an implementation of TemplateController
-   * 
+   *
    * @return
    */
   public static Properties getDefaultProperties() {
