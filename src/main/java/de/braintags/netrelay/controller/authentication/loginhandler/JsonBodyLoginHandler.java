@@ -21,6 +21,9 @@ public class JsonBodyLoginHandler extends AbstractLoginHandler {
    */
   @Override
   public void handle(RoutingContext context) {
+    if (!isInitialized())
+      throw new IllegalStateException("Can not handle request, this login handler was not initialized");
+
     HttpServerRequest req = context.request();
     if (req.method() != HttpMethod.POST) {
       context.fail(405); // Must be a POST

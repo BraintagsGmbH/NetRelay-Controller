@@ -38,16 +38,23 @@ import io.vertx.ext.mongo.MongoClient;
  * 
  * Config-Parameter:<br/>
  * possible parameters, which are read from the configuration
- * <UL>
- * <LI>{@value #AUTH_PROVIDER_PROP}
- * <LI>for {@link MongoAuth}, specific parameters for MongoAuth can be added, like
- * <UL>
- * <LI>{@link MongoAuth#PROPERTY_COLLECTION_NAME}
- * <LI>{@link MongoAuth#PROPERTY_PASSWORD_FIELD}
- * <LI>{@link MongoAuth#PROPERTY_USERNAME_FIELD}
- * <LI>{@link MongoAuth#PROPERTY_ROLE_FIELD}
- * </UL>
- * </UL>
+ * <ul>
+ * <li>{@value #AUTH_PROVIDER_PROP}</li>
+ * <ul>
+ * <li>for {@link MongoAuth}, specific parameters for MongoAuth can be added, like
+ * <ul>
+ * <li>{@link MongoAuth#PROPERTY_COLLECTION_NAME}</li>
+ * <li>{@link MongoAuth#PROPERTY_PASSWORD_FIELD}</li>
+ * <li>{@link MongoAuth#PROPERTY_USERNAME_FIELD}</li>
+ * <li>{@link MongoAuth#PROPERTY_ROLE_FIELD}</li>
+ * </ul>
+ * </li>
+ * <li>for {@value #AUTH_PROVIDER_CUSTOM}, the parameter {@value #AUTH_PROVIDER_CUSTOM_CLASS} must be filled with the
+ * class of the auth provider</li>
+ * </ul>
+ * <li>{@link #USERNAME_FIELD}</li>
+ * <li>{@link #PASSWORD_FIELD}</li>
+ * </ul>
  * <br>
  * 
  * Request-Parameter:<br/>
