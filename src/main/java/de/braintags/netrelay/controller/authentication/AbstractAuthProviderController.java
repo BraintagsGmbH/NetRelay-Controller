@@ -15,6 +15,7 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.Properties;
 
 import de.braintags.netrelay.controller.AbstractController;
+import de.braintags.netrelay.controller.authentication.authprovider.CustomAuthProvider;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.mapping.IField;
@@ -91,7 +92,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
    * Property for the class name that implements CustomAuthProvider if the configured provider is
    * {@link #AUTH_PROVIDER_CUSTOM}
    */
-  public static final String AUTH_PROVIDER_CUSTOM_CLASS = "CustomAuthProviderClass";
+  public static final String AUTH_PROVIDER_CUSTOM_CLASS = "customAuthProviderClass";
 
   /**
    * The name of the key, which is used, to store the name of the mapper in the {@link User#principal()}
@@ -102,6 +103,16 @@ public abstract class AbstractAuthProviderController extends AbstractController 
    * Defines the name of the {@link AuthProvider} to be used. Currently {@link #AUTH_PROVIDER_MONGO} is supported
    */
   public static final String AUTH_PROVIDER_PROP = "authProvider";
+
+  /**
+   * Defines the name of the parameter where the username is stored in a login request
+   */
+  public static final String USERNAME_FIELD = "usernameField";
+
+  /**
+   * Defines the name of the parameter where the password is stored in a login request
+   */
+  public static final String PASSWORD_FIELD = "passwordField";
 
   private static AuthProvider authProvider;
 
@@ -136,7 +147,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
       String className = readProperty(AUTH_PROVIDER_CUSTOM_CLASS, null, true);
       try {
         CustomAuthProvider provider = (CustomAuthProvider) Class.forName(className).newInstance();
-        provider.init(properties, getNetRelay().getVertx());
+        provider.init(properties, getNetRelay());
         return provider;
       } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
         throw new InitException("Could not create custom auth provider " + className, e);
@@ -169,7 +180,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
     config.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.valueOf(saltStyle));
     MongoAuth auth = MongoAuth.create((MongoClient) ((MongoDataStore) store).getClient(), config);
 
-    String passwordFieldName = readProperty(MongoAuth.PROPERTY_PASSWORD_FIELD, null, true);
+    String passwordFieldName = readProperty(PASSWORD_FIELD, null, true);
     Class mapperClass = getNetRelay().getSettings().getMappingDefinitions().getMapperClass(mapper);
     if (mapperClass == null) {
       throw new InitException("Could not find mapper with name " + mapper);
@@ -180,7 +191,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
       throw new InitException("MongoAuth does not support the annotation Encoder, please use DatastoreAuth instead");
     }
     auth.setPasswordField(passwordFieldName);
-    auth.setUsernameField(readProperty(MongoAuth.PROPERTY_USERNAME_FIELD, null, true));
+    auth.setUsernameField(readProperty(USERNAME_FIELD, null, true));
     auth.setCollectionName(mapper);
 
     String roleField = readProperty(MongoAuth.PROPERTY_ROLE_FIELD, null, false);

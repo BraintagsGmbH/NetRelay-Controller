@@ -16,11 +16,14 @@ import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.RequestUtil;
+import de.braintags.netrelay.controller.authentication.loginhandler.FormLoginHandlerBt;
+import de.braintags.netrelay.controller.authentication.loginhandler.LoginHandler;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.impl.DataStoreAuth;
 import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.util.exception.InitException;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.web.RoutingContext;
@@ -157,12 +160,6 @@ public class AuthenticationController extends AbstractAuthProviderController {
       .getLogger(AuthenticationController.class);
 
   /**
-   * If an error occurs during login, then the error is added into the context. With this parameter you can define the
-   * name of the parameter, by which it is added into the context.
-   */
-  public static final String AUTHENTICATION_ERROR_PARAM = "authenticationError";
-
-  /**
    * With this property the url for the login can be defined. It is the url, which is called by a login form and is a
    * virtual url, where the {@link FormLoginHandler} is processed. Default is "/member/login"
    */
@@ -183,6 +180,12 @@ public class AuthenticationController extends AbstractAuthProviderController {
    * the form login handler without being redirected here first. ( parameter used by FormLoginHandler )
    */
   public static final String DIRECT_LOGGED_IN_OK_URL_PROP = "directLoggedInOKURL";
+
+  /**
+   * If an error occurs during login, then the error is added into the context. With this parameter you can define the
+   * name of the parameter, by which it is added into the context.
+   */
+  public static final String AUTHENTICATION_ERROR_PARAM = "authenticationError";
 
   /**
    * The default url, where the login action is performed
@@ -221,6 +224,13 @@ public class AuthenticationController extends AbstractAuthProviderController {
   public static final String LOGIN_PAGE_PROP = "loginPage";
 
   /**
+   * The name of the property which defines the login page to parameter name where the redirect URL can be found.
+   * Depending on the configuration, a user will be redirected to a page found under this key after a successful login.
+   */
+  public static final String RETURN_URL_PARAM_PROP = "returnUrlParam";
+
+  public static final String LOGIN_HANDLER_CLASS_PROP = "loginHandlerClass";
+  /**
    * By this property the permissions can be defined, which are required inside the scope of the
    * AuthenticationController, which is defined by the routes.
    */
@@ -247,7 +257,7 @@ public class AuthenticationController extends AbstractAuthProviderController {
     loginPage = (String) properties.get(LOGIN_PAGE_PROP);
     setupAuthentication(properties, getAuthProvider());
     initUserSessionHandler();
-    initLoginAction();
+    initLoginAction(properties);
     initLogoutAction();
     initPermissions();
   }
@@ -295,22 +305,17 @@ public class AuthenticationController extends AbstractAuthProviderController {
 
   }
 
-  private void initLoginAction() {
+  private void initLoginAction(Properties properties) {
+    String loginHandlerClass = readProperty(LOGIN_HANDLER_CLASS_PROP, FormLoginHandlerBt.class.getName(), false);
+    LoginHandler loginHandler;
+    try {
+      loginHandler = (LoginHandler) Class.forName(loginHandlerClass).newInstance();
+    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+      throw new InitException("Error initializing login handler with class " + loginHandlerClass, e);
+    }
+    loginHandler.init(getAuthProvider(), properties);
     String loginUrl = readProperty(LOGIN_ACTION_URL_PROP, DEFAULT_LOGIN_ACTION_URL, false);
-    String directLoginUrl = readProperty(DIRECT_LOGGED_IN_OK_URL_PROP, null, false);
-    String authErrorParam = readProperty(AUTHENTICATION_ERROR_PARAM, null, false);
-
-    FormLoginHandlerBt fl = new FormLoginHandlerBt(getAuthProvider());
-    if (directLoginUrl != null) {
-      fl.setDirectLoggedInOKURL(directLoginUrl);
-    }
-    if (loginPage != null) {
-      fl.setLoginPage(loginPage);
-    }
-    if (authErrorParam != null) {
-      fl.setAuthenticationErrorParameter(authErrorParam);
-    }
-    getNetRelay().getRouter().route(loginUrl).handler(fl);
+    getNetRelay().getRouter().route(loginUrl).handler(loginHandler);
   }
 
   /**
@@ -352,7 +357,8 @@ public class AuthenticationController extends AbstractAuthProviderController {
       break;
 
     case REDIRECT:
-      authHandler = new RedirectAuthHandlerBt(authProvider, loginPage, RedirectAuthHandler.DEFAULT_RETURN_URL_PARAM);
+      authHandler = new RedirectAuthHandlerBt(authProvider, loginPage,
+          properties.getProperty(RETURN_URL_PARAM_PROP, FormLoginHandler.DEFAULT_RETURN_URL_PARAM));
       break;
 
     default:

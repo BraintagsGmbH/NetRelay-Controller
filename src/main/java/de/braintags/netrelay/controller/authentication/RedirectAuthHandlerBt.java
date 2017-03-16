@@ -42,13 +42,14 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
   private static final Logger LOGGER = LoggerFactory.getLogger(RedirectAuthHandlerImpl.class);
 
   private final String loginRedirectURL;
-  private final String returnURLParam;
   private CRUDPermissionMap permissionMap;
 
-  public RedirectAuthHandlerBt(AuthProvider authProvider, String loginRedirectURL, String returnURLParam) {
+  private String returnUrlParam;
+
+  public RedirectAuthHandlerBt(AuthProvider authProvider, String loginRedirectURL, String returnUrlParam) {
     super(authProvider);
     this.loginRedirectURL = loginRedirectURL;
-    this.returnURLParam = returnURLParam;
+    this.returnUrlParam = returnUrlParam;
   }
 
   @Override
@@ -62,7 +63,7 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
       } else {
         // Now redirect to the login url - we'll get redirected back here after successful login
         String url = RequestUtil.createRedirectUrl(context, context.request().path());
-        session.put(returnURLParam, url);
+        session.put(returnUrlParam, url);
         context.response().putHeader("location", loginRedirectURL).setStatusCode(302).end();
       }
     } else {

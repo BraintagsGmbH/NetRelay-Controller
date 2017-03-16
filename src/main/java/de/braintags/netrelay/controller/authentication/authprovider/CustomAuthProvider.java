@@ -1,8 +1,9 @@
-package de.braintags.netrelay.controller.authentication;
+package de.braintags.netrelay.controller.authentication.authprovider;
 
 import java.util.Properties;
 
-import io.vertx.core.Vertx;
+import de.braintags.netrelay.NetRelay;
+import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import io.vertx.ext.auth.AuthProvider;
 
 /**
@@ -18,9 +19,9 @@ public interface CustomAuthProvider extends AuthProvider {
    * 
    * @param properties
    *          the controller properties
-   * @param vertx
-   *          the current vertx instance
+   * @param netRelay
+   *          the current NetRelay instance
    */
-  public void init(Properties properties, Vertx vertx);
+  public void init(Properties properties, NetRelay netRelay);
 
 }
