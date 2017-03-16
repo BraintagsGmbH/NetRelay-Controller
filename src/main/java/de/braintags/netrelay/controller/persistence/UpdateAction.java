@@ -57,8 +57,7 @@ public class UpdateAction extends InsertAction {
     String subEntityName = ip.getFieldPath();
     Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
     handleFileUploads(subEntityName, context, params);
-    NetRelayStoreObjectFactory nsf = (NetRelayStoreObjectFactory) getPersistenceController().getMapperFactory()
-        .getStoreObjectFactory();
+    NetRelayStoreObjectFactory nsf = getPersistenceController().getNetRelay().getStoreObjectFactory();
     nsf.createStoreObject(params, ip.getUpdateObject(), ip.getSubObjectMapper(), result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));

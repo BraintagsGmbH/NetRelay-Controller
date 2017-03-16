@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import de.braintags.netrelay.NetRelay;
 import de.braintags.vertx.jomnigate.dataaccess.query.IFieldValueResolver;
 import de.braintags.vertx.jomnigate.dataaccess.query.exception.VariableSyntaxException;
-import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
 import io.vertx.ext.web.RoutingContext;
 
@@ -167,7 +167,7 @@ public class ContextFieldValueResolver implements IFieldValueResolver {
       fieldName = path.substring(0, i);
     }
 
-    IField field = mapper.getField(fieldName);
+    IProperty field = mapper.getField(fieldName);
     Object fieldValue = field.getPropertyAccessor().readData(record);
     if (fieldValue != null && i > 0) {
       return extractMapperValue(path.substring(i + 1), fieldValue);

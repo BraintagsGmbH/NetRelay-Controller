@@ -18,7 +18,7 @@ import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.authentication.authprovider.CustomAuthProvider;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.jomnigate.IDataStore;
-import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.jomnigate.mongo.MongoDataStore;
 import de.braintags.vertx.util.exception.InitException;
@@ -186,7 +186,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
       throw new InitException("Could not find mapper with name " + mapper);
     }
     IMapper mapperDef = getNetRelay().getDatastore().getMapperFactory().getMapper(mapperClass);
-    IField pwField = mapperDef.getField(passwordFieldName);
+    IProperty pwField = mapperDef.getField(passwordFieldName);
     if (pwField.getEncoder() != null) {
       throw new InitException("MongoAuth does not support the annotation Encoder, please use DatastoreAuth instead");
     }

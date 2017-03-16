@@ -25,7 +25,7 @@ import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchConditionContainer;
-import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
 import de.braintags.vertx.util.assertion.Assert;
@@ -86,7 +86,7 @@ public class RecordContractor {
     if (index < 0) {
       DeleteParameter dp = new DeleteParameter();
       IMapper mapper = mapperFactory.getMapper(parent.getClass());
-      IField field = mapper.getField(extractEntityName(entityDef));
+      IProperty field = mapper.getField(extractEntityName(entityDef));
       dp.setParentCollection(readCollection(parent, field));
       dp.setDeleteObject(resolveNewParent(mapperFactory, parent, entityDef));
       return dp;
@@ -129,7 +129,7 @@ public class RecordContractor {
     if (index < 0) {
       InsertParameter ip = new InsertParameter();
       IMapper mapper = mapperFactory.getMapper(parent.getClass());
-      IField field = mapper.getField(extractEntityName(entityDef));
+      IProperty field = mapper.getField(extractEntityName(entityDef));
       ip.setParentCollection(readCollection(parent, field));
       ip.setSubObjectMapper(mapperFactory.getMapper(field.getSubClass()));
       ip.setUpdateObject(resolveNewParent(mapperFactory, parent, entityDef));
@@ -172,7 +172,7 @@ public class RecordContractor {
     if (index < 0) {
       InsertParameter ip = new InsertParameter();
       IMapper mapper = mapperFactory.getMapper(parent.getClass());
-      IField field = mapper.getField(entityDef);
+      IProperty field = mapper.getField(entityDef);
       ip.setParentCollection(readCollection(parent, field));
       ip.setSubObjectMapper(mapperFactory.getMapper(field.getSubClass()));
       return ip;
@@ -187,7 +187,7 @@ public class RecordContractor {
     List<String[]> ids = extractIds(objectReference);
     String fieldName = extractEntityName(objectReference);
     IMapper mapper = mapperFactory.getMapper(parent.getClass());
-    IField field = mapper.getField(fieldName);
+    IProperty field = mapper.getField(fieldName);
     Collection<?> collection = readCollection(parent, field);
     if (collection == null || collection.isEmpty()) {
       throw new NullPointerException("Could not find expected collection for object reference " + objectReference);
@@ -203,7 +203,7 @@ public class RecordContractor {
 
   private static boolean doesObjectFit(IMapper subMapper, List<String[]> ids, Object object) {
     for (String[] idDef : ids) {
-      IField fieldDef = subMapper.getField(idDef[0]);
+      IProperty fieldDef = subMapper.getField(idDef[0]);
       if (fieldDef == null) {
         throw new FieldNotFoundException(subMapper, idDef[0]);
       }
@@ -217,7 +217,7 @@ public class RecordContractor {
     return true;
   }
 
-  private static Collection<?> readCollection(Object parent, IField field) {
+  private static Collection<?> readCollection(Object parent, IProperty field) {
     if (!field.isCollection()) {
       throw new UnsupportedOperationException(
           "autmatic filling of subobjects is working only with fields, which are of type Collection");
@@ -317,7 +317,7 @@ public class RecordContractor {
     String mapperSpec = getEntityDefiniton(map);
     List<String[]> ids = extractIds(mapperSpec);
     for (String[] id : ids) {
-      IField field = mapper.getField(id[0]);
+      IProperty field = mapper.getField(id[0]);
       if (field == null) {
         throw new FieldNotFoundException(mapper, id[0]);
       }
@@ -415,7 +415,7 @@ public class RecordContractor {
    * @return
    */
   public static final String createIdReference(IMapper mapper, Object record) {
-    IField idField = mapper.getIdField();
+    IProperty idField = mapper.getIdField();
     Object id = idField.getPropertyAccessor().readData(record);
     Assert.notNull("id", id);
     return OPEN_BRACKET + idField.getName() + ID_SPLIT + id + CLOSE_BRACKET;

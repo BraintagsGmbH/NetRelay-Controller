@@ -23,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
-import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
 import de.braintags.vertx.jomnigate.typehandler.ITypeHandler;
 import io.vertx.core.AsyncResult;
@@ -121,7 +121,7 @@ public class DataTableLinkDescriptor {
   @SuppressWarnings({ "rawtypes" })
   private Future handleColumn(IQuery<?> query, IMapperFactory mf, ColDef def) {
     Future f = Future.future();
-    IField field = mf.getMapper(mapperClass).getField(def.name);
+    IProperty field = mf.getMapper(mapperClass).getField(def.name);
     ITypeHandler th = field.getTypeHandler();
     th.fromStore(def.searchValue, field, null, thResult -> {
       if (thResult.failed()) {

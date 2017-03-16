@@ -433,10 +433,9 @@ public class RegisterController extends AbstractAuthProviderController {
 
   @SuppressWarnings({ "unchecked" })
   private void toAuthenticatable(RoutingContext context, RegisterClaim rc, Handler<AsyncResult<Void>> handler) {
-    NetRelayMapperFactory mapperFactory = (NetRelayMapperFactory) getNetRelay().getNetRelayMapperFactory();
     Map<String, String> props = extractPropertiesFromMap(mapper.getMapperClass().getSimpleName(),
         rc.getRequestParameter());
-    IStoreObjectFactory<Map<String, String>> sf = mapperFactory.getStoreObjectFactory();
+    IStoreObjectFactory<Map<String, String>> sf = getNetRelay().getStoreObjectFactory();
     sf.createStoreObject(props, mapper, result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));
@@ -550,7 +549,7 @@ public class RegisterController extends AbstractAuthProviderController {
     } catch (ClassNotFoundException e) {
       throw new InitException(e);
     }
-    NetRelayMapperFactory mapperFactory = (NetRelayMapperFactory) getNetRelay().getNetRelayMapperFactory();
+    NetRelayMapperFactory mapperFactory = getNetRelay().getNetRelayMapperFactory();
     mapper = mapperFactory.getMapper(authenticatableCLass);
     super.initProperties(properties);
     allowDuplicateEmail = Boolean.valueOf(readProperty(ALLOW_DUPLICATION_EMAIL_PROP, "false", false));
