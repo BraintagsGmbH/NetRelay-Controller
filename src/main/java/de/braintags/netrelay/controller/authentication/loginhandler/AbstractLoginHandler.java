@@ -48,6 +48,8 @@ public abstract class AbstractLoginHandler implements LoginHandler {
   protected String directLoggedInOKURL;
   protected String returnURLParam;
 
+  private boolean initialized = false;
+
   @Override
   public void init(AuthProvider authProvider, Properties properties) {
     this.authProvider = authProvider;
@@ -57,6 +59,7 @@ public abstract class AbstractLoginHandler implements LoginHandler {
     this.directLoggedInOKURL = properties.getProperty(AuthenticationController.DIRECT_LOGGED_IN_OK_URL_PROP, null);
     this.returnURLParam = properties.getProperty(AuthenticationController.RETURN_URL_PARAM_PROP,
         RedirectAuthHandler.DEFAULT_RETURN_URL_PARAM);
+    initialized = true;
   }
 
   protected void authenticate(JsonObject authInfo, String customRedirectUrl, RoutingContext context) {
@@ -116,6 +119,10 @@ public abstract class AbstractLoginHandler implements LoginHandler {
       return true;
     }
     return false;
+  }
+
+  public boolean isInitialized() {
+    return initialized;
   }
 
 }

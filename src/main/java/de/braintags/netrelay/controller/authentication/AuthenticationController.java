@@ -89,14 +89,18 @@ import io.vertx.ext.web.handler.UserSessionHandler;
  * Possible values are:
  * {@link AuthHandlerEnum#BASIC}, {@link AuthHandlerEnum#REDIRECT}
  * <LI>{@value #PERMISSIONS_PROP}
+ * <LI>{@value #LOGIN_HANDLER_CLASS_PROP} the class of the login handler to use, defaults to {@link FormLoginHandler}
  * <LI>additionally add the properties of {@link AbstractAuthProviderController}
  * </UL>
  * <br>
  * Request-Parameter:<br/>
  * <br/>
  * Result-Parameter:<br/>
- * {@value #AUTHENTICATION_ERROR_PARAM} the parameter, where an error String of a failed authentication is stored in
- * the context
+ * <ul>
+ * <li>{@value #AUTHENTICATION_ERROR_PARAM} the parameter, where an error String of a failed authentication is stored in
+ * the context</li>
+ * <li>{@value #RETURN_URL_PARAM_PROP} the parameter, where the url to redirect to after a successful login can be found
+ * </ul>
  * <br/>
  * 
  * Example configuration: <br/>
