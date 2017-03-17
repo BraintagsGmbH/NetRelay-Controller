@@ -129,7 +129,7 @@ public class TPasswordLost extends NetRelayBaseConnectorTest {
     }, 200, "OK", null);
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
-    query.setSearchCondition(ISearchCondition.isEqual("email", USER_BRAINTAGS_DE));
+    query.setSearchCondition(ISearchCondition.isEqual(Member.EMAIL, USER_BRAINTAGS_DE));
     Member member = (Member) DatastoreBaseTest.findFirst(context, query);
     context.assertNotNull(member, "Member was not created");
     context.assertEquals(MY_USERNAME, member.getUserName(), "username not set");
@@ -171,7 +171,8 @@ public class TPasswordLost extends NetRelayBaseConnectorTest {
    */
   private PasswordLostClaim validateNoMultipleRequests(TestContext context, String email) {
     IQuery<PasswordLostClaim> query = netRelay.getDatastore().createQuery(PasswordLostClaim.class);
-    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual(PasswordLostClaim.EMAIL, email),
+        ISearchCondition.isEqual(PasswordLostClaim.ACTIVE, true)));
     List<?> recList = DatastoreBaseTest.findAll(context, query);
     context.assertEquals(1, recList.size(),
         "previous PasswordLostClaims are not deactivated ( > 1 ) OR PasswordLostClaim not written (0)");

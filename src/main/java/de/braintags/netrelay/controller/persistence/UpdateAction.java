@@ -81,9 +81,9 @@ public class UpdateAction extends InsertAction {
     List<String[]> ids = RecordContractor.extractIds(mapper, captureMap);
     boolean idFieldFound = false;
     for (String[] id : ids) {
-      if (id[0].equalsIgnoreCase(mapper.getIdField().getName())) {
+      if (id[0].equalsIgnoreCase(mapper.getIdField().getFieldName())) {
         idFieldFound = true;
-        map.put(mapper.getIdField().getName().toLowerCase(), id[1]);
+        map.put(mapper.getIdField().getFieldName().toLowerCase(), id[1]);
       }
     }
     if (!idFieldFound) {

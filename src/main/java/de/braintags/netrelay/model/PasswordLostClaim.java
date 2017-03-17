@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
+import de.braintags.vertx.jomnigate.dataaccess.query.impl.IndexedField;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 
@@ -29,6 +31,10 @@ import io.vertx.core.http.HttpServerRequest;
  * 
  */
 public class PasswordLostClaim extends AbstractRecord {
+
+  public static final IIndexedField EMAIL = new IndexedField("email");
+  public static final IIndexedField ACTIVE = new IndexedField("active");
+
   private String email;
   private boolean active = true;
   private Map<String, String> requestParameter = new HashMap<>();

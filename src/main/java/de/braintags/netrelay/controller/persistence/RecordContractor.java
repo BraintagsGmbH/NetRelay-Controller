@@ -22,6 +22,7 @@ import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.exception.FieldNotFoundException;
 import de.braintags.netrelay.exception.ObjectRequiredException;
 import de.braintags.netrelay.routing.CaptureCollection;
+import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchConditionContainer;
@@ -298,7 +299,13 @@ public class RecordContractor {
     if (!ids.isEmpty()) {
       ISearchConditionContainer and = ISearchCondition.and();
       for (String[] id : ids) {
-        and.getConditions().add(ISearchCondition.isEqual(id[0], id[1]));
+        IIndexedField indexedField;
+        try {
+          indexedField = IIndexedField.getIndexedField(id[0], mapper.getMapperClass());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+          throw new FieldNotFoundException(mapper, id[0], e);
+        }
+        and.getConditions().add(ISearchCondition.isEqual(indexedField, id[1]));
       }
       query.setSearchCondition(and);
     }
@@ -415,7 +422,7 @@ public class RecordContractor {
    * @return
    */
   public static final String createIdReference(IMapper mapper, Object record) {
-    IField idField = mapper.getIdField();
+    IField idField = mapper.getIdField().getField();
     Object id = idField.getPropertyAccessor().readData(record);
     Assert.notNull("id", id);
     return OPEN_BRACKET + idField.getName() + ID_SPLIT + id + CLOSE_BRACKET;
