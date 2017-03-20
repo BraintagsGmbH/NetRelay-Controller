@@ -141,7 +141,7 @@ public class MemberUtil {
       Handler<AsyncResult<IAuthenticatable>> resultHandler, Class<? extends IAuthenticatable> mapperClass) {
     String id = user.principal().getString("_id");
     IQuery<? extends IAuthenticatable> query = netRelay.getDatastore().createQuery(mapperClass);
-    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField().getName(), id));
+    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField(), id));
     query.execute(qr -> {
       if (qr.failed()) {
         resultHandler.handle(Future.failedFuture(qr.cause()));

@@ -14,6 +14,8 @@ package de.braintags.netrelay.model;
 
 import de.braintags.netrelay.controller.authentication.RegisterController;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
+import de.braintags.vertx.jomnigate.dataaccess.query.impl.IndexedField;
 import io.vertx.core.http.HttpServerRequest;
 
 /**
@@ -25,6 +27,10 @@ import io.vertx.core.http.HttpServerRequest;
  * 
  */
 public class RegisterClaim extends PasswordLostClaim {
+
+  public static final IIndexedField PASSWORD = new IndexedField("password");
+  public static final IIndexedField DESTINATION_URL = new IndexedField("destinationUrl");
+
   private String password;
   private String destinationUrl;
 

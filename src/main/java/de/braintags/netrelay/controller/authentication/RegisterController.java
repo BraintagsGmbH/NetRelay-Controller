@@ -327,8 +327,8 @@ public class RegisterController extends AbstractAuthProviderController {
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
     IQuery<RegisterClaim> query = getNetRelay().getDatastore().createQuery(RegisterClaim.class);
-    query.setSearchCondition(
-        ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual(RegisterClaim.EMAIL, email),
+        ISearchCondition.isEqual(RegisterClaim.ACTIVE, true)));
     QueryHelper.executeToList(query, qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
@@ -365,7 +365,7 @@ public class RegisterController extends AbstractAuthProviderController {
       handler.handle(Future.failedFuture(RegistrationCode.EMAIL_REQUIRED.toString()));
     } else if (!allowDuplicateEmail) {
       IQuery<? extends IAuthenticatable> query = getNetRelay().getDatastore().createQuery(this.authenticatableCLass);
-      query.setSearchCondition(ISearchCondition.isEqual("email", email));
+      query.setSearchCondition(ISearchCondition.isEqual(IAuthenticatable.EMAIL, email));
       query.executeCount(qr -> {
         if (qr.failed()) {
           LOGGER.error("", qr.cause());

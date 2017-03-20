@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.querypool.exceptions.DatastoreNotFoundException;
+import de.braintags.netrelay.controller.querypool.exceptions.IndexedFieldNotFoundException;
 import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
 import de.braintags.netrelay.controller.querypool.exceptions.QueryPoolException;
 import de.braintags.netrelay.controller.querypool.template.DynamicQuery;
@@ -38,6 +39,7 @@ import de.braintags.netrelay.controller.querypool.template.dynamic.QueryPart;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IFieldValueResolver;
+import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQueryResult;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
@@ -307,7 +309,7 @@ public class QueryPoolController extends AbstractController {
    * @throws InvalidSyntaxException
    *           if the part is of an unknown type
    */
-  private ISearchCondition parseQueryParts(QueryPart queryPart, IQuery<?> query) throws InvalidSyntaxException {
+  private ISearchCondition parseQueryParts(QueryPart queryPart, IQuery<?> query) throws QueryPoolException {
     if (queryPart.isAnd()) {
       List<QueryPart> queryParts = queryPart.getAnd();
       ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
@@ -329,7 +331,14 @@ public class QueryPoolController extends AbstractController {
       String field = condition.getField();
       QueryOperator operator = QueryOperator.translate(condition.getLogic());
       Object value = condition.getValue();
-      return ISearchCondition.condition(field, operator, value);
+      IIndexedField indexedField;
+      try {
+        indexedField = IIndexedField.getIndexedField(field, query.getMapperClass());
+      } catch (NoSuchFieldException | IllegalAccessException e) {
+        throw new IndexedFieldNotFoundException(
+            "No IndexedField found for name '" + field + "' in class '" + query.getMapperClass() + "'", e);
+      }
+      return ISearchCondition.condition(indexedField, operator, value);
     } else {
       throw new InvalidSyntaxException("Query part is neither 'and' nor 'or' nor 'condition'");
     }

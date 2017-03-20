@@ -21,6 +21,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.mapping.IProperty;
@@ -129,10 +130,17 @@ public class DataTableLinkDescriptor {
       } else {
         Object value = thResult.result().getResult();
         if (value != null && value.hashCode() != 0) {
+          IIndexedField indexedField;
+          try {
+            indexedField = IIndexedField.getIndexedField(def.name, query.getMapperClass());
+          } catch (NoSuchFieldException | IllegalAccessException e) {
+            f.fail(e);
+            return;
+          }
           if (allowContains(value)) {
-            query.setSearchCondition(ISearchCondition.contains(def.name, value));
+            query.setSearchCondition(ISearchCondition.contains(indexedField, value));
           } else {
-            query.setSearchCondition(ISearchCondition.isEqual(def.name, value));
+            query.setSearchCondition(ISearchCondition.isEqual(indexedField, value));
           }
         }
         if (def.sortable) {
