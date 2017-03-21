@@ -24,20 +24,17 @@ import io.vertx.ext.web.impl.Utils;
 
 /**
  * Regular template resolver, which is loading the given template from the vertx filesystem
- * 
- * 
+ *
+ *
  * @author Michael Remme
  *
  */
 public class ResourceTemplateResolver extends StringTemplateResolver {
-  private Vertx vertx;
+  protected final Vertx vertx;
 
-  public ResourceTemplateResolver() {
+  public ResourceTemplateResolver(Vertx vertx) {
     super();
     setName("vertx-web/Thymeleaf3");
-  }
-
-  void setVertx(Vertx vertx) {
     this.vertx = vertx;
   }
 

@@ -30,28 +30,23 @@ import io.vertx.ext.web.impl.Utils;
  * The resolver will first search for an existing template
  * inside the defined template directory. If none was found, the TemplateHandler will search for existing template in
  * the pure path, without the defined template directory, to allow the use of stored resources inside the classpath.
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class MultiPathResourceResolver extends ResourceTemplateResolver {
-  private static final String NOT_FOUND = "multipath option under path '%s' and '%s'";
-  private Vertx vertx;
-  private final String templateDirectory;
+  private static final String NOT_FOUND  = "multipath option under path '%s' and '%s'";
+  private final String        templateDirectory;
   private Map<String, String> pathLookup = new HashMap<>();
 
   /**
-   * 
+   *
    */
-  public MultiPathResourceResolver(String templateDirectory) {
+  public MultiPathResourceResolver(Vertx vertx, String templateDirectory) {
+    super(vertx);
     this.templateDirectory = templateDirectory;
     setName("braintags/Thymeleaf3");
-  }
-
-  @Override
-  void setVertx(Vertx vertx) {
-    this.vertx = vertx;
   }
 
   @Override

@@ -26,6 +26,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.LanguageHeader;
 import io.vertx.ext.web.RoutingContext;
@@ -34,23 +35,23 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 /**
  * A template engine for Thymeleaf, which allows different template resolver. If the property multipath is set to true,
  * then the {@link MultiPathResourceResolver} is used, otherwise the regular {@link ResourceTemplateResolver} is used
- * 
+ *
  * @author Michael Remme
- * 
+ *
  */
 public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
-  private final TemplateEngine templateEngine = new TemplateEngine();
+  private final TemplateEngine     templateEngine = new TemplateEngine();
   private ResourceTemplateResolver templateResolver;
 
-  public ThymeleafTemplateEngineImplBt(boolean multiPath, String templateDirectory) {
-    this.templateResolver = createResolver(multiPath, templateDirectory);
+  public ThymeleafTemplateEngineImplBt(Vertx vertx, boolean multiPath, String templateDirectory) {
+    this.templateResolver = createResolver(vertx, multiPath, templateDirectory);
     this.templateEngine.setTemplateResolver(templateResolver);
   }
 
-  private ResourceTemplateResolver createResolver(boolean multiPath, String templateDirectory) {
-    ResourceTemplateResolver ts = multiPath ? new MultiPathResourceResolver(templateDirectory)
-        : new ResourceTemplateResolver();
+  private ResourceTemplateResolver createResolver(Vertx vertx, boolean multiPath, String templateDirectory) {
+    ResourceTemplateResolver ts = multiPath ? new MultiPathResourceResolver(vertx, templateDirectory)
+        : new ResourceTemplateResolver(vertx);
     ts.setTemplateMode(ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE);
     return ts;
   }
@@ -70,49 +71,45 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
   public void render(RoutingContext context, String templateFileName, Handler<AsyncResult<Buffer>> handler) {
     Buffer buffer = Buffer.buffer();
 
-    try {
-      Map<String, Object> data = new HashMap<>();
-      data.put("context", context);
-      data.putAll(context.data());
+    Map<String, Object> data = new HashMap<>();
+    data.put("context", context);
+    data.putAll(context.data());
 
-      synchronized (this) {
-        templateResolver.setVertx(context.vertx());
-        final List<LanguageHeader> acceptableLocales = context.acceptableLanguages();
+    synchronized (this) {
 
-        LanguageHeader locale = null;
+      final List<LanguageHeader> acceptableLocales = context.acceptableLanguages();
 
-        if (!acceptableLocales.isEmpty()) {
-          // this is the users preferred locale
-          locale = acceptableLocales.get(0);
-        }
+      LanguageHeader locale = null;
 
-        templateEngine.process(templateFileName, new WebIContext(data, locale), new Writer() {
-          @Override
-          public void write(char[] cbuf, int off, int len) throws IOException {
-            buffer.appendString(new String(cbuf, off, len));
-          }
-
-          @Override
-          public void flush() throws IOException {
-            // not used
-          }
-
-          @Override
-          public void close() throws IOException {
-            // not used
-          }
-        });
+      if (!acceptableLocales.isEmpty()) {
+        // this is the users preferred locale
+        locale = acceptableLocales.get(0);
       }
 
+      templateEngine.process(templateFileName, new WebIContext(data, locale), new Writer() {
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+          buffer.appendString(new String(cbuf, off, len));
+        }
+
+        @Override
+        public void flush() throws IOException {
+          // not used
+        }
+
+        @Override
+        public void close() throws IOException {
+          // not used
+        }
+      });
       handler.handle(Future.succeededFuture(buffer));
-    } catch (Exception ex) {
-      handler.handle(Future.failedFuture(ex));
     }
+
   }
 
   private static class WebIContext implements IContext {
     private final Map<String, Object> data;
-    private final java.util.Locale locale;
+    private final java.util.Locale    locale;
 
     private WebIContext(Map<String, Object> data, LanguageHeader locale) {
       this.data = data;
