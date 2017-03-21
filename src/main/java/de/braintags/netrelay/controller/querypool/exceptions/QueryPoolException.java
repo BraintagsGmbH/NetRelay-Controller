@@ -27,7 +27,7 @@ import io.vertx.core.json.JsonObject;
 public abstract class QueryPoolException extends Exception {
 
   private static final long serialVersionUID = 1L;
-  private JsonObject        query;
+  private JsonObject query;
 
   /**
    * Creates an exception with only a message
@@ -36,6 +36,18 @@ public abstract class QueryPoolException extends Exception {
    */
   public QueryPoolException(String message) {
     super(message);
+  }
+
+  /**
+   * Creates an exception with a message and a cause
+   * 
+   * @param message
+   *          the exception message
+   * @param cause
+   *          the root exception
+   */
+  public QueryPoolException(String message, Throwable cause) {
+    super(message, cause);
   }
 
   /**
@@ -73,6 +85,7 @@ public abstract class QueryPoolException extends Exception {
 
   /*
    * (non-Javadoc)
+   * 
    * @see java.lang.Throwable#getMessage()
    */
   @Override

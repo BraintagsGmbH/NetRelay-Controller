@@ -20,10 +20,10 @@ import de.braintags.netrelay.MemberUtil;
 import de.braintags.netrelay.controller.AbstractCaptureController;
 import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.netrelay.mapping.NetRelayMapperFactory;
 import de.braintags.netrelay.routing.CaptureCollection;
 import de.braintags.netrelay.routing.CaptureDefinition;
 import de.braintags.netrelay.routing.RouterDefinition;
-import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
 import de.braintags.vertx.util.exception.InitException;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
@@ -148,7 +148,6 @@ public class PersistenceController extends AbstractCaptureController {
    */
   public static final String ORDERBY_CAPTURE_KEY = "orderBy";
 
-  private IMapperFactory mapperFactory;
   private DisplayAction displayAction;
   private InsertAction insertAction;
   private UpdateAction updateAction;
@@ -246,7 +245,6 @@ public class PersistenceController extends AbstractCaptureController {
    */
   @Override
   protected void internalInitProperties(Properties properties) {
-    mapperFactory = getNetRelay().getNetRelayMapperFactory();
     displayAction = new DisplayAction(this);
     insertAction = new InsertAction(this);
     updateAction = new UpdateAction(this);
@@ -310,7 +308,7 @@ public class PersistenceController extends AbstractCaptureController {
   /**
    * @return the mapperFactory
    */
-  public final IMapperFactory getMapperFactory() {
-    return mapperFactory;
+  public final NetRelayMapperFactory getMapperFactory() {
+    return getNetRelay().getNetRelayMapperFactory();
   }
 }

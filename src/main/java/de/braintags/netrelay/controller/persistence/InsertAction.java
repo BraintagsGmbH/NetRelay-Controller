@@ -78,8 +78,7 @@ public class InsertAction extends AbstractAction {
     String subEntityName = ip.getFieldPath();
     Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
     handleFileUploads(subEntityName, context, params);
-    IStoreObjectFactory<Map<String, String>> sf = (IStoreObjectFactory<Map<String, String>>) getPersistenceController()
-        .getMapperFactory().getStoreObjectFactory();
+    IStoreObjectFactory<Map<String, String>> sf = getPersistenceController().getNetRelay().getStoreObjectFactory();
     sf.createStoreObject(params, ip.getSubObjectMapper(), result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));
@@ -104,8 +103,7 @@ public class InsertAction extends AbstractAction {
       IMapper<?> mapper, Handler<AsyncResult<Void>> handler) {
     Map<String, String> params = extractProperties(entityName, captureMap, context, mapper);
     handleFileUploads(entityName, context, params);
-    IStoreObjectFactory<Map<String, String>> sf = (IStoreObjectFactory<Map<String, String>>) getPersistenceController()
-        .getMapperFactory().getStoreObjectFactory();
+    IStoreObjectFactory<Map<String, String>> sf = getPersistenceController().getNetRelay().getStoreObjectFactory();
     sf.createStoreObject(params, mapper, result -> {
       if (result.failed()) {
         handler.handle(Future.failedFuture(result.cause()));

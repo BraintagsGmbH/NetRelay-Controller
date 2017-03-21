@@ -155,7 +155,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     }, 200, "OK", null);
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
-    query.setSearchCondition(ISearchCondition.isEqual("email", USER_BRAINTAGS_DE));
+    query.setSearchCondition(ISearchCondition.isEqual(Member.EMAIL, USER_BRAINTAGS_DE));
     ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
     context.assertNotNull(qres, "No result returned");
     Member member = (Member) DatastoreBaseTest.findFirst(context, query);
@@ -188,7 +188,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     }, 302, "Found", null);
 
     IQuery<Member> query = netRelay.getDatastore().createQuery(Member.class);
-    query.setSearchCondition(ISearchCondition.isEqual("email", USER_BRAINTAGS_DE));
+    query.setSearchCondition(ISearchCondition.isEqual(Member.EMAIL, USER_BRAINTAGS_DE));
     ResultContainer qres = DatastoreBaseTest.find(context, query, 1);
     context.assertNotNull(qres, "No result returned");
     Member member = (Member) DatastoreBaseTest.findFirst(context, query);
@@ -252,7 +252,8 @@ public class TRegistration extends NetRelayBaseConnectorTest {
    */
   private RegisterClaim validateNoMultipleRequests(TestContext context, String email) {
     IQuery<RegisterClaim> query = netRelay.getDatastore().createQuery(RegisterClaim.class);
-    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual(RegisterClaim.EMAIL, email),
+        ISearchCondition.isEqual(RegisterClaim.ACTIVE, true)));
     List<?> recList = DatastoreBaseTest.findAll(context, query);
     context.assertEquals(1, recList.size(), "previous RegisterClaims are not deactivated");
     return (RegisterClaim) recList.get(0);

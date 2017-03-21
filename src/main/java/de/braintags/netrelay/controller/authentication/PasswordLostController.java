@@ -297,7 +297,8 @@ public class PasswordLostController extends AbstractController {
 
   private void deactivatePreviousClaims(RoutingContext context, String email, Handler<AsyncResult<Void>> handler) {
     IQuery<PasswordLostClaim> query = getNetRelay().getDatastore().createQuery(PasswordLostClaim.class);
-    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual("email", email), ISearchCondition.isEqual("active", true)));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual(PasswordLostClaim.EMAIL, email),
+        ISearchCondition.isEqual(PasswordLostClaim.ACTIVE, true)));
     QueryHelper.executeToList(query, qr -> {
       if (qr.failed()) {
         handler.handle(Future.failedFuture(qr.cause()));
@@ -350,7 +351,7 @@ public class PasswordLostController extends AbstractController {
       handler.handle(Future.failedFuture(PasswordLostCode.EMAIL_REQUIRED.toString()));
     } else {
       IQuery<? extends IAuthenticatable> query = getNetRelay().getDatastore().createQuery(this.authenticatableCLass);
-      query.setSearchCondition(ISearchCondition.isEqual("email", email));
+      query.setSearchCondition(ISearchCondition.isEqual(IAuthenticatable.EMAIL, email));
       QueryHelper.executeToList(query, qr -> {
         if (qr.failed()) {
           LOGGER.error("", qr.cause());

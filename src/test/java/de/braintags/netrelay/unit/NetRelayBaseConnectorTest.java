@@ -79,8 +79,8 @@ public abstract class NetRelayBaseConnectorTest extends NetRelayBaseTest {
    */
   public static final Member createOrFindMember(TestContext context, IDataStore datastore, Member member) {
     IQuery<Member> query = datastore.createQuery(Member.class);
-    query.setSearchCondition(
-        ISearchCondition.and(ISearchCondition.isEqual("userName", member.getUserName()), ISearchCondition.isEqual("password", member.getPassword())));
+    query.setSearchCondition(ISearchCondition.and(ISearchCondition.isEqual(Member.USER_NAME, member.getUserName()),
+        ISearchCondition.isEqual(Member.PASSWORD, member.getPassword())));
     Member returnMember = (Member) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       ResultContainer cont = DatastoreBaseTest.saveRecord(context, member);

@@ -19,6 +19,8 @@ import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.jomnigate.annotation.Entity;
 import de.braintags.vertx.jomnigate.annotation.field.Id;
+import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
+import de.braintags.vertx.jomnigate.dataaccess.query.impl.IndexedField;
 
 /**
  * Defines a member, which can be used inside a web application for authorization and authentication
@@ -28,6 +30,10 @@ import de.braintags.vertx.jomnigate.annotation.field.Id;
  */
 @Entity
 public class Member implements IAuthenticatable {
+
+  public static final IIndexedField USER_NAME = new IndexedField("userName");
+  public static final IIndexedField PASSWORD = new IndexedField("password");
+
   @Id
   private String id;
   private String userName;

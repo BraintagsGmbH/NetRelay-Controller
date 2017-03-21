@@ -21,12 +21,12 @@ import java.util.Properties;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.api.DataTableLinkDescriptor.ColDef;
 import de.braintags.netrelay.mapping.NetRelayMapperFactory;
+import de.braintags.netrelay.mapping.NetRelayStoreObjectFactory;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
-import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.jomnigate.mapping.IStoreObject;
-import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
 import de.braintags.vertx.util.HttpContentType;
 import de.braintags.vertx.util.exception.ParameterRequiredException;
 import io.vertx.core.AsyncResult;
@@ -133,6 +133,7 @@ public class DataTablesController extends AbstractController {
     });
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private void execute(IQuery<?> query, DataTableLinkDescriptor descr, long tableCount,
       Handler<AsyncResult<JsonObject>> handler) {
     query.execute(null, descr.getDisplayLength(), descr.getDisplayStart(), qr -> {
@@ -151,8 +152,9 @@ public class DataTablesController extends AbstractController {
               handler.handle(Future.succeededFuture(createJsonObject(query.getMapper(),
                   new ArrayList<IStoreObject<?, ?>>(), descr, totalResult, tableCount)));
             } else {
-              IStoreObjectFactory<?> sf = mapperFactory.getStoreObjectFactory();
-              sf.createStoreObjects(query.getMapper(), Arrays.asList(selection), str -> {
+              NetRelayStoreObjectFactory sf = getNetRelay().getStoreObjectFactory();
+              IMapper mapper = query.getMapper();
+              sf.createStoreObjects(mapper, Arrays.asList(selection), str -> {
                 if (str.failed()) {
                   handler.handle(Future.failedFuture(result.cause()));
                 } else {
@@ -186,7 +188,7 @@ public class DataTablesController extends AbstractController {
     JsonArray json = new JsonArray();
     for (ColDef colDef : descr.getColumns()) {
       if (colDef != null && colDef.name != null && colDef.name.hashCode() != 0) {
-        IField field = mapper.getField(colDef.name);
+        IProperty field = mapper.getField(colDef.name);
         Objects.requireNonNull(field, "Could not find defined field for '" + colDef.name + "'");
         Object value = sto.get(field);
         json.add(value == null ? "" : value);

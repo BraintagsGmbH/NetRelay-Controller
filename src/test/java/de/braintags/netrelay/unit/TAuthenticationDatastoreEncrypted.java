@@ -115,7 +115,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
     IQuery<TestMemberEncrypted> query = datastore.createQuery(TestMemberEncrypted.class);
     String password = member.getPassword();
     context.assertNotNull(password, "password must not be null");
-    query.setSearchCondition(ISearchCondition.isEqual("email", member.getEmail()));
+    query.setSearchCondition(ISearchCondition.isEqual(TestMemberEncrypted.EMAIL, member.getEmail()));
     TestMemberEncrypted returnMember = (TestMemberEncrypted) DatastoreBaseTest.findFirst(context, query);
     if (returnMember == null) {
       DatastoreBaseTest.saveRecord(context, member);
