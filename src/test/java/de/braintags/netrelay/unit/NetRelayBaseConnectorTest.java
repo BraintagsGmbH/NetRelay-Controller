@@ -104,7 +104,7 @@ public abstract class NetRelayBaseConnectorTest extends NetRelayBaseTest {
     Object id = rc.writeResult.iterator().next().getId();
     Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, country.id);
     context.assertTrue(savedCountry.cities.size() == 1);
-    context.assertTrue(savedCountry.cities.get(0).id != null);
+    context.assertTrue(savedCountry.cities.get(0).id != null); // as embedded entities
     context.assertTrue(savedCountry.cities.get(0).streets != null);
     context.assertTrue(savedCountry.cities.get(0).streets.size() == 1);
     return savedCountry;

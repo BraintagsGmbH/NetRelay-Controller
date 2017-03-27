@@ -260,6 +260,7 @@ public class TAuthenticationMongo extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put("collectionName", "Member");
     def.getHandlerProperties().put("passwordField", "password");
     def.getHandlerProperties().put("usernameField", "userName");
+    def.getHandlerProperties().put(MongoAuth.PROPERTY_CREDENTIAL_USERNAME_FIELD, "userName");
     def.getHandlerProperties().put("roleField", "roles");
     settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
     def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,

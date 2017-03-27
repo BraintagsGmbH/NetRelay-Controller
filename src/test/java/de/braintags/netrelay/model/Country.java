@@ -23,6 +23,6 @@ public class Country extends AbstractRecord {
   public String name;
 
   @Embedded
-  public List<City> cities = new ArrayList<City>();
+  public List<City> cities = new ArrayList<>();
 
 }

@@ -18,8 +18,8 @@ import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.authentication.authprovider.CustomAuthProvider;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.jomnigate.IDataStore;
-import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mongo.MongoDataStore;
 import de.braintags.vertx.util.exception.InitException;
 import io.vertx.core.AsyncResult;
@@ -185,6 +185,7 @@ public abstract class AbstractAuthProviderController extends AbstractController 
     JsonObject config = new JsonObject();
     String saltStyle = readProperty(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.NO_SALT.toString(), false);
     config.put(MongoAuth.PROPERTY_SALT_STYLE, HashSaltStyle.valueOf(saltStyle));
+
     MongoAuth auth = MongoAuth.create((MongoClient) ((MongoDataStore) store).getClient(), config);
 
     String passwordFieldName = readProperty(PASSWORD_FIELD, null, true);
@@ -208,6 +209,16 @@ public abstract class AbstractAuthProviderController extends AbstractController 
     String saltField = readProperty(MongoAuth.PROPERTY_SALT_FIELD, null, false);
     if (saltField != null) {
       auth.setSaltField(saltField);
+    }
+
+    String authCredentialField = readProperty(MongoAuth.PROPERTY_CREDENTIAL_USERNAME_FIELD, null, false);
+    if (authCredentialField != null) {
+      auth.setUsernameCredentialField(authCredentialField);
+    }
+
+    String authPasswordCredField = readProperty(MongoAuth.PROPERTY_CREDENTIAL_PASSWORD_FIELD, null, false);
+    if (authPasswordCredField != null) {
+      auth.setPasswordCredentialField(authPasswordCredField);
     }
 
     return auth;

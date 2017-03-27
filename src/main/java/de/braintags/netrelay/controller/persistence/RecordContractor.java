@@ -22,13 +22,12 @@ import de.braintags.netrelay.controller.Action;
 import de.braintags.netrelay.exception.FieldNotFoundException;
 import de.braintags.netrelay.exception.ObjectRequiredException;
 import de.braintags.netrelay.routing.CaptureCollection;
-import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchConditionContainer;
-import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.jomnigate.mapping.IMapperFactory;
+import de.braintags.vertx.jomnigate.mapping.IProperty;
 import de.braintags.vertx.util.assertion.Assert;
 
 /**
@@ -299,13 +298,7 @@ public class RecordContractor {
     if (!ids.isEmpty()) {
       ISearchConditionContainer and = ISearchCondition.and();
       for (String[] id : ids) {
-        IIndexedField indexedField;
-        try {
-          indexedField = IIndexedField.getIndexedField(id[0], mapper.getMapperClass());
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-          throw new FieldNotFoundException(mapper, id[0], e);
-        }
-        and.getConditions().add(ISearchCondition.isEqual(indexedField, id[1]));
+        and.getConditions().add(ISearchCondition.isEqual(id[0], id[1]));
       }
       query.setSearchCondition(and);
     }
@@ -424,7 +417,10 @@ public class RecordContractor {
   public static final String createIdReference(IMapper mapper, Object record) {
     IProperty idField = mapper.getIdField().getField();
     Object id = idField.getPropertyAccessor().readData(record);
-    Assert.notNull("id", id);
+    if (id == null) {
+      throw new IllegalArgumentException("To create an id reference the field " + record.getClass().getName() + "."
+          + idField.getName() + " must have a value");
+    }
     return OPEN_BRACKET + idField.getName() + ID_SPLIT + id + CLOSE_BRACKET;
   }
 }
