@@ -51,6 +51,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
    */
   @Test
   public void loginLogout(TestContext context) {
+    DatastoreBaseTest.clearTable(context, TestMemberEncrypted.class);
     TestMemberEncrypted member = createMember(context, TESTPASSWORD);
     Buffer cookie = Buffer.buffer();
     try {
