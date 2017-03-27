@@ -15,6 +15,8 @@ package de.braintags.netrelay.controller.querypool.template.dynamic;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.braintags.vertx.jomnigate.dataaccess.query.QueryOperator;
+
 /**
  * A simple query condition, in the form of <code>"Field" "Logic" "Value"</code>.<br>
  * <br>
@@ -26,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Condition {
   private String field;
-  private String logic;
+  private QueryOperator logic;
   private Object value;
 
   /**
@@ -41,7 +43,7 @@ public class Condition {
    */
   @JsonCreator
   public Condition(@JsonProperty(value = "field", required = true) String field,
-      @JsonProperty(value = "logic", required = true) String logic, @JsonProperty("value") Object value) {
+      @JsonProperty(value = "logic", required = true) QueryOperator logic, @JsonProperty("value") Object value) {
     this.field = field;
     this.logic = logic;
     this.value = value;
@@ -57,7 +59,7 @@ public class Condition {
   /**
    * @return the logic of this condition
    */
-  public String getLogic() {
+  public QueryOperator getLogic() {
     return logic;
   }
 

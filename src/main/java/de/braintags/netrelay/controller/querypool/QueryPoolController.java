@@ -92,7 +92,7 @@ import io.vertx.ext.web.RoutingContext;
  *  }
  * }
  * </pre>
- * 
+ *
  * <br>
  * Copyright: Copyright (c) 13.12.2016 <br>
  * Company: Braintags GmbH <br>
@@ -151,9 +151,9 @@ public class QueryPoolController extends AbstractController {
               context.next();
             } else if (queryResult.size() == 1) {
               queryResult.iterator().next(nh -> {
-                if (nh.failed())
+                if (nh.failed()) {
                   context.fail(nh.cause());
-                else {
+                } else {
                   context.put(entry.destination, nh.result());
                   context.next();
                 }
@@ -191,7 +191,7 @@ public class QueryPoolController extends AbstractController {
     /**
      * Executes the configured operation for the given query and puts the result under the destination name in the
      * current context
-     * 
+     *
      * @param entry
      *          contains the query, and all information needed to execute it (i.e. destination, limit, offset)
      * @param resolver
@@ -270,8 +270,9 @@ public class QueryPoolController extends AbstractController {
       } else if (queryTemplate.getDynamicQuery() != null) {
         parseDynamicQuery(queryTemplate.getDynamicQuery(), query);
       }
-      if (StringUtils.isNotBlank(queryTemplate.getOrderBy()))
+      if (StringUtils.isNotBlank(queryTemplate.getOrderBy())) {
         addOrderBy(queryTemplate, query);
+      }
       return query;
     } catch (QueryPoolException e) {
       // add the underlying JSON to the exception
@@ -329,7 +330,7 @@ public class QueryPoolController extends AbstractController {
     } else if (queryPart.isCondition()) {
       Condition condition = queryPart.getCondition();
       String field = condition.getField();
-      QueryOperator operator = QueryOperator.translate(condition.getLogic());
+      QueryOperator operator = condition.getLogic();
       Object value = condition.getValue();
       IIndexedField indexedField;
       try {
@@ -354,13 +355,14 @@ public class QueryPoolController extends AbstractController {
    */
   private void addOrderBy(QueryTemplate queryTemplate, IQuery<?> query) {
     String[] orderBys = queryTemplate.getOrderBy().split(",");
-    for (int i = 0; i < orderBys.length; i++) {
-      String[] orderBy = orderBys[i].trim().split("\\s+");
+    for (String orderBy2 : orderBys) {
+      String[] orderBy = orderBy2.trim().split("\\s+");
       boolean ascending = true;
       if (orderBy.length > 1) {
         String direction = orderBy[1];
-        if ("desc".equalsIgnoreCase(direction))
+        if ("desc".equalsIgnoreCase(direction)) {
           ascending = false;
+        }
       }
       query.addSort(orderBy[0], ascending);
     }
@@ -387,9 +389,10 @@ public class QueryPoolController extends AbstractController {
         break;
       }
     }
-    if (!found)
+    if (!found) {
       throw new DatastoreNotFoundException("Query has a native block, but the current datastore ('"
           + datastore.getClass().getName() + "') is not defined");
+    }
   }
 
   /*
@@ -467,11 +470,13 @@ public class QueryPoolController extends AbstractController {
   private String buildQueryName(String file, String directory) {
     StringBuilder query = new StringBuilder();
     query.append(file.substring(directory.length()));
-    if (query.charAt(0) != '/')
+    if (query.charAt(0) != '/') {
       query.insert(0, '/');
+    }
     int i = query.lastIndexOf(".");
-    if (i > 0)
+    if (i > 0) {
       query.delete(i, query.length());
+    }
     return query.toString().toLowerCase(Locale.US);
   }
 
