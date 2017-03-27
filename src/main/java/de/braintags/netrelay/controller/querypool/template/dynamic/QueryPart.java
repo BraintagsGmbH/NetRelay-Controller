@@ -15,6 +15,8 @@ package de.braintags.netrelay.controller.querypool.template.dynamic;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
@@ -33,7 +35,7 @@ import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxExcept
  *
  * @author sschmitt
  */
-
+@JsonInclude(value = Include.NON_NULL)
 public class QueryPart {
   private List<QueryPart> and;
   private List<QueryPart> or;
@@ -42,7 +44,7 @@ public class QueryPart {
   /**
    * The constructor filling the fields of this part. Exactly one of the given parameters must not be null, the others
    * must be null.
-   * 
+   *
    * @throws InvalidSyntaxException
    */
   @JsonCreator
