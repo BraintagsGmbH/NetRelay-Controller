@@ -44,7 +44,7 @@ public class MultiPathResourceResolver extends ResourceTemplateResolver {
    *
    */
   public MultiPathResourceResolver(Vertx vertx, String templateDirectory) {
-    super(vertx);
+    super(vertx, templateDirectory);
     this.templateDirectory = templateDirectory;
     setName("braintags/Thymeleaf3");
   }

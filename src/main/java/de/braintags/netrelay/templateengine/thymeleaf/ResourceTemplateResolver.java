@@ -12,6 +12,8 @@
  */
 package de.braintags.netrelay.templateengine.thymeleaf;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.thymeleaf.IEngineConfiguration;
@@ -31,17 +33,25 @@ import io.vertx.ext.web.impl.Utils;
  */
 public class ResourceTemplateResolver extends StringTemplateResolver {
   protected final Vertx vertx;
+  private Path          templatePath;
 
-  public ResourceTemplateResolver(Vertx vertx) {
+  public ResourceTemplateResolver(Vertx vertx, String templateDir) {
     super();
     setName("vertx-web/Thymeleaf3");
     this.vertx = vertx;
+    this.templatePath = Paths.get(templateDir);
   }
 
   @Override
   protected ITemplateResource computeTemplateResource(IEngineConfiguration configuration, String ownerTemplate,
       String template, Map<String, Object> templateResolutionAttributes) {
-    String str = Utils.readFileToString(vertx, template);
+    String str;
+    if (ownerTemplate != null) {
+      str = Utils.readFileToString(vertx, templatePath.resolve(template).toString());
+    } else {
+      str = Utils.readFileToString(vertx, template);
+    }
+
     return new StringTemplateResource(str);
   }
 }
