@@ -6,7 +6,7 @@
     "query": {
       "condition": {
         "field": "firstname",
-        "logic": "=",
+        "logic": "EQUALS",
         "value": "max"
       }
     }

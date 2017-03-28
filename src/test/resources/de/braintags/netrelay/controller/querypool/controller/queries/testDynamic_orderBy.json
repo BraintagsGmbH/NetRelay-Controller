@@ -9,14 +9,14 @@
         {
           "condition": {
             "field": "firstname",
-            "logic": "=",
+            "logic": "EQUALS",
             "value": "max"
           }
         },
         {
           "condition": {
             "field": "score",
-            "logic": "<=",
+            "logic": "SMALLER_EQUAL",
             "value": 2.5
           }
         },
@@ -25,14 +25,14 @@
             {
               "condition": {
                 "field": "city",
-                "logic": "=",
+                "logic": "EQUALS",
                 "value": "willich"
               }
             },
             {
               "condition": {
                 "field": "zip",
-                "logic": "=",
+                "logic": "EQUALS",
                 "value": "47877"
               }
             }

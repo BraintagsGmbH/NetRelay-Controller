@@ -8,14 +8,14 @@
 		    {
 				"condition": {
 		        	"field": "firstname",
-		            "logic": "=",
+		            "logic": "EQUALS",
 		            "value": "max"
 				}
 			}, 
 		    {
 		    	"condition": {
 		        	"field": "score",
-		            "logic": "=",
+		            "logic": "EQUALS",
 		            "value": 2.5
 				}
 			}

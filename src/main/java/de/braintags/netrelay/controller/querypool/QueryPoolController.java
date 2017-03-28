@@ -429,6 +429,7 @@ public class QueryPoolController extends AbstractController {
       try {
         template = om.readValue(fileResult.toString(), QueryTemplate.class);
       } catch (IOException e) {
+        LOGGER.error("", e);
         throw new InitException("Invalid query template file: " + file, e);
       }
       template.setSource(fileResult.toJsonObject());

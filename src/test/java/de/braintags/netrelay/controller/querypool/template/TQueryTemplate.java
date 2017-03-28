@@ -23,8 +23,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
-import de.braintags.netrelay.controller.querypool.template.dynamic.QueryPart;
 import de.braintags.vertx.jomnigate.mongo.MongoDataStore;
 import de.braintags.vertx.jomnigate.mysql.MySqlDataStore;
 import io.vertx.core.json.JsonObject;
@@ -124,14 +122,13 @@ public class TQueryTemplate {
   public void testDynamicQuery_invalidJson_multipleParts()
       throws JsonParseException, JsonMappingException, IOException {
     File jsonFile = new File(TEST_RESOURCE_PATH + "InvalidDynamicQuery_MultipleParts.json");
-
     ObjectMapper om = new ObjectMapper();
     try {
       om.readValue(jsonFile, QueryTemplate.class);
       Assert.fail("Expected JsonMappingException with InvalidSyntaxException as cause");
     } catch (JsonMappingException e) {
-      Assert.assertEquals("Expected InvalidSyntaxException at the constructor of " + QueryPart.class.getSimpleName(),
-          InvalidSyntaxException.class, e.getCause().getClass());
+      Assert.assertTrue("Expected message contains 'Missing required creator property', but is " + e.getMessage(),
+          e.getMessage().contains("Missing required creator property"));
     }
   }
 

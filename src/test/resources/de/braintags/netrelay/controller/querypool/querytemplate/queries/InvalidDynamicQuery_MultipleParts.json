@@ -9,21 +9,20 @@
         {
           "condition": {
             "field": "firstname",
-            "logic": "=",
             "value": "max"
           },
           "or": [
 	          {
 	          	"condition": {
 	            	"field": "score",
-	            	"logic": "=",
+	            	"logic": "EQUALS",
 	            	"value": 2.5
 	          	}
 	          },
 	          {
               "condition": {
                 "field": "zip",
-                "logic": "=",
+                "logic": "EQUALS",
                 "value": 47877
               }
             }
