@@ -39,14 +39,17 @@ public class ResourceTemplateResolver extends StringTemplateResolver {
     super();
     setName("vertx-web/Thymeleaf3");
     this.vertx = vertx;
-    this.templatePath = Paths.get(templateDir);
+    if (templateDir != null && templateDir != "") {
+      this.templatePath = Paths.get(templateDir);
+    }
+
   }
 
   @Override
   protected ITemplateResource computeTemplateResource(IEngineConfiguration configuration, String ownerTemplate,
       String template, Map<String, Object> templateResolutionAttributes) {
     String str;
-    if (ownerTemplate != null) {
+    if (ownerTemplate != null && templatePath != null) {
       str = Utils.readFileToString(vertx, templatePath.resolve(template).toString());
     } else {
       str = Utils.readFileToString(vertx, template);
