@@ -51,7 +51,7 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
   private ResourceTemplateResolver createResolver(Vertx vertx, boolean multiPath, String templateDirectory) {
     ResourceTemplateResolver ts = multiPath ? new MultiPathResourceResolver(vertx, templateDirectory)
-        : new ResourceTemplateResolver(vertx, templateDirectory);
+        : new ResourceTemplateResolver(vertx);
     ts.setTemplateMode(ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE);
     return ts;
   }
