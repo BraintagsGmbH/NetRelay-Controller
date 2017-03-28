@@ -44,7 +44,7 @@ public class MultiPathResourceResolver extends ResourceTemplateResolver {
    *
    */
   public MultiPathResourceResolver(Vertx vertx, String templateDirectory) {
-    super(vertx, templateDirectory);
+    super(vertx);
     this.templateDirectory = templateDirectory;
     setName("braintags/Thymeleaf3");
   }
@@ -66,16 +66,19 @@ public class MultiPathResourceResolver extends ResourceTemplateResolver {
     }
     String file = template;
     if (!vertx.fileSystem().existsBlocking(file)) {
-      String cpFile = templateDirectory + file;
+      if (file.startsWith(templateDirectory)) {
+        String cpFile = file.substring(templateDirectory.length());
         if (cpFile.startsWith("/")) {
-        cpFile = cpFile.substring(1);
+          cpFile = cpFile.substring(1);
         }
         if (vertx.fileSystem().existsBlocking(cpFile)) {
           file = cpFile;
         } else {
           throw new NoSuchFileException(String.format(NOT_FOUND, file, cpFile));
         }
-
+      } else {
+        throw new IllegalArgumentException("Wrong requested file, path does not start with template directory");
+      }
     }
     pathLookup.put(template, file);
     return file;
