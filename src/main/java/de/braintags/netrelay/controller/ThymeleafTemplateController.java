@@ -122,7 +122,7 @@ public class ThymeleafTemplateController extends AbstractController {
   public void handleController(RoutingContext context) {
     String path = context.request().path();
     addNetRelayToContext(context);
-    LOGGER.info("handling template for url " + context.normalisedPath() + " | " + path);
+    LOGGER.debug("handling template for url " + context.normalisedPath() + " | " + path);
     if (path.endsWith("/")) {
       LOGGER.info("REROUTING TO: " + path);
       path += "index.html";
@@ -134,7 +134,7 @@ public class ThymeleafTemplateController extends AbstractController {
 
   @Override
   public void initProperties(Properties properties) {
-    LOGGER.info("init " + getName());
+    LOGGER.debug("init " + getName());
     ThymeleafTemplateEngine thEngine = createTemplateEngine(getNetRelay().getVertx(), properties);
     templateHandler = TemplateHandler.create(thEngine, getTemplateDirectory(properties), getContentType(properties));
   }
