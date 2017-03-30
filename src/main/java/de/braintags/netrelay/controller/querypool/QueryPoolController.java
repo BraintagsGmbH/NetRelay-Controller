@@ -291,7 +291,7 @@ public class QueryPoolController extends AbstractController {
    */
   private void parseDynamicQuery(DynamicQuery dynamicQuery, IQuery<?> query) throws QueryPoolException {
     if (dynamicQuery.getRootQueryPart() != null) {
-      ISearchCondition searchCondition = parseQueryParts(dynamicQuery.getRootQueryPart(), query);
+      ISearchCondition searchCondition = dynamicQuery.getRootQueryPart().toSearchCondition();
       query.setSearchCondition(searchCondition);
     }
   }
