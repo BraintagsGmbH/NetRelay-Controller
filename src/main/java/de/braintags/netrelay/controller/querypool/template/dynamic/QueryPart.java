@@ -20,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
+import de.braintags.vertx.jomnigate.dataaccess.query.QueryOperator;
+import de.braintags.vertx.jomnigate.dataaccess.query.impl.QueryOr;
 
 /**
  * A part of a query. All parts together form the complete condition of this query. A part my be<br>
@@ -57,6 +60,41 @@ public class QueryPart {
     } else {
       throw new InvalidSyntaxException(
           "A query part must consist of exactly one 'and', 'or', or 'condition': " + and + " " + or + " " + condition);
+    }
+  }
+
+  /**
+   * Recursively convert this query part to an {@link ISearchCondition}
+   *
+   * @throws InvalidSyntaxException
+   *           if the part is of an unknown type
+   */
+  public ISearchCondition toSearchCondition() throws InvalidSyntaxException {
+    if (isAnd()) {
+      List<QueryPart> queryParts = getAnd();
+      ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
+      for (int i = 0; i < queryParts.size(); i++) {
+        ISearchCondition subQueryPart = queryParts.get(i).toSearchCondition();
+        searchConditions[i] = subQueryPart;
+      }
+      return ISearchCondition.and(searchConditions);
+    } else if (isOr()) {
+      List<QueryPart> queryParts = getOr();
+      ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
+      for (int i = 0; i < queryParts.size(); i++) {
+        ISearchCondition subQueryPart = queryParts.get(i).toSearchCondition();
+        searchConditions[i] = subQueryPart;
+      }
+      return new QueryOr(searchConditions);
+    } else if (isCondition()) {
+      Condition condition = getCondition();
+      String field = condition.getField();
+      QueryOperator operator = condition.getLogic();
+      Object value = condition.getValue();
+      // XXX a new IIndexedField is created here, better would be to check if there is an IIndexedField and fail if not
+      return ISearchCondition.condition(field, operator, value);
+    } else {
+      throw new InvalidSyntaxException("Query part is neither 'and' nor 'or' nor 'condition'");
     }
   }
 
