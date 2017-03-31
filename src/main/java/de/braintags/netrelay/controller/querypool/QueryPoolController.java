@@ -28,21 +28,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.querypool.exceptions.DatastoreNotFoundException;
-import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
 import de.braintags.netrelay.controller.querypool.exceptions.QueryPoolException;
 import de.braintags.netrelay.controller.querypool.template.DynamicQuery;
 import de.braintags.netrelay.controller.querypool.template.NativeQuery;
 import de.braintags.netrelay.controller.querypool.template.QueryTemplate;
-import de.braintags.netrelay.controller.querypool.template.dynamic.Condition;
-import de.braintags.netrelay.controller.querypool.template.dynamic.QueryPart;
 import de.braintags.netrelay.routing.RouterDefinition;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IFieldValueResolver;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQueryResult;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
-import de.braintags.vertx.jomnigate.dataaccess.query.QueryOperator;
-import de.braintags.vertx.jomnigate.dataaccess.query.impl.QueryOr;
 import de.braintags.vertx.util.exception.InitException;
 import de.braintags.vertx.util.exception.NoSuchFileException;
 import de.braintags.vertx.util.file.FileSystemUtil;
@@ -293,46 +288,6 @@ public class QueryPoolController extends AbstractController {
     if (dynamicQuery.getRootQueryPart() != null) {
       ISearchCondition searchCondition = dynamicQuery.getRootQueryPart().toSearchCondition();
       query.setSearchCondition(searchCondition);
-    }
-  }
-
-  /**
-   * Recursively convert the {@link DynamicQuery} of the {@link QueryTemplate} to an {@link ISearchCondition} of the
-   * {@link IQuery}.
-   *
-   * @param queryPart
-   *          the query part to convert
-   * @param query
-   *          the query, to create valid search condition parts
-   * @return the converted {@link ISearchCondition}
-   * @throws InvalidSyntaxException
-   *           if the part is of an unknown type
-   */
-  private ISearchCondition parseQueryParts(QueryPart queryPart, IQuery<?> query) throws QueryPoolException {
-    if (queryPart.isAnd()) {
-      List<QueryPart> queryParts = queryPart.getAnd();
-      ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
-      for (int i = 0; i < queryParts.size(); i++) {
-        ISearchCondition subQueryPart = parseQueryParts(queryParts.get(i), query);
-        searchConditions[i] = subQueryPart;
-      }
-      return ISearchCondition.and(searchConditions);
-    } else if (queryPart.isOr()) {
-      List<QueryPart> queryParts = queryPart.getOr();
-      ISearchCondition[] searchConditions = new ISearchCondition[queryParts.size()];
-      for (int i = 0; i < queryParts.size(); i++) {
-        ISearchCondition subQueryPart = parseQueryParts(queryParts.get(i), query);
-        searchConditions[i] = subQueryPart;
-      }
-      return new QueryOr(searchConditions);
-    } else if (queryPart.isCondition()) {
-      Condition condition = queryPart.getCondition();
-      String field = condition.getField();
-      QueryOperator operator = condition.getLogic();
-      Object value = condition.getValue();
-      return ISearchCondition.condition(field, operator, value);
-    } else {
-      throw new InvalidSyntaxException("Query part is neither 'and' nor 'or' nor 'condition'");
     }
   }
 
