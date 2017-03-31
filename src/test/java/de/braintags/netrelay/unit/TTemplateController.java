@@ -29,7 +29,7 @@ import io.vertx.ext.unit.TestContext;
 public class TTemplateController extends NetRelayBaseConnectorTest {
 
   /**
-   * Call a template with multipath, where the template exists not in template directory and as resource
+   * Call a template with multipath, where the template exists not in template directory, but exists as resource
    * 
    * @param context
    * @throws Exception
