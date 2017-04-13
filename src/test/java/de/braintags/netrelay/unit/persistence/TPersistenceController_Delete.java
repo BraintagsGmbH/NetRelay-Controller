@@ -50,7 +50,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
   private static final String DELETE_CITY_URL = "/country/deleteCity.html";
 
   @Test
-  public void testDeleteSubSubRecord(TestContext context) {
+  public void testDeleteSubSubRecord(final TestContext context) {
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(Country.class);
     IMapper cityMapper = netRelay.getDatastore().getMapperFactory().getMapper(City.class);
     IMapper streetMapper = netRelay.getDatastore().getMapperFactory().getMapper(Street.class);
@@ -72,7 +72,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
 
     // after this request the customer must contain the phone-number
-    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
+    Country savedCountry = DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
     context.assertNotNull(savedCountry, "could not find City in datastore");
     context.assertEquals(1, savedCountry.cities.size(), "Expected one city");
     context.assertNotNull(savedCountry.cities.get(0).streets, "streets are null");
@@ -81,7 +81,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
   }
 
   @Test
-  public void testDeleteSubRecord(TestContext context) {
+  public void testDeleteSubRecord(final TestContext context) {
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
     IMapper phoneMapper = netRelay.getDatastore().getMapperFactory().getMapper(TestPhone.class);
     TestCustomer customer = initCustomer(context);
@@ -103,13 +103,13 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
 
     // after this request the customer must contain the phone-number
-    TestCustomer savedCustomer = (TestCustomer) DatastoreBaseTest.findRecordByID(context, TestCustomer.class, id);
+    TestCustomer savedCustomer = DatastoreBaseTest.findRecordByID(context, TestCustomer.class, id);
     context.assertNotNull(savedCustomer, "could not find customer in datastore");
     context.assertEquals(0, savedCustomer.getPhoneNumbers().size(), "Expected zero phone numbers");
   }
 
   @Test
-  public void testDeleteRecord(TestContext context) {
+  public void testDeleteRecord(final TestContext context) {
     Async async1 = context.async();
     IWrite<SimpleNetRelayMapper> write = netRelay.getDatastore().createWrite(SimpleNetRelayMapper.class);
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
@@ -146,12 +146,12 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField(), id));
+    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdInfo().getIndexedField(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 
   @Test
-  public void testDeleteRecordAsParameter(TestContext context) {
+  public void testDeleteRecordAsParameter(final TestContext context) {
     Async async1 = context.async();
     IWrite<SimpleNetRelayMapper> write = netRelay.getDatastore().createWrite(SimpleNetRelayMapper.class);
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
@@ -188,7 +188,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     }
     async2.await();
     IQuery<SimpleNetRelayMapper> query = netRelay.getDatastore().createQuery(SimpleNetRelayMapper.class);
-    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField(), id));
+    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdInfo().getIndexedField(), id));
     DatastoreBaseTest.find(context, query, 0);
   }
 
@@ -198,7 +198,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
    * @see de.braintags.netrelay.NetRelayBaseTest#modifySettings(de.braintags.netrelay.init.Settings)
    */
   @Override
-  public void modifySettings(TestContext context, Settings settings) {
+  public void modifySettings(final TestContext context, final Settings settings) {
     super.modifySettings(context, settings);
     RouterDefinition persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/delete.html", "/products/delete2.html",

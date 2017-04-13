@@ -415,7 +415,7 @@ public class RecordContractor {
    * @return
    */
   public static final String createIdReference(IMapper mapper, Object record) {
-    IProperty idField = mapper.getIdField().getField();
+    IProperty idField = mapper.getIdInfo().getField();
     Object id = idField.getPropertyAccessor().readData(record);
     if (id == null) {
       throw new IllegalArgumentException("To create an id reference the field " + record.getClass().getName() + "."

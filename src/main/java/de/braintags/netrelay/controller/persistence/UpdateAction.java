@@ -35,7 +35,7 @@ public class UpdateAction extends InsertAction {
   /**
    * @param persitenceController
    */
-  public UpdateAction(PersistenceController persitenceController) {
+  public UpdateAction(final PersistenceController persitenceController) {
     super(persitenceController);
   }
 
@@ -51,8 +51,8 @@ public class UpdateAction extends InsertAction {
    * @param handler
    */
   @Override
-  protected void handleSubObject(RoutingContext context, String entityName, CaptureMap captureMap, IMapper<?> mapper,
-      Object mainObject, Handler<AsyncResult<Void>> handler) {
+  protected void handleSubObject(final RoutingContext context, final String entityName, final CaptureMap captureMap, final IMapper<?> mapper,
+      final Object mainObject, final Handler<AsyncResult<Void>> handler) {
     InsertParameter ip = RecordContractor.resolveUpdateParameter(mapper.getMapperFactory(), mainObject, captureMap);
     String subEntityName = ip.getFieldPath();
     Map<String, String> params = extractProperties(subEntityName, captureMap, context, ip.getSubObjectMapper());
@@ -74,15 +74,15 @@ public class UpdateAction extends InsertAction {
    * io.vertx.ext.web.RoutingContext)
    */
   @Override
-  protected Map<String, String> extractProperties(String entityName, CaptureMap captureMap, RoutingContext context,
-      IMapper mapper) {
+  protected Map<String, String> extractProperties(final String entityName, final CaptureMap captureMap, final RoutingContext context,
+      final IMapper mapper) {
     Map<String, String> map = super.extractProperties(entityName, captureMap, context, mapper);
     List<String[]> ids = RecordContractor.extractIds(mapper, captureMap);
     boolean idFieldFound = false;
     for (String[] id : ids) {
-      if (id[0].equalsIgnoreCase(mapper.getIdField().getFieldName())) {
+      if (id[0].equalsIgnoreCase(mapper.getIdInfo().getIndexedField().getFieldName())) {
         idFieldFound = true;
-        map.put(mapper.getIdField().getFieldName().toLowerCase(), id[1]);
+        map.put(mapper.getIdInfo().getIndexedField().getFieldName().toLowerCase(), id[1]);
       }
     }
     if (!idFieldFound) {
