@@ -45,7 +45,7 @@ public class MemberUtil {
    *
    * @param context
    */
-  public static final void recoverContextUser(RoutingContext context) {
+  public static final void recoverContextUser(final RoutingContext context) {
     if (context.user() == null && context.session() != null && context.session().get(USER_PROPERTY_BT) != null) {
       context.setUser(context.session().get(USER_PROPERTY_BT));
     }
@@ -58,7 +58,7 @@ public class MemberUtil {
    * @param context
    * @param user
    */
-  public static final void setContextUser(RoutingContext context, User user) {
+  public static final void setContextUser(final RoutingContext context, final User user) {
     context.setUser(user);
     if (context.session() != null) {
       context.session().put(USER_PROPERTY_BT, user);
@@ -70,7 +70,7 @@ public class MemberUtil {
    *
    * @param context
    */
-  public static final void logout(RoutingContext context) {
+  public static final void logout(final RoutingContext context) {
     context.clearUser();
     if (context.session() != null) {
       context.session().remove(USER_PROPERTY_BT);
@@ -92,8 +92,8 @@ public class MemberUtil {
    *          the result habndler, which is getting a found instance of IAuthenticatable or null, if no user is logged
    *          in
    */
-  public static final void getCurrentUser(RoutingContext context, NetRelay netRelay,
-      Handler<AsyncResult<IAuthenticatable>> resultHandler) {
+  public static final void getCurrentUser(final RoutingContext context, final NetRelay netRelay,
+      final Handler<AsyncResult<IAuthenticatable>> resultHandler) {
     IAuthenticatable member = getCurrentUser(context);
     if (member != null) {
       resultHandler.handle(Future.succeededFuture(member));
@@ -116,8 +116,8 @@ public class MemberUtil {
    * @param user
    * @param resultHandler
    */
-  private static void readUser(RoutingContext context, NetRelay netRelay, User user,
-      Handler<AsyncResult<IAuthenticatable>> resultHandler) {
+  private static void readUser(final RoutingContext context, final NetRelay netRelay, final User user,
+      final Handler<AsyncResult<IAuthenticatable>> resultHandler) {
     Class<? extends IAuthenticatable> mapperClass = getMapperClass(context, netRelay);
     if (user instanceof MongoUser) {
       readMongoUser(context, netRelay, (MongoUser) user, resultHandler, mapperClass);
@@ -137,11 +137,11 @@ public class MemberUtil {
    * @param resultHandler
    * @param mapperClass
    */
-  private static void readMongoUser(RoutingContext context, NetRelay netRelay, MongoUser user,
-      Handler<AsyncResult<IAuthenticatable>> resultHandler, Class<? extends IAuthenticatable> mapperClass) {
+  private static void readMongoUser(final RoutingContext context, final NetRelay netRelay, final MongoUser user,
+      final Handler<AsyncResult<IAuthenticatable>> resultHandler, final Class<? extends IAuthenticatable> mapperClass) {
     String id = user.principal().getString("_id");
     IQuery<? extends IAuthenticatable> query = netRelay.getDatastore().createQuery(mapperClass);
-    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdField(), id));
+    query.setSearchCondition(ISearchCondition.isEqual(query.getMapper().getIdInfo().getIndexedField(), id));
     query.execute(qr -> {
       if (qr.failed()) {
         resultHandler.handle(Future.failedFuture(qr.cause()));
@@ -164,7 +164,7 @@ public class MemberUtil {
   }
 
   @SuppressWarnings("unchecked")
-  private static Class<? extends IAuthenticatable> getMapperClass(RoutingContext context, NetRelay netRelay) {
+  private static Class<? extends IAuthenticatable> getMapperClass(final RoutingContext context, final NetRelay netRelay) {
     String mapperName = context.user().principal().getString(AuthenticationController.MAPPERNAME_IN_PRINCIPAL);
     if (mapperName == null) {
       throw new IllegalArgumentException("No mapper definition found in principal");
@@ -183,7 +183,7 @@ public class MemberUtil {
    * @param context
    * @return
    */
-  public static IAuthenticatable getCurrentUser(RoutingContext context) {
+  public static IAuthenticatable getCurrentUser(final RoutingContext context) {
     return context.session().get(IAuthenticatable.CURRENT_USER_PROPERTY);
   }
 
@@ -193,7 +193,7 @@ public class MemberUtil {
    * @param user
    * @param context
    */
-  public static final void setCurrentUser(IAuthenticatable user, RoutingContext context) {
+  public static final void setCurrentUser(final IAuthenticatable user, final RoutingContext context) {
     context.session().put(IAuthenticatable.CURRENT_USER_PROPERTY, user);
   }
 
@@ -202,7 +202,7 @@ public class MemberUtil {
    *
    * @param context
    */
-  public static final void removeCurrentUser(RoutingContext context) {
+  public static final void removeCurrentUser(final RoutingContext context) {
     context.session().remove(IAuthenticatable.CURRENT_USER_PROPERTY);
   }
 
