@@ -24,6 +24,4 @@ test {
   systemProperty 'IDatastoreContainer', 'de.braintags.vertx.jomnigate.mongo.vertxunit.MongoDataStoreContainer'
   systemProperty 'startMongoLocal', 'true'
   systemProperty 'db_name', 'NetRelayControllerDatabase'
-  systemProperty 'mailClientUserName', mailClientUserName
-  systemProperty 'mailClientPassword', mailClientPassword
 }
