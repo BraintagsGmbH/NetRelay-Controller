@@ -14,7 +14,7 @@ package de.braintags.netrelay.controller;
 
 import java.util.Properties;
 
-import de.braintags.netrelay.RequestUtil;
+import de.braintags.vertx.util.request.RequestUtil;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.VirtualHostHandler;
 

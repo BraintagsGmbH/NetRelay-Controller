@@ -14,12 +14,12 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.init.Settings;
 import de.braintags.netrelay.routing.RouterDefinition;
+import de.braintags.vertx.util.request.RequestUtil;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;

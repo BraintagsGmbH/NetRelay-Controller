@@ -15,7 +15,6 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.List;
 import java.util.Properties;
 
-import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.AbstractController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.api.MailController.MailSendResult;
@@ -29,6 +28,7 @@ import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.dataaccess.write.IWrite;
 import de.braintags.vertx.jomnigate.util.QueryHelper;
 import de.braintags.vertx.util.exception.InitException;
+import de.braintags.vertx.util.request.RequestUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
