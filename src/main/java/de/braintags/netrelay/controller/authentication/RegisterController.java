@@ -20,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
-import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.api.MailController.MailSendResult;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -37,6 +36,7 @@ import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.jomnigate.mapping.IStoreObjectFactory;
 import de.braintags.vertx.jomnigate.util.QueryHelper;
 import de.braintags.vertx.util.exception.InitException;
+import de.braintags.vertx.util.request.RequestUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

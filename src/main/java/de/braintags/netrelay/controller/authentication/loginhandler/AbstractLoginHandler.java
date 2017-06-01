@@ -3,8 +3,8 @@ package de.braintags.netrelay.controller.authentication.loginhandler;
 import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
-import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
+import de.braintags.vertx.util.request.RequestUtil;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;

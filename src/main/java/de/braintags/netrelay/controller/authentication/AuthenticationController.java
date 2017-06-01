@@ -15,7 +15,6 @@ package de.braintags.netrelay.controller.authentication;
 import java.util.Properties;
 
 import de.braintags.netrelay.MemberUtil;
-import de.braintags.netrelay.RequestUtil;
 import de.braintags.netrelay.controller.authentication.loginhandler.FormLoginHandlerBt;
 import de.braintags.netrelay.controller.authentication.loginhandler.LoginHandler;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
@@ -24,6 +23,7 @@ import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.impl.DataStoreAuth;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.util.exception.InitException;
+import de.braintags.vertx.util.request.RequestUtil;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.mongo.MongoAuth;
 import io.vertx.ext.web.RoutingContext;
