@@ -41,7 +41,7 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
  */
 public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
-  private final TemplateEngine     templateEngine = new TemplateEngine();
+  private final TemplateEngine templateEngine = new TemplateEngine();
   private ResourceTemplateResolver templateResolver;
 
   public ThymeleafTemplateEngineImplBt(Vertx vertx, boolean multiPath, String templateDirectory) {
@@ -68,7 +68,9 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
   }
 
   @Override
-  public void render(RoutingContext context, String templateFileName, Handler<AsyncResult<Buffer>> handler) {
+  public void render(RoutingContext context, String templateDirectory, String templateFileName,
+      Handler<AsyncResult<Buffer>> handler) {
+    String fileName = templateDirectory + templateFileName;
     Buffer buffer = Buffer.buffer();
 
     Map<String, Object> data = new HashMap<>();
@@ -86,7 +88,7 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
         locale = acceptableLocales.get(0);
       }
 
-      templateEngine.process(templateFileName, new WebIContext(data, locale), new Writer() {
+      templateEngine.process(fileName, new WebIContext(data, locale), new Writer() {
         @Override
         public void write(char[] cbuf, int off, int len) throws IOException {
           buffer.appendString(new String(cbuf, off, len));
@@ -109,7 +111,7 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
   private static class WebIContext implements IContext {
     private final Map<String, Object> data;
-    private final java.util.Locale    locale;
+    private final java.util.Locale locale;
 
     private WebIContext(Map<String, Object> data, LanguageHeader locale) {
       this.data = data;
@@ -145,5 +147,4 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
       return data.get(name);
     }
   }
-
 }
