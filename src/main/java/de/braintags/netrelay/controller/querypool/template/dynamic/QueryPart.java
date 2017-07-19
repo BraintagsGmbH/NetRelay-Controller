@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.braintags.netrelay.controller.querypool.exceptions.InvalidSyntaxException;
 import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.dataaccess.query.QueryOperator;
+import de.braintags.vertx.jomnigate.dataaccess.query.impl.QueryNot;
 import de.braintags.vertx.jomnigate.dataaccess.query.impl.QueryOr;
 
 /**
@@ -43,6 +44,7 @@ public class QueryPart {
   private List<QueryPart> and;
   private List<QueryPart> or;
   private Condition condition;
+  private final QueryPart not;
 
   /**
    * The constructor filling the fields of this part. Exactly one of the given parameters must not be null, the others
@@ -52,15 +54,22 @@ public class QueryPart {
    */
   @JsonCreator
   public QueryPart(@JsonProperty("and") List<QueryPart> and, @JsonProperty("or") List<QueryPart> or,
+      @JsonProperty("not") QueryPart not,
       @JsonProperty("condition") Condition condition) throws InvalidSyntaxException {
-    if (and != null ^ or != null ^ condition != null ^ (and != null && or != null && condition != null)) {
+    if (count(and) + count(or) + count(not) + count(condition) == 1) {
       this.and = and;
       this.or = or;
+      this.not = not;
       this.condition = condition;
     } else {
       throw new InvalidSyntaxException(
-          "A query part must consist of exactly one 'and', 'or', or 'condition': " + and + " " + or + " " + condition);
+          "A query part must consist of exactly one 'and', 'or', 'not', or 'condition': " + and + " " + or + " " + not
+              + " " + condition);
     }
+  }
+
+  private int count(Object condition) {
+    return condition != null ? 1 : 0;
   }
 
   /**
@@ -86,6 +95,8 @@ public class QueryPart {
         searchConditions[i] = subQueryPart;
       }
       return new QueryOr(searchConditions);
+    } else if (isNot()) {
+      return new QueryNot(not.toSearchCondition());
     } else if (isCondition()) {
       Condition condition = getCondition();
       String field = condition.getField();
@@ -113,6 +124,13 @@ public class QueryPart {
   }
 
   /**
+   * @return if this query part is a "not" part
+   */
+  public boolean isNot() {
+    return not != null;
+  }
+
+  /**
    * @return if this query part is a "condition" part
    */
   public boolean isCondition() {
@@ -133,6 +151,14 @@ public class QueryPart {
   public List<QueryPart> getOr() {
     assert isOr();
     return or;
+  }
+
+  /**
+   * @return the query parts inside this "not" part
+   */
+  public QueryPart getNot() {
+    assert isNot();
+    return not;
   }
 
   /**
