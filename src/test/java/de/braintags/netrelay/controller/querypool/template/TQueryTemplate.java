@@ -59,6 +59,24 @@ public class TQueryTemplate {
   }
 
   /**
+   * Test the parsing of a valid JSON of a dynamic query that has an 'and' part at the beginning
+   *
+   * @throws JsonParseException
+   * @throws JsonMappingException
+   * @throws IOException
+   */
+  @Test
+  public void testDynamicQuery_validJson_notFirst() throws JsonParseException, JsonMappingException, IOException {
+    File jsonFile = new File(TEST_RESOURCE_PATH + "ValidDynamicQuery_NotFirst.json");
+
+    ObjectMapper om = new ObjectMapper();
+    QueryTemplate queryTemplate = om.readValue(jsonFile, QueryTemplate.class);
+
+    DynamicQuery dynamicQuery = queryTemplate.getDynamicQuery();
+    Assert.assertTrue("First part should be 'not'", dynamicQuery.getRootQueryPart().isNot());
+  }
+
+  /**
    * Test the parsing of a valid JSON of a dynamic query that has a 'condition' part at the beginning
    *
    * @throws JsonParseException
