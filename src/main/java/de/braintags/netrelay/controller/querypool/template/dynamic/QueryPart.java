@@ -56,7 +56,7 @@ public class QueryPart {
   public QueryPart(@JsonProperty("and") List<QueryPart> and, @JsonProperty("or") List<QueryPart> or,
       @JsonProperty("not") QueryPart not,
       @JsonProperty("condition") Condition condition) throws InvalidSyntaxException {
-    if (count(and) + count(or) + count(not) + count(condition) != 1) {
+    if (count(and) + count(or) + count(not) + count(condition) == 1) {
       this.and = and;
       this.or = or;
       this.not = not;
