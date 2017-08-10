@@ -12,6 +12,8 @@
  */
 package de.braintags.netrelay;
 
+import java.util.Optional;
+
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.impl.DatastoreUser;
@@ -63,6 +65,16 @@ public class MemberUtil {
     if (context.session() != null) {
       context.session().put(USER_PROPERTY_BT, user);
     }
+  }
+
+  /**
+   * Gets the current context user if it exists.
+   * 
+   * @param context
+   * @return the current user as {@link Optional}
+   */
+  public static final Optional<User> getContextUser(final RoutingContext context) {
+    return Optional.ofNullable(context.session().get(USER_PROPERTY_BT));
   }
 
   /**
