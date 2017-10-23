@@ -42,22 +42,28 @@ import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
   private final TemplateEngine templateEngine = new TemplateEngine();
-  private ResourceTemplateResolver templateResolver;
+  private final ResourceTemplateResolver templateResolver;
 
-  public ThymeleafTemplateEngineImplBt(Vertx vertx, boolean multiPath, String templateDirectory) {
-    this.templateResolver = createResolver(vertx, multiPath, templateDirectory);
+  private final boolean cacheEnabled;
+
+  public ThymeleafTemplateEngineImplBt(final Vertx vertx, final boolean multiPath, final String templateDirectory,
+      final boolean cacheEnabled) {
+    this.templateResolver = createResolver(vertx, multiPath, templateDirectory, cacheEnabled);
+    this.cacheEnabled = cacheEnabled;
     this.templateEngine.setTemplateResolver(templateResolver);
   }
 
-  private ResourceTemplateResolver createResolver(Vertx vertx, boolean multiPath, String templateDirectory) {
+  private ResourceTemplateResolver createResolver(final Vertx vertx, final boolean multiPath,
+      final String templateDirectory, final boolean cacheEnabled) {
     ResourceTemplateResolver ts = multiPath ? new MultiPathResourceResolver(vertx, templateDirectory)
         : new ResourceTemplateResolver(vertx, templateDirectory);
     ts.setTemplateMode(ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE);
+    ts.setCacheable(cacheEnabled);
     return ts;
   }
 
   @Override
-  public ThymeleafTemplateEngine setMode(TemplateMode mode) {
+  public ThymeleafTemplateEngine setMode(final TemplateMode mode) {
     templateResolver.setTemplateMode(TemplateMode.HTML);
     return this;
   }
@@ -68,8 +74,13 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
   }
 
   @Override
-  public void render(RoutingContext context, String templateDirectory, String templateFileName,
-      Handler<AsyncResult<Buffer>> handler) {
+  public boolean isCachingEnabled() {
+    return cacheEnabled;
+  }
+
+  @Override
+  public void render(final RoutingContext context, final String templateDirectory, final String templateFileName,
+      final Handler<AsyncResult<Buffer>> handler) {
     String fileName = templateDirectory + templateFileName;
     Buffer buffer = Buffer.buffer();
 
@@ -90,7 +101,7 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
 
       templateEngine.process(fileName, new WebIContext(data, locale), new Writer() {
         @Override
-        public void write(char[] cbuf, int off, int len) throws IOException {
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
           buffer.appendString(new String(cbuf, off, len));
         }
 
@@ -113,12 +124,12 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
     private final Map<String, Object> data;
     private final java.util.Locale locale;
 
-    private WebIContext(Map<String, Object> data, LanguageHeader locale) {
+    private WebIContext(final Map<String, Object> data, final LanguageHeader locale) {
       this.data = data;
       this.locale = locale == null ? java.util.Locale.getDefault() : generate(locale);
     }
 
-    private static java.util.Locale generate(LanguageHeader locale) {
+    private static java.util.Locale generate(final LanguageHeader locale) {
       String variant;
       String lang = locale.tag();
       String country = locale.subtag();
@@ -133,7 +144,7 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
     }
 
     @Override
-    public boolean containsVariable(String name) {
+    public boolean containsVariable(final String name) {
       return data.containsKey(name);
     }
 
@@ -143,7 +154,7 @@ public class ThymeleafTemplateEngineImplBt implements ThymeleafTemplateEngine {
     }
 
     @Override
-    public Object getVariable(String name) {
+    public Object getVariable(final String name) {
       return data.get(name);
     }
   }

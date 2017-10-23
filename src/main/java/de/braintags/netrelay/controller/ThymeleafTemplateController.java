@@ -119,7 +119,7 @@ public class ThymeleafTemplateController extends AbstractController {
    * @see io.vertx.core.Handler#handle(java.lang.Object)
    */
   @Override
-  public void handleController(RoutingContext context) {
+  public void handleController(final RoutingContext context) {
     String path = context.request().path();
     addNetRelayToContext(context);
     LOGGER.debug("handling template for url " + context.normalisedPath() + " | " + path);
@@ -133,7 +133,7 @@ public class ThymeleafTemplateController extends AbstractController {
   }
 
   @Override
-  public void initProperties(Properties properties) {
+  public void initProperties(final Properties properties) {
     LOGGER.debug("init " + getName());
     ThymeleafTemplateEngine thEngine = createTemplateEngine(getNetRelay().getVertx(), properties);
     templateHandler = TemplateHandler.create(thEngine, getTemplateDirectory(properties), getContentType(properties));
@@ -145,21 +145,20 @@ public class ThymeleafTemplateController extends AbstractController {
    * @param properties
    * @return
    */
-  public static ThymeleafTemplateEngine createTemplateEngine(Vertx vertx, Properties properties) {
-
+  public static ThymeleafTemplateEngine createTemplateEngine(final Vertx vertx, final Properties properties) {
     boolean multiPath = Boolean.valueOf((String) properties.getOrDefault(MULTIPATH_PROPERTY, "false"));
+    boolean cacheEnabled = Boolean.valueOf((String) properties.getOrDefault(CACHE_ENABLED_PROPERTY, "false"));
     ThymeleafTemplateEngine thEngine = new ThymeleafTemplateEngineImplBt(vertx, multiPath,
-        getTemplateDirectory(properties));
+        getTemplateDirectory(properties), cacheEnabled);
     String tms = properties.getProperty(TEMPLATE_MODE_PROPERTY, ThymeleafTemplateEngine.DEFAULT_TEMPLATE_MODE.name());
     TemplateMode tm = TemplateMode.valueOf(tms);
     thEngine.setMode(tm);
-    setCachable(thEngine, properties);
     addDialects(thEngine, properties);
     return thEngine;
   }
 
   @SuppressWarnings("unchecked")
-  private static void addDialects(ThymeleafTemplateEngine thEngine, Properties properties) {
+  private static void addDialects(final ThymeleafTemplateEngine thEngine, final Properties properties) {
     try {
       String dP = (String) properties.getOrDefault(DIALECTS_PROPERTY, null);
       if (dP != null && dP.hashCode() != 0) {
@@ -187,16 +186,12 @@ public class ThymeleafTemplateController extends AbstractController {
    *          the configuration
    * @return the defined value inside the properties or {@value #DEFAULT_TEMPLATE_DIRECTORY}
    */
-  public static String getTemplateDirectory(Properties props) {
+  public static String getTemplateDirectory(final Properties props) {
     return (String) props.getOrDefault(TEMPLATE_DIRECTORY_PROPERTY, DEFAULT_TEMPLATE_DIRECTORY);
   }
 
-  private String getContentType(Properties props) {
+  private String getContentType(final Properties props) {
     return (String) props.getOrDefault(CONTENT_TYPE_PROPERTY, DEFAULT_CONTENT_TYPE);
-  }
-
-  private static void setCachable(ThymeleafTemplateEngine thEngine, Properties properties) {
-    LOGGER.warn("CACHING property currently unsupported since version 3 of Thymeleaf");
   }
 
   /**
