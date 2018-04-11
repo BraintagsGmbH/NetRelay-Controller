@@ -87,6 +87,7 @@ public class MemberUtil {
     if (context.session() != null) {
       context.session().remove(USER_PROPERTY_BT);
       removeCurrentUser(context);
+      context.session().destroy();
     }
   }
 
