@@ -15,7 +15,7 @@ package de.braintags.netrelay.unit;
 import org.junit.Test;
 
 import de.braintags.netrelay.controller.Action;
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.authentication.PasswordLostController;
 import de.braintags.netrelay.controller.authentication.RegisterController;
@@ -59,7 +59,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testSubobject_Role_HasNoUpdatePermission(TestContext context) throws Exception {
+  public void testSubobject_Role_HasNoUpdatePermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "users");
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
     IMapper phoneMapper = netRelay.getDatastore().getMapperFactory().getMapper(TestPhone.class);
@@ -94,7 +94,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasNoUpdatePermission(TestContext context) throws Exception {
+  public void testRole_HasNoUpdatePermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
     testExpectsPersistenceNOK(context, member, mapper, "role: admin{U}", PROTECTED_PERSISTENCE_URL, Action.UPDATE);
@@ -107,7 +107,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasUpdatePermission(TestContext context) throws Exception {
+  public void testRole_HasUpdatePermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
     testExpectsPersistenceOK(context, member, mapper, "role: admin{U}", PROTECTED_PERSISTENCE_URL, Action.UPDATE);
@@ -120,7 +120,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasNoDeletePermission(TestContext context) throws Exception {
+  public void testRole_HasNoDeletePermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
     testExpectsPersistenceNOK(context, member, mapper, "role: admin{D}", PROTECTED_PERSISTENCE_URL, Action.DISPLAY);
@@ -133,7 +133,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasDeletePermission(TestContext context) throws Exception {
+  public void testRole_HasDeletePermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
     testExpectsPersistenceOK(context, member, mapper, "role: admin{D}", PROTECTED_PERSISTENCE_URL, Action.DELETE);
@@ -146,7 +146,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasNoReadPermission(TestContext context) throws Exception {
+  public void testRole_HasNoReadPermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
     testExpectsPersistenceNOK(context, member, mapper, "role: admin{R}", PROTECTED_PERSISTENCE_URL, Action.DISPLAY);
@@ -159,7 +159,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasReadPermission(TestContext context) throws Exception {
+  public void testRole_HasReadPermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     SimpleNetRelayMapper mapper = createInstance(context, true);
     testExpectsPersistenceOK(context, member, mapper, "role: admin{R}", PROTECTED_PERSISTENCE_URL, Action.DISPLAY);
@@ -172,7 +172,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasWildcardPermission(TestContext context) throws Exception {
+  public void testRole_HasWildcardPermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsPersistenceOK(context, member, null, "role: *{C}", PROTECTED_PERSISTENCE_URL, Action.INSERT);
   }
@@ -184,7 +184,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_CheckTwoMembers(TestContext context) throws Exception {
+  public void testRole_CheckTwoMembers(final TestContext context) throws Exception {
     Member admin = createMember(context, true, "TestUser3", "admin", "users");
     Member user = createMember(context, false, "TestUser4", "users");
     testExpectsPersistenceOK(context, admin, null, "role: admin{C}, users, bookers", PROTECTED_PERSISTENCE_URL,
@@ -200,7 +200,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasNoInsertPermission(TestContext context) throws Exception {
+  public void testRole_HasNoInsertPermission(final TestContext context) throws Exception {
     Member admin = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsPersistenceNOK(context, admin, null, "role: admin, users, bookers", PROTECTED_PERSISTENCE_URL,
         Action.INSERT);
@@ -213,7 +213,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_HasInsertPermission(TestContext context) throws Exception {
+  public void testRole_HasInsertPermission(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsPersistenceOK(context, member, null, "role: admin{C}, users, bookers", PROTECTED_PERSISTENCE_URL,
         Action.INSERT);
@@ -227,7 +227,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_Wildcard(TestContext context) throws Exception {
+  public void testRole_Wildcard(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsOK(context, member, "role: *");
   }
@@ -240,7 +240,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_UserHasRole3(TestContext context) throws Exception {
+  public void testRole_UserHasRole3(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsOK(context, member, "role: admin, users, bookers");
   }
@@ -253,7 +253,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_UserHasRole2(TestContext context) throws Exception {
+  public void testRole_UserHasRole2(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin", "users");
     testExpectsOK(context, member, "role: admin");
   }
@@ -266,7 +266,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_UserHasRole(TestContext context) throws Exception {
+  public void testRole_UserHasRole(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser3", "admin");
     testExpectsOK(context, member, "role: admin");
   }
@@ -279,7 +279,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testRole_UserNoRole(TestContext context) throws Exception {
+  public void testRole_UserNoRole(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser2", null);
     testExpectsForbidden(context, member, "role: admin");
   }
@@ -291,7 +291,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testNoPermissions(TestContext context) throws Exception {
+  public void testNoPermissions(final TestContext context) throws Exception {
     Member member = createMember(context, true, "TestUser1", null);
     testExpectsOK(context, member, null);
   }
@@ -302,7 +302,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
-  public void testExpectsForbidden(TestContext context, Member member, String permissions) throws Exception {
+  public void testExpectsForbidden(final TestContext context, final Member member, final String permissions) throws Exception {
     resetRoutes(permissions);
     String cookie = login(context, member);
     if (cookie != null) {
@@ -322,8 +322,8 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
-  public void testExpectsPersistenceNOK(TestContext context, Member member, SimpleNetRelayMapper mapper,
-      String templatePermissions, String url, Action action) throws Exception {
+  public void testExpectsPersistenceNOK(final TestContext context, final Member member, final SimpleNetRelayMapper mapper,
+      final String templatePermissions, String url, final Action action) throws Exception {
     resetRoutes(templatePermissions);
     if (action.equals(Action.INSERT)) {
       url = String.format(url + "?action=%s&entity=%s", "INSERT", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
@@ -352,8 +352,8 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
-  public void testExpectsPersistenceOK(TestContext context, Member member, SimpleNetRelayMapper mapper,
-      String templatePermissions, String url, Action action) throws Exception {
+  public void testExpectsPersistenceOK(final TestContext context, final Member member, final SimpleNetRelayMapper mapper,
+      final String templatePermissions, String url, final Action action) throws Exception {
     resetRoutes(templatePermissions);
     if (action.equals(Action.INSERT)) {
       url = String.format(url + "?action=%s&entity=%s", "INSERT", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
@@ -383,7 +383,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @throws Exception
    */
-  public void testExpectsOK(TestContext context, Member member, String permissions) throws Exception {
+  public void testExpectsOK(final TestContext context, final Member member, final String permissions) throws Exception {
     resetRoutes(permissions);
     String cookie = login(context, member);
     if (cookie != null) {
@@ -405,7 +405,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
   /**
    * Perform login and return cookie
    */
-  public String login(TestContext context, Member member) {
+  public String login(final TestContext context, final Member member) {
     Buffer cookie = Buffer.buffer();
     try {
       MultipartUtil mu = new MultipartUtil();
@@ -433,7 +433,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * @param context
    * @return
    */
-  private Member createMember(TestContext context, boolean clearTable, String username, String... roles) {
+  private Member createMember(final TestContext context, final boolean clearTable, final String username, final String... roles) {
     if (clearTable) {
       DatastoreBaseTest.clearTable(context, Member.class);
     }
@@ -451,7 +451,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
     return member;
   }
 
-  private void improveRedirect(String redirectPath, TestContext context, ResponseCopy resp) {
+  private void improveRedirect(final String redirectPath, final TestContext context, final ResponseCopy resp) {
     context.assertTrue(resp.headers.contains("location"), "parameter location does not exist");
     context.assertTrue(resp.headers.get("location").startsWith(redirectPath), "Expected redirect to " + redirectPath);
   }
@@ -463,7 +463,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * de.braintags.netrelay.init.Settings)
    */
   @Override
-  public void modifySettings(TestContext context, Settings settings) {
+  public void modifySettings(final TestContext context, final Settings settings) {
     super.modifySettings(context, settings);
 
     RouterDefinition def = AuthenticationController.createDefaultRouterDefinition();
@@ -472,7 +472,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put("collectionName", "Member");
     def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
         AuthenticationController.AUTH_PROVIDER_DATASTORE);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
 
     def = RegisterController.createDefaultRouterDefinition();
     def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "Member");
@@ -498,7 +498,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
    * 
    * @throws Exception
    */
-  private void resetRoutes(String permissions) throws Exception {
+  private void resetRoutes(final String permissions) throws Exception {
     RouterDefinition def1 = netRelay.getSettings().getRouterDefinitions()
         .getNamedDefinition(AuthenticationController.class.getSimpleName());
     if (permissions != null) {
@@ -515,7 +515,7 @@ public class TAuthorization extends NetRelayBaseConnectorTest {
     netRelay.resetRoutes();
   }
 
-  private SimpleNetRelayMapper createInstance(TestContext context, boolean resetTable) {
+  private SimpleNetRelayMapper createInstance(final TestContext context, final boolean resetTable) {
     if (resetTable) {
       DatastoreBaseTest.clearTable(context, SimpleNetRelayMapper.class);
     }

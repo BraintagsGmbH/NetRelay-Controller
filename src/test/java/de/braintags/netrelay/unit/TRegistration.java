@@ -16,8 +16,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
 import de.braintags.netrelay.controller.CurrentMemberController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
@@ -274,7 +274,7 @@ public class TRegistration extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put("collectionName", "Member");
     def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
         AuthenticationController.AUTH_PROVIDER_DATASTORE);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
 
     RouterDefinition cmc = settings.getRouterDefinitions().remove(CurrentMemberController.class.getSimpleName());
     if (cmc == null) {

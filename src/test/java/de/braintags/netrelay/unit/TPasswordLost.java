@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.controller.authentication.PasswordLostCode;
@@ -201,7 +201,7 @@ public class TPasswordLost extends NetRelayBaseConnectorTest {
         "/customer/passwordLostConfirmSuccess.html");
     def.getHandlerProperties().put(PasswordLostController.PW_RESET_FAIL_URL_PROP, "/customer/passwordLostError.html");
     def.getHandlerProperties().put(PasswordLostController.EMAIL_FIELD_NAME_PROP, EMAIL_PROPERTY);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
     initMailClient(settings);
   }
 

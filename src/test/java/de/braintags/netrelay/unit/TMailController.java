@@ -14,7 +14,7 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.ThymeleafTemplateController;
 import de.braintags.netrelay.controller.api.MailController;
 import de.braintags.netrelay.init.Settings;
@@ -210,7 +210,7 @@ public class TMailController extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put(ThymeleafTemplateController.TEMPLATE_DIRECTORY_PROPERTY, "testTemplates");
     def.getHandlerProperties().put(MailController.INLINE_PROP, "false");
 
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
   }
 
   private void resetRoutes(boolean sendInline) throws Exception {

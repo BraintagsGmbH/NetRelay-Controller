@@ -20,6 +20,7 @@ import de.braintags.vertx.util.security.CRUDPermissionMap;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AuthProvider;
@@ -63,7 +64,13 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
       User user = context.user();
       if (user != null) {
         // Already logged in, just authorise
-        authorise(user, context);
+        authorize(user, res -> {
+          if (res.succeeded()) {
+            context.next();
+          } else {
+            context.fail(res.cause());
+          }
+        });
       } else {
         // Now redirect to the login url - we'll get redirected back here after successful login
         String url = RequestUtil.createRedirectUrl(context, context.request().path());
@@ -73,7 +80,11 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
     } else {
       context.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
     }
+  }
 
+  @Override
+  public void parseCredentials(final RoutingContext context, final Handler<AsyncResult<JsonObject>> handler) {
+    handler.handle(Future.succeededFuture());
   }
 
   @Override

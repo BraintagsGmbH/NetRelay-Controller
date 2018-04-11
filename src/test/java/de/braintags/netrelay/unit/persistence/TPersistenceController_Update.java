@@ -15,7 +15,7 @@ package de.braintags.netrelay.unit.persistence;
 import org.junit.Test;
 
 import de.braintags.netrelay.controller.Action;
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
@@ -51,7 +51,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   private static final String UPDATE_CITY_URL = "/country/updateCity.html";
 
   @Test
-  public void testUpdateSubRecord(TestContext context) {
+  public void testUpdateSubRecord(final TestContext context) {
     String newNumber = "222232323";
     CheckController.checkMapperName = TestCustomer.class.getSimpleName();
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
@@ -79,7 +79,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
     }
 
     // after this request the customer must contain the phone-number
-    TestCustomer savedCustomer = (TestCustomer) DatastoreBaseTest.findRecordByID(context, TestCustomer.class,
+    TestCustomer savedCustomer = DatastoreBaseTest.findRecordByID(context, TestCustomer.class,
         customer.getId());
     context.assertEquals(1, savedCustomer.getPhoneNumbers().size(), "Expected two phone numbers");
     boolean found = false;
@@ -98,7 +98,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   }
 
   @Test
-  public void testUpdateSubSubRecord(TestContext context) {
+  public void testUpdateSubSubRecord(final TestContext context) {
     CheckController.checkMapperName = Country.class.getSimpleName();
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(Country.class);
     IMapper cityMapper = netRelay.getDatastore().getMapperFactory().getMapper(City.class);
@@ -126,7 +126,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
     }
 
     // after this request the customer must contain the phone-number
-    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
+    Country savedCountry = DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
     context.assertEquals(1, savedCountry.cities.size(), "Expected one city");
     context.assertEquals(1, savedCountry.cities.get(0).streets.size(), "Expected one streets");
 
@@ -140,7 +140,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   }
 
   @Test
-  public void testUpdate(TestContext context) {
+  public void testUpdate(final TestContext context) {
     CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
     mapper.age = 13;
@@ -179,7 +179,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
   }
 
   @Test
-  public void testUpdateAsParameter(TestContext context) {
+  public void testUpdateAsParameter(final TestContext context) {
     CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
     SimpleNetRelayMapper mapper = new SimpleNetRelayMapper();
     mapper.age = 13;
@@ -211,7 +211,7 @@ public class TPersistenceController_Update extends AbstractPersistenceController
         context.assertTrue(content.contains("true"), "property child was modified, but should not");
       }, 200, "OK", null);
 
-      SimpleNetRelayMapper rec = (SimpleNetRelayMapper) DatastoreBaseTest.findRecordByID(context,
+      SimpleNetRelayMapper rec = DatastoreBaseTest.findRecordByID(context,
           SimpleNetRelayMapper.class, id);
       context.assertTrue(rec.child, "property child should not be changed");
     } catch (Exception e) {
@@ -226,14 +226,14 @@ public class TPersistenceController_Update extends AbstractPersistenceController
    * @see de.braintags.netrelay.NetRelayBaseTest#modifySettings(de.braintags.netrelay.init.Settings)
    */
   @Override
-  public void modifySettings(TestContext context, Settings settings) {
+  public void modifySettings(final TestContext context, final Settings settings) {
     super.modifySettings(context, settings);
     RouterDefinition persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/update.html", "/products/update2.html",
         UPDATE_CUSTOMER_URL, UPDATE_CITY_URL });
     persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), persistenceDefinition);
     setPersistenceDef(persistenceDefinition);
 
     RouterDefinition rd = new RouterDefinition();

@@ -14,7 +14,7 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.authentication.PasswordLostController;
 import de.braintags.netrelay.controller.authentication.RegisterController;
@@ -48,7 +48,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testProtectedPageWithoutLogin(TestContext context) throws Exception {
+  public void testProtectedPageWithoutLogin(final TestContext context) throws Exception {
     Member member = createMember(context);
     resetRoutes(null);
     String url = PROTECTED_URL;
@@ -66,7 +66,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * @param context
    */
   @Test
-  public void testDirectLoginWithoutDestination(TestContext context) {
+  public void testDirectLoginWithoutDestination(final TestContext context) {
     Member member = createMember(context);
     try {
       resetRoutes(null);
@@ -94,7 +94,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * @param context
    */
   @Test
-  public void testDirectLoginWitDestination(TestContext context) {
+  public void testDirectLoginWitDestination(final TestContext context) {
     Member member = createMember(context);
     try {
       resetRoutes("/loginSuccess.html");
@@ -123,7 +123,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * @param context
    */
   @Test
-  public void testDirectLoginWithoutDestination_WrongLogin(TestContext context) {
+  public void testDirectLoginWithoutDestination_WrongLogin(final TestContext context) {
     Member member = createMember(context);
     try {
       resetRoutes(null);
@@ -149,7 +149,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * Perform login and logout by resusing sent cookie
    */
   @Test
-  public void loginLogout(TestContext context) {
+  public void loginLogout(final TestContext context) {
     Member member = createMember(context);
     Buffer cookie = Buffer.buffer();
     try {
@@ -191,7 +191,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * Perform login and logout
    */
   @Test
-  public void logoutWithoutLogin(TestContext context) {
+  public void logoutWithoutLogin(final TestContext context) {
     try {
       resetRoutes(null);
       String url = AuthenticationController.DEFAULT_LOGOUT_ACTION_URL;
@@ -211,7 +211,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * @param context
    */
   @Test
-  public void testSimpleLogin(TestContext context) {
+  public void testSimpleLogin(final TestContext context) {
     try {
       resetRoutes(null);
       String url = PROTECTED_URL;
@@ -229,7 +229,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * @param context
    * @return
    */
-  private Member createMember(TestContext context) {
+  private Member createMember(final TestContext context) {
     Member member = new Member();
     member.setUserName("testuser");
     member.setEmail("testuser");
@@ -239,7 +239,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
     return member;
   }
 
-  private void improveRedirect(String redirectPath, TestContext context, ResponseCopy resp) {
+  private void improveRedirect(final String redirectPath, final TestContext context, final ResponseCopy resp) {
     context.assertTrue(resp.headers.contains("location"), "parameter location does not exist");
     context.assertTrue(resp.headers.get("location").startsWith(redirectPath), "Expected redirect to " + redirectPath);
   }
@@ -251,7 +251,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * de.braintags.netrelay.init.Settings)
    */
   @Override
-  public void modifySettings(TestContext context, Settings settings) {
+  public void modifySettings(final TestContext context, final Settings settings) {
     super.modifySettings(context, settings);
 
     RouterDefinition def = AuthenticationController.createDefaultRouterDefinition();
@@ -260,7 +260,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
     def.getHandlerProperties().put("collectionName", "Member");
     def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
         AuthenticationController.AUTH_PROVIDER_DATASTORE);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
 
     def = RegisterController.createDefaultRouterDefinition();
     def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "Member");
@@ -284,7 +284,7 @@ public class TAuthenticationDatastore extends NetRelayBaseConnectorTest {
    * 
    * @throws Exception
    */
-  private void resetRoutes(String directLoginPage) throws Exception {
+  private void resetRoutes(final String directLoginPage) throws Exception {
     RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
         .getNamedDefinition(AuthenticationController.class.getSimpleName());
     if (directLoginPage != null) {
