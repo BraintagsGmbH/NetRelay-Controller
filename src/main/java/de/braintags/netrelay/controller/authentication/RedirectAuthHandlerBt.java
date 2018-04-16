@@ -18,7 +18,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import de.braintags.vertx.util.request.RequestUtil;
 import de.braintags.vertx.util.security.CRUDPermissionMap;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.auth.AuthProvider;
@@ -27,6 +29,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.AuthHandler;
 import io.vertx.ext.web.handler.impl.AuthHandlerImpl;
+import io.vertx.ext.web.handler.impl.HttpStatusException;
 import io.vertx.ext.web.handler.impl.RedirectAuthHandlerImpl;
 
 /**
@@ -41,25 +44,33 @@ import io.vertx.ext.web.handler.impl.RedirectAuthHandlerImpl;
 public class RedirectAuthHandlerBt extends AuthHandlerImpl {
   private static final Logger LOGGER = LoggerFactory.getLogger(RedirectAuthHandlerImpl.class);
 
+  static final HttpStatusException FORBIDDEN = new HttpStatusException(403);
+
   private final String loginRedirectURL;
   private CRUDPermissionMap permissionMap;
 
-  private String returnUrlParam;
+  private final String returnUrlParam;
 
-  public RedirectAuthHandlerBt(AuthProvider authProvider, String loginRedirectURL, String returnUrlParam) {
+  public RedirectAuthHandlerBt(final AuthProvider authProvider, final String loginRedirectURL, final String returnUrlParam) {
     super(authProvider);
     this.loginRedirectURL = loginRedirectURL;
     this.returnUrlParam = returnUrlParam;
   }
 
   @Override
-  public void handle(RoutingContext context) {
+  public void handle(final RoutingContext context) {
     Session session = context.session();
     if (session != null) {
       User user = context.user();
       if (user != null) {
         // Already logged in, just authorise
-        authorise(user, context);
+        authorize(user, res -> {
+          if (res.succeeded()) {
+            context.next();
+          } else {
+            context.fail(res.cause());
+          }
+        });
       } else {
         // Now redirect to the login url - we'll get redirected back here after successful login
         String url = RequestUtil.createRedirectUrl(context, context.request().path());
@@ -69,11 +80,15 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
     } else {
       context.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
     }
-
   }
 
   @Override
-  protected void authorise(User user, RoutingContext context) {
+  public void parseCredentials(final RoutingContext context, final Handler<AsyncResult<JsonObject>> handler) {
+    handler.handle(Future.succeededFuture());
+  }
+
+  @Override
+  public void authorize(final User user, final Handler<AsyncResult<Void>> handler) {
     int requiredcount = authorities.size();
     if (requiredcount > 0) {
       AtomicInteger count = new AtomicInteger();
@@ -82,17 +97,17 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
       Handler<AsyncResult<Boolean>> authHandler = res -> {
         if (res.failed()) {
           stopLoop.set(true);
-          context.fail(res.cause());
+          handler.handle(Future.failedFuture(res.cause()));
         } else {
           if (res.result()) {
             // Has ONE required authorities
             stopLoop.set(true);
             LOGGER.info("one authority fits: access granted");
-            context.next();
+            handler.handle(Future.succeededFuture());
           } else if (count.incrementAndGet() == requiredcount) {
             // Has none of the required authorities
             LOGGER.info("none of the authorities was fitting - access forbidden");
-            context.fail(403);
+            handler.handle(Future.failedFuture(FORBIDDEN));
           }
         }
       };
@@ -102,7 +117,7 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
           // Wildcard role - grant access
           stopLoop.set(true);
           LOGGER.info("Wildcard role authority found: access granted");
-          context.next();
+          handler.handle(Future.succeededFuture());
         } else {
           user.isAuthorised(authority, authHandler);
         }
@@ -112,7 +127,7 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
       }
     } else {
       // No auth required
-      context.next();
+      handler.handle(Future.succeededFuture());
     }
   }
 
@@ -122,7 +137,7 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
    * @see io.vertx.ext.web.handler.impl.AuthHandlerImpl#addAuthority(java.lang.String)
    */
   @Override
-  public AuthHandler addAuthority(String authority) {
+  public AuthHandler addAuthority(final String authority) {
     if (authority.startsWith("role:")) {
       // this creates the pure role authority without permissions: role:admin{CRUD} -> role:admin
       String rolePermission = "role:" + addRoleAuthority(authority.substring(5));
@@ -132,7 +147,7 @@ public class RedirectAuthHandlerBt extends AuthHandlerImpl {
     }
   }
 
-  private String addRoleAuthority(String permission) {
+  private String addRoleAuthority(final String permission) {
     CRUDPermissionMap cm = getPermissionMap();
     return cm.addPermissionEntry(permission);
   }

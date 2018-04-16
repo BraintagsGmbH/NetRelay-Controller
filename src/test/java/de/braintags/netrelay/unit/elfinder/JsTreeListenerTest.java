@@ -14,7 +14,7 @@ package de.braintags.netrelay.unit.elfinder;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.ICommandListener;
@@ -135,7 +135,7 @@ public class JsTreeListenerTest extends AbstractCaptureParameterTest {
     // defineRouterDefinitions adds the default key-definitions
     RouterDefinition def = defineRouterDefinition(JsTreeController.class, API_ELFINDER);
     def.getHandlerProperties().put(JsTreeController.ROOT_DIRECTORIES_PROPERTY, VOLUME_ID + ":" + ROOT_DIR);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
     settings.getMappingDefinitions().addMapperDefinition("Member", Member.class);
   }
 

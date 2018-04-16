@@ -15,7 +15,7 @@ package de.braintags.netrelay.unit.persistence;
 import org.junit.Test;
 
 import de.braintags.netrelay.controller.Action;
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.init.Settings;
@@ -203,7 +203,7 @@ public class TPersistenceController_Delete extends AbstractPersistenceController
     RouterDefinition persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/delete.html", "/products/delete2.html",
         DELETE_CUSTOMER_URL, DELETE_CITY_URL });
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), persistenceDefinition);
     setPersistenceDef(persistenceDefinition);
   }
 

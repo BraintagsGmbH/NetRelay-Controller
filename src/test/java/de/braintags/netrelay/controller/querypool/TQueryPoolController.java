@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.querypool.mapper.Address;
 import de.braintags.netrelay.controller.querypool.mapper.Person;
 import de.braintags.netrelay.init.Settings;
@@ -55,7 +55,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testNativeQuery(TestContext context) throws Exception {
+  public void testNativeQuery(final TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
     Person wrongPerson = new Person();
     wrongPerson.firstname = "max";
@@ -85,7 +85,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testDynamicQuery_orderBy(TestContext context) throws Exception {
+  public void testDynamicQuery_orderBy(final TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
     Person person_higherScore = new Person();
     person_higherScore.firstname = "max";
@@ -121,7 +121,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testDynamicQuery_withRequestParameterVariable(TestContext context) throws Exception {
+  public void testDynamicQuery_withRequestParameterVariable(final TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
     Person person = new Person();
     person.firstname = "paramvalue";
@@ -144,7 +144,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testDynamicQuery_withDeepVariable(TestContext context) throws Exception {
+  public void testDynamicQuery_withDeepVariable(final TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
 
     String value = "deep";
@@ -185,7 +185,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testDynamicQuery_withContextVariable_executedTwice(TestContext context) throws Exception {
+  public void testDynamicQuery_withContextVariable_executedTwice(final TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
 
     String value = "con text";
@@ -239,7 +239,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testDynamicQuery_simpleQuery(TestContext context) throws Exception {
+  public void testDynamicQuery_simpleQuery(final TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
     Person rightPerson = new Person();
     rightPerson.firstname = "max";
@@ -266,7 +266,7 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * @throws Exception
    */
   @Test
-  public void testDynamicQuery_limit(TestContext context) throws Exception {
+  public void testDynamicQuery_limit(final TestContext context) throws Exception {
     DatastoreBaseTest.clearTable(context, Person.class);
     Person firstPerson = new Person();
     firstPerson.firstname = "max";
@@ -303,13 +303,13 @@ public class TQueryPoolController extends NetRelayBaseConnectorTest {
    * de.braintags.netrelay.init.Settings)
    */
   @Override
-  public void modifySettings(TestContext context, Settings settings) {
+  public void modifySettings(final TestContext context, final Settings settings) {
     super.modifySettings(context, settings);
 
     RouterDefinition def = QueryPoolController.createDefaultRouterDefinition();
     def.setRoutes(new String[] { "/*" });
     def.getHandlerProperties().put(QueryPoolController.QUERY_DIRECTORY_PROPERTY, TEST_RESOURCE_PATH);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
     settings.getMappingDefinitions().addMapperDefinition(Person.class);
   }
 }

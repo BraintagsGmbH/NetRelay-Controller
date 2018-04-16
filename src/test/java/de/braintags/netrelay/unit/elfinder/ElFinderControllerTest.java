@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderConstants;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderContext;
 import de.braintags.netrelay.controller.filemanager.elfinder.ElFinderController;
@@ -509,7 +509,7 @@ public class ElFinderControllerTest extends AbstractCaptureParameterTest {
     // defineRouterDefinitions adds the default key-definitions
     RouterDefinition def = defineRouterDefinition(ElFinderController.class, API_ELFINDER);
     def.getHandlerProperties().put(ElFinderController.ROOT_DIRECTORIES_PROPERTY, VOLUME_ID + ":" + ROOT_DIR);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
     settings.getMappingDefinitions().addMapperDefinition("Member", Member.class);
   }
 

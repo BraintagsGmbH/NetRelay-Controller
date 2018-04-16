@@ -14,7 +14,7 @@ package de.braintags.netrelay.unit;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.authentication.AuthenticationController;
 import de.braintags.netrelay.controller.authentication.PasswordLostController;
 import de.braintags.netrelay.controller.authentication.RegisterController;
@@ -50,7 +50,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
    * Perform login and logout by resusing sent cookie
    */
   @Test
-  public void loginLogout(TestContext context) {
+  public void loginLogout(final TestContext context) {
     DatastoreBaseTest.clearTable(context, TestMemberEncrypted.class);
     TestMemberEncrypted member = createMember(context, TESTPASSWORD);
     Buffer cookie = Buffer.buffer();
@@ -93,7 +93,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
    * @param context
    * @return
    */
-  private TestMemberEncrypted createMember(TestContext context, String password) {
+  private TestMemberEncrypted createMember(final TestContext context, final String password) {
     TestMemberEncrypted member = new TestMemberEncrypted();
     member.setEmail("testuser");
     member.setPassword(password);
@@ -111,8 +111,8 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
    * @param member
    * @return
    */
-  private final TestMemberEncrypted createOrFindMember(TestContext context, IDataStore datastore,
-      TestMemberEncrypted member) {
+  private final TestMemberEncrypted createOrFindMember(final TestContext context, final IDataStore datastore,
+      final TestMemberEncrypted member) {
     IQuery<TestMemberEncrypted> query = datastore.createQuery(TestMemberEncrypted.class);
     String password = member.getPassword();
     context.assertNotNull(password, "password must not be null");
@@ -132,7 +132,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
    * @param context
    */
   @Test
-  public void testSimpleLogin(TestContext context) {
+  public void testSimpleLogin(final TestContext context) {
     try {
       resetRoutes(null);
       String url = PROTECTED_URL;
@@ -146,7 +146,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
     }
   }
 
-  private void improveRedirect(String redirectPath, TestContext context, ResponseCopy resp) {
+  private void improveRedirect(final String redirectPath, final TestContext context, final ResponseCopy resp) {
     context.assertTrue(resp.headers.contains("location"), "parameter location does not exist");
     context.assertTrue(resp.headers.get("location").startsWith(redirectPath), "Expected redirect to " + redirectPath);
   }
@@ -162,7 +162,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
    * 
    * @throws Exception
    */
-  private void resetRoutes(String directLoginPage) throws Exception {
+  private void resetRoutes(final String directLoginPage) throws Exception {
     RouterDefinition def = netRelay.getSettings().getRouterDefinitions()
         .getNamedDefinition(AuthenticationController.class.getSimpleName());
     if (directLoginPage != null) {
@@ -180,7 +180,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
    * de.braintags.netrelay.init.Settings)
    */
   @Override
-  public void modifySettings(TestContext context, Settings settings) {
+  public void modifySettings(final TestContext context, final Settings settings) {
     super.modifySettings(context, settings);
 
     RouterDefinition def = AuthenticationController.createDefaultRouterDefinition();
@@ -188,7 +188,7 @@ public class TAuthenticationDatastoreEncrypted extends NetRelayBaseConnectorTest
     def.setRoutes(new String[] { "/private/*" });
     def.getHandlerProperties().put(AuthenticationController.AUTH_PROVIDER_PROP,
         AuthenticationController.AUTH_PROVIDER_DATASTORE);
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), def);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), def);
 
     def = RegisterController.createDefaultRouterDefinition();
     def.getHandlerProperties().put(MongoAuth.PROPERTY_COLLECTION_NAME, "TestMemberEncrypted");

@@ -14,7 +14,7 @@ package de.braintags.netrelay.unit.persistence;
 
 import org.junit.Test;
 
-import de.braintags.netrelay.controller.BodyController;
+import de.braintags.netrelay.controller.SessionController;
 import de.braintags.netrelay.controller.persistence.PersistenceController;
 import de.braintags.netrelay.controller.persistence.RecordContractor;
 import de.braintags.netrelay.impl.NetRelayExt_FileBasedSettings;
@@ -49,7 +49,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   private static final String INSERT_CITY_URL = "/country/insertCity.html";
 
   @Test
-  public void testInsertSubSubObject(TestContext context) throws Exception {
+  public void testInsertSubSubObject(final TestContext context) throws Exception {
     CheckController.checkMapperName = Country.class.getSimpleName();
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(Country.class);
     IMapper cityMapper = netRelay.getDatastore().getMapperFactory().getMapper(City.class);
@@ -76,7 +76,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     }
 
     // after this request the customer must contain the phone-number
-    Country savedCountry = (Country) DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
+    Country savedCountry = DatastoreBaseTest.findRecordByID(context, Country.class, tmpCountry.id);
     context.assertEquals(1, savedCountry.cities.size(), "Expected one city");
     context.assertEquals(2, savedCountry.cities.get(0).streets.size(), "Expected two streets");
 
@@ -96,7 +96,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
    * @throws Exception
    */
   @Test
-  public void testInsertSubObject(TestContext context) throws Exception {
+  public void testInsertSubObject(final TestContext context) throws Exception {
     String newNumber = "222232323";
     CheckController.checkMapperName = TestCustomer.class.getSimpleName();
     IMapper mapper = netRelay.getDatastore().getMapperFactory().getMapper(TestCustomer.class);
@@ -121,7 +121,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
     }
 
     // after this request the customer must contain the phone-number
-    TestCustomer savedCustomer = (TestCustomer) DatastoreBaseTest.findRecordByID(context, TestCustomer.class,
+    TestCustomer savedCustomer = DatastoreBaseTest.findRecordByID(context, TestCustomer.class,
         customer.getId());
     context.assertEquals(2, savedCustomer.getPhoneNumbers().size(), "Expected two phone numbers");
     boolean found = false;
@@ -140,7 +140,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   }
 
   @Test
-  public void testInsertAsParameter(TestContext context) throws Exception {
+  public void testInsertAsParameter(final TestContext context) throws Exception {
     try {
       CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
       String url = String.format("/products/insert2.html?action=INSERT&entity=%s",
@@ -159,7 +159,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   }
 
   @Test
-  public void testInsertAsParameterWithFile(TestContext context) throws Exception {
+  public void testInsertAsParameterWithFile(final TestContext context) throws Exception {
     try {
       CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
       String url = String.format("/products/insert3.html?action=INSERT&entity=%s",
@@ -188,7 +188,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   }
 
   @Test
-  public void testInsertAsCapture(TestContext context) throws Exception {
+  public void testInsertAsCapture(final TestContext context) throws Exception {
     try {
       CheckController.checkMapperName = NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME;
       String url = String.format("/products/%s/INSERT/insert.html", NetRelayExt_FileBasedSettings.SIMPLEMAPPER_NAME);
@@ -208,7 +208,7 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
   /**
    * @param mu
    */
-  protected void addFields(MultipartUtil mu) {
+  protected void addFields(final MultipartUtil mu) {
     mu.addFormField("origin", "junit-testUserAlias");
     mu.addFormField("login", "admin@foo.bar");
     mu.addFormField("pass word", "admin");
@@ -224,14 +224,14 @@ public class TPersistenceController_Insert extends AbstractPersistenceController
    * @see de.braintags.netrelay.NetRelayBaseTest#modifySettings(de.braintags.netrelay.init.Settings)
    */
   @Override
-  public void modifySettings(TestContext context, Settings settings) {
+  public void modifySettings(final TestContext context, final Settings settings) {
     super.modifySettings(context, settings);
     RouterDefinition persistenceDefinition = PersistenceController.createDefaultRouterDefinition();
     persistenceDefinition.setRoutes(new String[] { "/products/:entity/:action/insert.html", "/products/insert2.html",
         "/products/insert3.html", INSERT_CUSTOMER_URL, INSERT_CITY_URL });
     persistenceDefinition.getHandlerProperties().put(PersistenceController.UPLOAD_DIRECTORY_PROP,
         "webroot/images/productImages");
-    settings.getRouterDefinitions().addAfter(BodyController.class.getSimpleName(), persistenceDefinition);
+    settings.getRouterDefinitions().addAfter(SessionController.class.getSimpleName(), persistenceDefinition);
     setPersistenceDef(persistenceDefinition);
 
     RouterDefinition rd = new RouterDefinition();
