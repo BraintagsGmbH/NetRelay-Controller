@@ -205,7 +205,7 @@ public class MailController extends AbstractController {
     String varname = readProperty(STORE_RESULT_VARIABLE_PARAMETER, null, false);
     if (varname == null) {
       HttpServerResponse response = context.response();
-      response.putHeader("content-type", HttpContentType.JSON_UTF8.toString()).end(Json.encodePrettily(result));
+      response.putHeader("content-type", HttpContentType.APPLICATION_JSON.toString()).end(Json.encodePrettily(result));
     } else {
       context.put(varname, Json.encodePrettily(result));
       context.next();

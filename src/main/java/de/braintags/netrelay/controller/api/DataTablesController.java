@@ -123,7 +123,7 @@ public class DataTablesController extends AbstractController {
                 context.fail(result.cause());
               } else {
                 HttpServerResponse response = context.response();
-                response.putHeader("content-type", HttpContentType.JSON_UTF8.toString())
+                response.putHeader("content-type", HttpContentType.APPLICATION_JSON.toString())
                     .end(result.result().encodePrettily());
               }
             });
