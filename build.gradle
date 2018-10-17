@@ -7,7 +7,7 @@ dependencies {
 
   compile group: 'io.vertx', name: 'vertx-mail-client', version:vertxVersion
   compile group: 'org.thymeleaf', name: 'thymeleaf', version:thymeleafVersion
-  compile group: 'org.apache.tika', name: 'tika-core', version:'1.9'
+  compile group: 'org.apache.tika', name: 'tika-core', version:'1.19.1'
 
   if (isIncludedBuild) {
     testCompile group: 'de.braintags', name: 'netrelay', version:netrelayVersion, configuration:'commonTests'
